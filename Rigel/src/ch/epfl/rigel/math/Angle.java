@@ -2,7 +2,7 @@ package ch.epfl.rigel.math;
 import static ch.epfl.rigel.Preconditions.checkArgument;
 
 public final class Angle {
-	
+	//Changes
 	public final static double TAU=2*Math.PI;
 	private static final double DEG_PER_RAD = 360.0 / TAU;
 	private static final double RAD_PER_DEG= TAU/360.0;
