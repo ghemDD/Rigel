@@ -3,6 +3,7 @@
 package ch.epfl.rigel.math;
 
 import ch.epfl.test.TestRandomizer;
+
 import org.junit.jupiter.api.Test;
 
 import static java.lang.Math.PI;

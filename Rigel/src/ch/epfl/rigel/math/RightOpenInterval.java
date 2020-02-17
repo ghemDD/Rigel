@@ -2,6 +2,8 @@ package ch.epfl.rigel.math;
 
 import static ch.epfl.rigel.Preconditions.checkArgument;
 
+import java.util.Locale;
+
 public final class RightOpenInterval extends Interval {
 
 	private RightOpenInterval(double boundA, double boundB) {
@@ -9,15 +11,15 @@ public final class RightOpenInterval extends Interval {
 	}
 	
 	public static RightOpenInterval of(double low, double high) {
-		checkArgument(low>=high);
+		checkArgument(low<high);
 		
 		return new RightOpenInterval(low, high);
 	}
 	
 	public static RightOpenInterval symmetric(double size) {
-		checkArgument(size>=0);
+		checkArgument(size>0);
 
-		return new RightOpenInterval(-size, size);
+		return new RightOpenInterval(-size/2, size/2);
 	}
 
 	@Override
@@ -32,13 +34,17 @@ public final class RightOpenInterval extends Interval {
 	public double reduce(double v) {
 		double a=getLower();
 		double b=getUpper();
-		double floorMod=(v-a)-(b-a)*Math.floor(v-a/b-a);
+		double floorMod=(v-a)-(b-a)*Math.floor((v-a)/(b-a));
 		
 		return a+floorMod;
 	}
 	
-	@Override
+	@Override 
 	public String toString() {
-		return null;
+		return String.format(Locale.ROOT, "[%s,%s[", getLower(), getUpper());	
+	}
+	
+	public double at(double x) {
+		return x;
 	}
 }
