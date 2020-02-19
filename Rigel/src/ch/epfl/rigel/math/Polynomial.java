@@ -85,24 +85,19 @@ public final class Polynomial {
 	}
 	
 	/**
-	 * Calculate the polynomial
+	 * Calculate the polynomial using Horner's method
 	 * @param v : value for which the polynomial is calculated
 	 * @return the value of the polynomial with respect to v
 	 */
 	public double at(double v) {
-		int count=coefficients.length-1;
-		double poly=0.0;
-		double pow=1.0;
 		
-		for(int i=0; i<coefficients.length; ++i) {
-			pow=1.0;
-			for(int y=0; y<count; ++y) {
-				pow*=v;
-			}
-			poly+=pow*coefficients[i];
-			--count;
+		double sum=coefficients[0];
+		
+		for(int i=1; i<coefficients.length; ++i) {
+			sum=sum*v+coefficients[i];
 		}
-		return poly;
+		
+		return sum;
 	}
 	
 	@Override
