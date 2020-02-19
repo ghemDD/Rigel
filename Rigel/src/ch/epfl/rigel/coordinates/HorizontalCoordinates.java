@@ -42,11 +42,36 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	
 	public double altDeg() {return super.latDeg();}
 	
-	/*
+	
 	public String azOctantName(String n, String e, String s, String w) {
+		StringBuilder string=new StringBuilder();
 		
+		RightOpenInterval north1=RightOpenInterval.of(315, 360);
+		RightOpenInterval north2=RightOpenInterval.of(0, 45);
+		
+		ClosedInterval south=ClosedInterval.of(135, 225);
+		
+		ClosedInterval west=ClosedInterval.of(135, 225);
+		
+		ClosedInterval east=ClosedInterval.of(135, 225);
+		
+		
+		
+		if (north1.contains(az()) || north2.contains(az()))
+			string.append(n);
+		
+		if (south.contains(az()))
+			string.append(s);
+		
+		if (east.contains(az()))
+			string.append(e);
+		
+		if (west.contains(az()))
+			string.append(w);
+		
+		return string.toString();
 	}
-	*/
+	
 	
 	@Override
 	public String toString() {
