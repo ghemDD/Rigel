@@ -35,6 +35,23 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
 	
 	/**
 	 * 
+	 * @param az
+	 * @param alt
+	 * @return
+	 */
+	public static EquatorialCoordinates ofDeg(double ra, double dec) {
+		RightOpenInterval azIntDeg=RightOpenInterval.of(0, 360);
+		checkInInterval(azIntDeg, ra);
+		
+		ClosedInterval altInt=ClosedInterval.symmetric(180);
+		checkInInterval(altInt, dec);
+		
+		
+		return new EquatorialCoordinates(ra, dec);
+	}
+	
+	/**
+	 * 
 	 * @return
 	 */
 	public double ra() {return super.lon();}
