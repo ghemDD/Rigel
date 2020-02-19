@@ -6,6 +6,11 @@ import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 import ch.epfl.rigel.math.Angle;
 
+/**
+ * Horizontal Coordinates
+ * @author Nael Ouerghemi / Tanguy Marbot
+ *
+ */
 public final class HorizontalCoordinates extends SphericalCoordinates {
 
 	private HorizontalCoordinates(double longitude, double latitude) {
@@ -23,6 +28,12 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	}
 
 	
+	/**
+	 * 
+	 * @param az
+	 * @param alt
+	 * @return
+	 */
 	public static HorizontalCoordinates ofDeg(double az, double alt) {
 		RightOpenInterval azIntDeg=RightOpenInterval.of(0, 360);
 		checkInInterval(azIntDeg, az);
@@ -34,15 +45,39 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 		return new HorizontalCoordinates(az, alt);
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public double az() {return super.lon();}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public double azDeg() {return super.lonDeg();}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public double alt() {return super.lat();}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public double altDeg() {return super.latDeg();}
 	
 	
+	/**
+	 * 
+	 * @param n
+	 * @param e
+	 * @param s
+	 * @param w
+	 * @return
+	 */
 	public String azOctantName(String n, String e, String s, String w) {
 		StringBuilder string=new StringBuilder();
 		
@@ -54,8 +89,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 		ClosedInterval west=ClosedInterval.of(135, 225);
 		
 		ClosedInterval east=ClosedInterval.of(135, 225);
-		
-		
 		
 		if (north1.contains(az()) || north2.contains(az()))
 			string.append(n);
@@ -70,6 +103,19 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 			string.append(w);
 		
 		return string.toString();
+	}
+	
+	/**
+	 * 
+	 * @param that
+	 * @return
+	 */
+	public double angularDistanceTo(HorizontalCoordinates that) {
+		double sinD=Math.sin(this.alt())*Math.sin(that.alt());
+		double cosD=Math.cos(this.alt())*Math.acos(that.alt());
+		double delta=Math.acos(this.az()-that.az());
+		
+		return Math.acos(sinD+cosD*delta);
 	}
 	
 	
