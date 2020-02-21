@@ -6,6 +6,8 @@ import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.RightOpenInterval;
 import static ch.epfl.rigel.Preconditions.*;
 
+import java.util.Locale;
+
 public final class GeographicCoordinates extends SphericalCoordinates {
 	final static RightOpenInterval LONGITUDE_INT=RightOpenInterval.symmetric(360);
 	final static ClosedInterval LATITUDE_INT=ClosedInterval.symmetric(180);
@@ -49,6 +51,6 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 
 	@Override 
 	public String toString() {
-		return String.format("(lon=%.4f°, lat=%.4f°)", lonDeg(), latDeg());
+		return String.format(Locale.ROOT, "(lon=%.4f°, lat=%.4f°)", lonDeg(), latDeg());
 	}
 }

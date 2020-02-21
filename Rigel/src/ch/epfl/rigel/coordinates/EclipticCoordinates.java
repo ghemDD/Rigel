@@ -2,6 +2,8 @@ package ch.epfl.rigel.coordinates;
 
 import static ch.epfl.rigel.Preconditions.checkInInterval;
 
+import java.util.Locale;
+
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
@@ -55,7 +57,7 @@ public final class EclipticCoordinates extends SphericalCoordinates {
 	
 	@Override
 	public String toString() {
-		return String.format("(λ=%.4f°, β=%.4f°)", lonDeg(), latDeg());
+		return String.format(Locale.ROOT, "(λ=%.4f°, β=%.4f°)", lonDeg(), latDeg());
 	}
 
 }

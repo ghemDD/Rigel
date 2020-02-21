@@ -2,6 +2,8 @@ package ch.epfl.rigel.coordinates;
 
 import static ch.epfl.rigel.Preconditions.checkInInterval;
 
+import java.util.Locale;
+
 import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 import ch.epfl.rigel.math.Angle;
@@ -120,6 +122,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	
 	@Override
 	public String toString() {
-		return String.format("(az=%.4f°, alt=%.4f°)", lonDeg(), latDeg());
+		return String.format(Locale.ROOT, "(az=%.4f°, alt=%.4f°)", lonDeg(), latDeg());
 	}
 }

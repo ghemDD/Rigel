@@ -4,6 +4,8 @@ import static ch.epfl.rigel.coordinates.HorizontalCoordinates.ofDeg;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.rigel.math.Angle;
@@ -92,6 +94,6 @@ public class HorizontalCoordinatesTest {
 	@Test
 	void toStringWorksOnKnownHorizontalCoordinates() {
 		HorizontalCoordinates hor=HorizontalCoordinates.ofDeg(350, 7.2);
-		assertEquals("(az=350.0000°, alt=7.2000°)", hor.toString());
+		assertEquals(Locale.ROOT, "(az=350.0000°, alt=7.2000°)", hor.toString());
 	}
 }
