@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 import ch.epfl.rigel.math.Angle;
 
 public class HorizontalCoordinatesTest {
-
+	//Round the value of the angular distance ?
+	//Fix the comma in toString() method
 
 	@Test 
 	void ofFailsWithUnvalidValues(){
