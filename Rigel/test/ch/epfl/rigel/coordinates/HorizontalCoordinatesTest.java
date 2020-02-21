@@ -94,6 +94,6 @@ public class HorizontalCoordinatesTest {
 	@Test
 	void toStringWorksOnKnownHorizontalCoordinates() {
 		HorizontalCoordinates hor=HorizontalCoordinates.ofDeg(350, 7.2);
-		assertEquals(Locale.ROOT, "(az=350.0000°, alt=7.2000°)", hor.toString());
+		assertEquals("(az=350.0000°, alt=7.2000°)", hor.toString());
 	}
 }
