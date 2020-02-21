@@ -15,14 +15,13 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 	}
 
 	public static GeographicCoordinates ofDeg(double lonDeg, double latDeg) {
-		checkInInterval(LONGITUDE_INT, lonDeg);
-		checkInInterval(LATITUDE_INT, latDeg);
+		checkArgument(isValidLonDeg(lonDeg));
+		checkArgument(isValidLatDeg(latDeg));
 
 		return new GeographicCoordinates(Angle.ofDeg(lonDeg), Angle.ofDeg(latDeg));
 	}
 
 	public static boolean isValidLonDeg(double lonDeg) {
-
 		if (LONGITUDE_INT.contains(lonDeg))
 			return true;
 
@@ -30,7 +29,6 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 	}
 
 	public static boolean isValidLatDeg(double latDeg) {
-
 		if (LATITUDE_INT.contains(latDeg))
 			return true;
 
