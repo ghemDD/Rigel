@@ -23,14 +23,14 @@ public final class EclipticCoordinates extends SphericalCoordinates {
 	 * @param dec
 	 * @return
 	 */
-	public static EclipticCoordinates of(double ra, double dec) {
+	public static EclipticCoordinates of(double lon, double lat) {
 		RightOpenInterval azIntDeg=RightOpenInterval.of(0, Angle.TAU);
-		checkInInterval(azIntDeg, ra);
+		checkInInterval(azIntDeg, lon);
 		
 		ClosedInterval altInt=ClosedInterval.symmetric(Math.PI);
-		checkInInterval(altInt, dec);
+		checkInInterval(altInt, lat);
 		
-		return new EclipticCoordinates(ra , dec);
+		return new EclipticCoordinates(lon, lat);
 	}
 	
 	/**
@@ -55,7 +55,7 @@ public final class EclipticCoordinates extends SphericalCoordinates {
 	
 	@Override
 	public String toString() {
-		return String.format("(az=%s�, alt=%s�)", lonDeg(), latDeg());
+		return String.format("(λ=%.4f°, β=%.4f°)", lonDeg(), latDeg());
 	}
 
 }

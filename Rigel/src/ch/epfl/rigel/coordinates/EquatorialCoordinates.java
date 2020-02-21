@@ -46,8 +46,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
 		ClosedInterval altInt=ClosedInterval.symmetric(180);
 		checkInInterval(altInt, dec);
 		
-		
-		return new EquatorialCoordinates(ra, dec);
+		return new EquatorialCoordinates(Angle.ofDeg(ra), Angle.ofDeg(dec));
 	}
 	
 	/**
@@ -82,7 +81,6 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
 	
 	@Override
 	public String toString() {
-		return String.format("(ra=%sh, dec=%s°)", Angle.toHr(lon()), latDeg());
+		return String.format("(ra=%.4fh, dec=%.4f°)", Angle.toHr(lon()), latDeg());
 	}
-
 }

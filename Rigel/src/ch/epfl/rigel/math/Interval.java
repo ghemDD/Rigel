@@ -27,14 +27,4 @@ public abstract class Interval {
 	public int hashCode() {
 		throw new UnsupportedOperationException();
 	}
-	
-	public double getLower() {
-		return bound1;
-	}
-	
-	public double getUpper() {
-		return bound2;
-	}
-	
-	
 }

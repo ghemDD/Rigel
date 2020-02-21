@@ -40,7 +40,7 @@ public final class RightOpenInterval extends Interval {
 	@Override
 	public boolean contains(double v) {
 		// TODO Auto-generated method stub
-		if (v>=getLower() && v<getUpper())
+		if (v>=low() && v<high())
 			return true;
 		
 		return false;
@@ -52,8 +52,8 @@ public final class RightOpenInterval extends Interval {
 	 * @return Value of the reduce function with respect to the value v and the current instance of the interval
 	 */
 	public double reduce(double v) {
-		double a=getLower();
-		double b=getUpper();
+		double a=low();
+		double b=high();
 		double floorMod=(v-a)-(b-a)*Math.floor((v-a)/(b-a));
 		
 		return a+floorMod;
@@ -61,6 +61,6 @@ public final class RightOpenInterval extends Interval {
 	
 	@Override 
 	public String toString() {
-		return String.format(Locale.ROOT, "[%s,%s[", getLower(), getUpper());	
+		return String.format(Locale.ROOT, "[%s,%s[", low(), high());	
 	}
 }

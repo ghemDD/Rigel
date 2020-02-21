@@ -42,7 +42,7 @@ public final class ClosedInterval extends Interval {
 	@Override
 	public boolean contains(double v) {
 		// TODO Auto-generated method stub
-		if (v>=getLower() && v<=getUpper())
+		if (v>=low() && v<=high())
 			return true;
 		
 		return false;
@@ -55,11 +55,11 @@ public final class ClosedInterval extends Interval {
 	 */
 	public double clip(double v) {
 		
-		if (v<=getLower())
-			return getLower();
+		if (v<=low())
+			return low();
 		
-		else if (v>=getUpper())
-			return getUpper();
+		else if (v>=high())
+			return high();
 		
 		else
 			return v;
@@ -71,6 +71,6 @@ public final class ClosedInterval extends Interval {
 	 */
 	@Override 
 	public String toString() {
-		return String.format(Locale.ROOT, "[%s,%s]", getLower(), getUpper());	
+		return String.format(Locale.ROOT, "[%s,%s]", low(), high());	
 	}
 }
