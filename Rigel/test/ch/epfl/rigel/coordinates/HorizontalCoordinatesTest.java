@@ -88,7 +88,13 @@ public class HorizontalCoordinatesTest {
 		HorizontalCoordinates paris=HorizontalCoordinates.ofDeg(48.8534, 2.3488);
 		double dist2=paris.angularDistanceTo(epfl);
 
-		assertEquals(1.022, dist2, 1E-4);
+		assertEquals(1.0022, dist2, 1E-4);
+		
+		double ndist=epfl.angularDistanceTo(epfl);
+		
+		assertEquals(0.0, ndist);
+		
+		
 	}
 
 	@Test
