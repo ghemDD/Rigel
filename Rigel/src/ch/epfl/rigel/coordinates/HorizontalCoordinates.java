@@ -20,6 +20,12 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 		super(longitude, latitude);
 	}
 
+	/**
+	 * Creation of horizontal coordinates with the desired values in radians
+	 * @param az : azimut (in radians)
+	 * @param alt : altitude (in radians)
+	 * @return horizontal coordinates with the desired values
+	 */
 	public static HorizontalCoordinates of(double az, double alt) {
 		RightOpenInterval azIntDeg=RightOpenInterval.of(0, Angle.TAU);
 		checkInInterval(azIntDeg, az);
@@ -30,12 +36,11 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 		return new HorizontalCoordinates(az , alt);
 	}
 
-
 	/**
-	 * 
-	 * @param az
-	 * @param alt
-	 * @return
+	 * Creation of horizontal coordinates with the desired values in degrees
+	 * @param az : azimut (in degrees)
+	 * @param alt : altitude (in degrees)
+	 * @return horizontal coordinates with the desired values
 	 */
 	public static HorizontalCoordinates ofDeg(double az, double alt) {
 		RightOpenInterval azIntDeg=RightOpenInterval.of(0, 360);
@@ -49,37 +54,37 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the azimut (radians)
+	 * @return value of the azimut
 	 */
 	public double az() {return super.lon();}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the azimut (degrees)
+	 * @return value of the azimut (in degrees)
 	 */
 	public double azDeg() {return super.lonDeg();}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the altitude
+	 * @return value of the altitude (in radians)
 	 */
 	public double alt() {return super.lat();}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the altitude (in degrees)
+	 * @return value of the altitude 'in degrees)
 	 */
 	public double altDeg() {return super.latDeg();}
 
 
 	/**
-	 * 
-	 * @param n
-	 * @param e
-	 * @param s
-	 * @param w
-	 * @return
+	 * Construction of a string the polar direction given the horizontal coordinates
+	 * @param n : 1st direction
+	 * @param e : 2nd direction
+	 * @param s : 3rd direction
+	 * @param w : 4th direction
+	 * @return String representing the polar direction given the horizontal coordinates
 	 */
 	public String azOctantName(String n, String e, String s, String w) {
 		StringBuilder string=new StringBuilder();
@@ -109,16 +114,17 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	}
 
 	/**
-	 * 
-	 * @param that
-	 * @return
+	 * Compute the angular distance between these and that horizontal coordinates
+	 * @param that Horizontal Coordinates
+	 * @return : angular distance between this and that
 	 */
 	public double angularDistanceTo(HorizontalCoordinates that) {
-		double sinD=Math.sin(this.alt())*Math.sin(that.alt());
-		double cosD=Math.cos(this.alt())*Math.cos(that.alt());
-		double delta=Math.cos(this.az()-that.az());
 
-		return Math.acos(sinD+cosD*delta);
+		double sinD=Math.sin(this.alt()) *Math.sin(that.alt());
+		double cosD=Math.cos(this.alt()) * Math.cos(that.alt() );
+		double delta=Math.cos(this.az() - that.az());
+
+		return Math.acos(sinD + cosD*delta);
 	}
 
 	@Override

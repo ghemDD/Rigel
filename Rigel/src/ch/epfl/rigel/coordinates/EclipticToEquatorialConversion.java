@@ -8,9 +8,13 @@ import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 import static ch.epfl.rigel.math.Angle.*; 
 
+/**
+ * Conversion from ecliptic coordinates to equatorial coordinates
+ * @author Nael Ouerghemi
+ *
+ */
 public class EclipticToEquatorialConversion implements Function<EclipticCoordinates, EquatorialCoordinates>{
 	private double cosecl, sinecl;
-
 
 
 	public EclipticToEquatorialConversion(ZonedDateTime when) {

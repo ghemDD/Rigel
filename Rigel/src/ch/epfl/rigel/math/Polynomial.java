@@ -94,7 +94,7 @@ public final class Polynomial {
 		double sum=coefficients[0];
 
 		for(int i=1; i<coefficients.length; ++i) {
-			sum=sum*v+coefficients[i];
+			sum= sum * v + coefficients[i];
 		}
 
 		return sum;

@@ -56,6 +56,6 @@ public class EquatorialCoordinatesTest {
 	@Test
 	void toStringWorksOnKnownEquatorialCoordinates() {
 	EquatorialCoordinates equ=EquatorialCoordinates.of(Angle.ofHr(1.5), Angle.ofDeg(45.00));
-		assertEquals("(ra=1.5000h, dec=45.0000°)", equ.toString());
+		assertEquals("(ra=1.5000h, dec=45.0000Â°)", equ.toString());
 	}
 }

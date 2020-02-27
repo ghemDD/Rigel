@@ -89,28 +89,28 @@ public class GeographicCoordinatesTest {
 	@Test
 	void toStringWorksOnKnownGeographicalCoordinates() {
 		GeographicCoordinates geo=GeographicCoordinates.ofDeg(6.5700, 46.5200);
-		assertEquals("(lon=6.5700°, lat=46.5200°)", geo.toString());
+		assertEquals("(lon=6.5700Â°, lat=46.5200Â°)", geo.toString());
 		
 		GeographicCoordinates geo1=GeographicCoordinates.ofDeg(6.5700, 46.5200);
-		assertEquals("(lon=6.5700°, lat=46.5200°)", geo1.toString());
+		assertEquals("(lon=6.5700Â°, lat=46.5200Â°)", geo1.toString());
 		
 		GeographicCoordinates geo2=GeographicCoordinates.ofDeg(89.98321, 34.56);
-		assertEquals("(lon=89.9832°, lat=34.5600°)", geo2.toString());
+		assertEquals("(lon=89.9832Â°, lat=34.5600Â°)", geo2.toString());
 		
 		GeographicCoordinates geo3=GeographicCoordinates.ofDeg(78.3452, 46.52212);
-		assertEquals("(lon=78.3452°, lat=46.5221°)", geo3.toString());
+		assertEquals("(lon=78.3452Â°, lat=46.5221Â°)", geo3.toString());
 	}
 	
 	@Test
 	void toStringWorks(){
-		assertEquals("(lon=6.5700°, lat=46.5200°)",GeographicCoordinates.ofDeg(6.57, 46.52).toString());
+		assertEquals("(lon=6.5700Â°, lat=46.5200Â°)",GeographicCoordinates.ofDeg(6.57, 46.52).toString());
 		
-		assertEquals("(lon=6.5700°, lat=-90.0000°)",GeographicCoordinates.ofDeg(6.57, -90).toString());
-		assertEquals("(lon=6.5700°, lat=90.0000°)",GeographicCoordinates.ofDeg(6.57, 90).toString());
-		assertEquals("(lon=-180.0000°, lat=67.0000°)",GeographicCoordinates.ofDeg(-180, 67).toString());
-		assertEquals("(lon=-6.5700°, lat=-46.5200°)",GeographicCoordinates.ofDeg(-6.57, -46.52).toString());
-		assertEquals("(lon=-179.9000°, lat=90.0000°)",GeographicCoordinates.ofDeg(-179.9, 90).toString());
-		assertEquals("(lon=-180.0000°, lat=-90.0000°)",GeographicCoordinates.ofDeg(-180, -90).toString());
+		assertEquals("(lon=6.5700Â°, lat=-90.0000Â°)",GeographicCoordinates.ofDeg(6.57, -90).toString());
+		assertEquals("(lon=6.5700Â°, lat=90.0000Â°)",GeographicCoordinates.ofDeg(6.57, 90).toString());
+		assertEquals("(lon=-180.0000Â°, lat=67.0000Â°)",GeographicCoordinates.ofDeg(-180, 67).toString());
+		assertEquals("(lon=-6.5700Â°, lat=-46.5200Â°)",GeographicCoordinates.ofDeg(-6.57, -46.52).toString());
+		assertEquals("(lon=-179.9000Â°, lat=90.0000Â°)",GeographicCoordinates.ofDeg(-179.9, 90).toString());
+		assertEquals("(lon=-180.0000Â°, lat=-90.0000Â°)",GeographicCoordinates.ofDeg(-180, -90).toString());
 	}
 	
 	@Test

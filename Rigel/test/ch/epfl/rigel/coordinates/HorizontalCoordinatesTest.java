@@ -104,12 +104,12 @@ public class HorizontalCoordinatesTest {
 	@Test
 	void toStringWorksOnKnownHorizontalCoordinates() {
 		HorizontalCoordinates hor1=HorizontalCoordinates.ofDeg(350, 7.2);
-		assertEquals("(az=350.0000°, alt=7.2000°)", hor1.toString());
+		assertEquals("(az=350.0000Â°, alt=7.2000Â°)", hor1.toString());
 		
 		HorizontalCoordinates hor2=HorizontalCoordinates.ofDeg(230, 3.22233);
-		assertEquals("(az=230.0000°, alt=3.2223°)", hor2.toString());
+		assertEquals("(az=230.0000Â°, alt=3.2223Â°)", hor2.toString());
 		
 		HorizontalCoordinates hor3=HorizontalCoordinates.ofDeg(210.4563, 3.22233);
-		assertEquals("(az=210.4563°, alt=3.2223°)", hor3.toString());
+		assertEquals("(az=210.4563Â°, alt=3.2223Â°)", hor3.toString());
 	}
 }

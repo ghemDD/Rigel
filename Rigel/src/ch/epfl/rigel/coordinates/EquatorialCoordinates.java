@@ -20,10 +20,10 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
 	}
 
 	/**
-	 * 
-	 * @param ra
-	 * @param dec
-	 * @return
+	 * Creation of equatorial coordinates with the desired values in Radians
+	 * @param ra : right ascension (radians)
+	 * @param dec : declination (radian)
+	 * @return Equatorial Coordinates with the desired right ascension and declination
 	 */
 	public static EquatorialCoordinates of(double ra, double dec) {
 		RightOpenInterval azIntDeg=RightOpenInterval.of(0, Angle.TAU);
@@ -36,10 +36,10 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
 	}
 
 	/**
-	 * 
-	 * @param az
-	 * @param alt
-	 * @return
+	 * Creation of equatorial coordinates with the desired values in degree
+	 * @param ra : right ascension (degrees)
+	 * @param dec : declination (degrees)
+	 * @return Equatorial Coordinates with the desired right ascension and dec (degrees)
 	 */
 	public static EquatorialCoordinates ofDeg(double ra, double dec) {
 		RightOpenInterval azIntDeg=RightOpenInterval.of(0, 360);
@@ -52,32 +52,32 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the right ascension (radian)
+	 * @return right ascension (radian)
 	 */
 	public double ra() {return super.lon();}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the right ascension (degree)
+	 * @return right ascension (degree)
 	 */
 	public double raDeg() {return super.lonDeg();}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the right ascension (hour)
+	 * @return right ascension (hour)
 	 */
 	public double raHr() {return Angle.toHr(ra());}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the declination (radian)
+	 * @return declination (radian)
 	 */
 	public double dec() {return super.lat();}
 
 	/**
-	 * 
-	 * @return
+	 * Getter for the declination (degree)
+	 * @return declination (degree)
 	 */
 	public double decDeg() {return super.latDeg();}
 
