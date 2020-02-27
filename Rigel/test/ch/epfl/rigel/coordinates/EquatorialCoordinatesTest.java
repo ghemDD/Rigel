@@ -1,6 +1,7 @@
 package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.math.Angle;
+
 import ch.epfl.test.TestRandomizer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,19 +58,4 @@ public class EquatorialCoordinatesTest {
 	EquatorialCoordinates equ=EquatorialCoordinates.of(Angle.ofHr(1.5), Angle.ofDeg(45.00));
 		assertEquals("(ra=1.5000h, dec=45.0000°)", equ.toString());
 	}
-	
-	@Test
-	void equalsThrowsUOE() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			var equ = ofDeg(67, 57);
-			equ.equals(equ);
-		});
-	}
-
-	@Test
-	void hashCodeThrowsUOE() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			ofDeg(54, 45).hashCode();
-		});
-	}	
 }

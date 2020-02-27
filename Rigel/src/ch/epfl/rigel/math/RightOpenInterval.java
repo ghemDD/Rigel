@@ -5,7 +5,7 @@ import static ch.epfl.rigel.Preconditions.checkArgument;
 import java.util.Locale;
 /**
  * A right open interval
- * @author Nael Ouerghemi/Tanguy Marbot
+ * @author Nael Ouerghemi
  *
  */
 public final class RightOpenInterval extends Interval {
@@ -13,7 +13,7 @@ public final class RightOpenInterval extends Interval {
 	private RightOpenInterval(double boundA, double boundB) {
 		super(boundA, boundB);
 	}
-	
+
 	/**
 	 Create a right open interval with respect to the two bounds given below
 	 * @param low : lower bound of the interval 
@@ -22,10 +22,10 @@ public final class RightOpenInterval extends Interval {
 	 */
 	public static RightOpenInterval of(double low, double high) {
 		checkArgument(low<high);
-		
+
 		return new RightOpenInterval(low, high);
 	}
-	
+
 	/**
 	 * Create a closed interval of length "size" centered on 0
 	 * @param size : size of the interval 
@@ -42,10 +42,10 @@ public final class RightOpenInterval extends Interval {
 		// TODO Auto-generated method stub
 		if (v>=low() && v<high())
 			return true;
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Reduce function
 	 * @param v : antecedent
@@ -55,10 +55,10 @@ public final class RightOpenInterval extends Interval {
 		double a=low();
 		double b=high();
 		double floorMod=(v-a)-(b-a)*Math.floor((v-a)/(b-a));
-		
+
 		return a+floorMod;
 	}
-	
+
 	@Override 
 	public String toString() {
 		return String.format(Locale.ROOT, "[%s,%s[", low(), high());	

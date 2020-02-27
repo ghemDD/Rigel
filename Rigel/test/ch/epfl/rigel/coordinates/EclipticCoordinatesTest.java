@@ -43,19 +43,4 @@ public class EclipticCoordinatesTest {
 		EclipticCoordinates ecli=EclipticCoordinates.of(ofDeg(22.5000), ofDeg(18.0000));
 		assertEquals("(λ=22.5000°, β=18.0000°)", ecli.toString());
 	}
-	
-	@Test
-	void equalsThrowsUOE() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			var equ = of(ofDeg(67), ofDeg(57));
-			equ.equals(equ);
-		});
-	}
-
-	@Test
-	void hashCodeThrowsUOE() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			of(ofDeg(54), ofDeg(45)).hashCode();
-		});
-	}
 }

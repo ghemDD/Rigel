@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 import ch.epfl.rigel.math.Angle;
 
 public class HorizontalCoordinatesTest {
-	//Round the value of the angular distance ?
-	//Fix the comma in toString() method
+	//Precision of angular distance?
+	//
 
 	@Test 
 	void ofFailsWithUnvalidValues(){
@@ -57,13 +57,14 @@ public class HorizontalCoordinatesTest {
 		assertEquals("NO", HorizontalCoordinates.ofDeg(335, 0)
 				.azOctantName("N", "E", "S", "O"));
 		
-		assertEquals("N", HorizontalCoordinates.ofDeg(0, 0)
+		assertEquals("N", HorizontalCoordinates.ofDeg(337.5, 0)
 				.azOctantName("N", "E", "S", "O"));
 		
-		assertEquals("NE", HorizontalCoordinates.ofDeg(40, 0)
+		assertEquals("NE", HorizontalCoordinates.ofDeg(22.5, 0)
 				.azOctantName("N", "E", "S", "O"));
 		
-		assertEquals("E", HorizontalCoordinates.ofDeg(90, 0).azOctantName("N", "E", "S", "O"));
+		assertEquals("E", HorizontalCoordinates.ofDeg(90, 0)
+				.azOctantName("N", "E", "S", "O"));
 		
 		assertEquals("SE", HorizontalCoordinates.ofDeg(136, 0)
 				.azOctantName("N", "E", "S", "O"));
@@ -85,21 +86,30 @@ public class HorizontalCoordinatesTest {
 
 		assertEquals(0.0279, dist1, 1E-4);
 		
-		HorizontalCoordinates paris=HorizontalCoordinates.ofDeg(48.8534, 2.3488);
+		HorizontalCoordinates paris=HorizontalCoordinates.ofDeg(2.3488, 48.8534);
 		double dist2=paris.angularDistanceTo(epfl);
 
-		assertEquals(1.0022, dist2, 1E-4);
+		assertEquals(Angle.ofDeg(3.6761), dist2, 1E-4);
 		
 		double ndist=epfl.angularDistanceTo(epfl);
 		
 		assertEquals(0.0, ndist);
 		
+		HorizontalCoordinates tunis=HorizontalCoordinates.ofDeg(10.1657, 36.8189);
+		double dist3=paris.angularDistanceTo(tunis);
 		
+		assertEquals(Angle.ofDeg(13.3128), dist3, 1E-4);
 	}
 
 	@Test
 	void toStringWorksOnKnownHorizontalCoordinates() {
-		HorizontalCoordinates hor=HorizontalCoordinates.ofDeg(350, 7.2);
-		assertEquals("(az=350.0000°, alt=7.2000°)", hor.toString());
+		HorizontalCoordinates hor1=HorizontalCoordinates.ofDeg(350, 7.2);
+		assertEquals("(az=350.0000°, alt=7.2000°)", hor1.toString());
+		
+		HorizontalCoordinates hor2=HorizontalCoordinates.ofDeg(230, 3.22233);
+		assertEquals("(az=230.0000°, alt=3.2223°)", hor2.toString());
+		
+		HorizontalCoordinates hor3=HorizontalCoordinates.ofDeg(210.4563, 3.22233);
+		assertEquals("(az=210.4563°, alt=3.2223°)", hor3.toString());
 	}
 }
