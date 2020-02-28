@@ -41,6 +41,6 @@ public enum Epoch {
 	 * @return number of julian centuries from the chosen epoch (J2000/J2010) to the desired date when
 	 */ 
 	public double julianCenturiesUntil(ZonedDateTime when) {
-		return daysUntil(when)/36525; 
+		return daysUntil(when)/36525.0; 
 	}
 }

@@ -53,19 +53,24 @@ public class EpochTest {
 		
 		assertEquals(0.06522929500342 , Epoch.J2000.julianCenturiesUntil(td3), 1E-4);
 		
+		ZonedDateTime td4=ZonedDateTime.of(LocalDate.of(2010, Month.JULY, 14), LocalTime.of(0, 0), ZoneId.of("UTC"));
+		
+		assertEquals(0.10531143052703, Epoch.J2000.julianCenturiesUntil(td4), 1E-10);
+		
+		ZonedDateTime td5=ZonedDateTime.of(LocalDate.of(2005, Month.MAY, 23), LocalTime.of(0, 0), ZoneId.of("UTC"));
+		
+		assertEquals(0.05389459274469, Epoch.J2000.julianCenturiesUntil(td5), 1E-10);
+		
+		ZonedDateTime td6=ZonedDateTime.of(LocalDate.of(2019, Month.MARCH, 15), LocalTime.of(0, 0), ZoneId.of("UTC"));
+		
+		assertEquals(0.19199178644763, Epoch.J2000.julianCenturiesUntil(td6), 1E-10);
+		
 	}
 
 	
 	/**
-	 * 
-	 * julianCenturiesTest
-	 * 		Several tests normal cases : - J2000   - J2010
-	 * 		Exceptions
-	 * 
-	 * daysUntil
-	 * 		Several dates : -J2000 - J2010
-	 * 		Returns 0 
-	 * 		Exceptions
+	 * 			
+	 * 	
 	 * 
 	 */
 	

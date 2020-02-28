@@ -53,7 +53,7 @@ public final class Angle {
 	/**
 	 * Conversion from degrees to radians
 	 * @param deg : value of the angle in degrees
-	 * @return : value of the angle in degrees
+	 * @return : value of the angle in radians
 	 */
 	public static double ofDeg(double deg) {
 		return deg * RAD_PER_DEG;

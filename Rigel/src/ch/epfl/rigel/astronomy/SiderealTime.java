@@ -7,6 +7,7 @@ import static ch.epfl.rigel.math.Angle.*;
 
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigel.math.Polynomial;
 
 /**
  * Sideral Time : computation of the greenwich sidereal time depending on a certain date and local sidereal time depending on a certain location
@@ -25,20 +26,29 @@ public final class SiderealTime {
 	public static double greenwich(ZonedDateTime when) {
 		when=when.withZoneSameInstant(ZoneId.of("UTC"));
 		ZonedDateTime whenDayInstant=when.truncatedTo(ChronoUnit.DAYS);
-		ZonedDateTime whenInstant=when.truncatedTo(ChronoUnit.DAYS);
+		ZonedDateTime whenInstant=when.truncatedTo(ChronoUnit.MILLIS);
 
 
 		double T=Epoch.J2000.julianCenturiesUntil(whenDayInstant);
-		double t=whenInstant.getHour();
-
-		double so=0.000025862*T*T+2400.051336*T+6.697374558;
+		double t=(double) whenInstant.getHour() + whenInstant.getMinute()/60.0 + whenInstant.getSecond()/3600.0;
+		
+		System.out.println("Valeur de t:"+t);
+		System.out.println("Valeur de T:"+T);
+		
+		Polynomial greenwich=Polynomial.of(0.000025862, 2400.051336, 6.697374558);
+		System.out.println(greenwich);
+		double so=greenwich.at(T);
+		System.out.println("Valeur de So :"+so);
 		double s1=1.002737909*t;
+		System.out.println("Valeur de S1 :"+s1);
 
 		double sg=so+s1;
+		System.out.println("Valeur de Sg :"+sg);
 
-		sg=ofHr(sg);
-
-		return normalizePositive(sg); 
+		double sg1= sg - Math.floor(sg/24) * 24;
+		System.out.println("Valeur de sg normalisée 2 :"+ofHr(sg1));
+		System.out.println("Valeur de sg normalisée 1 :"+normalizePositive(ofHr(sg)));
+		return ofHr(sg1); 
 	}
 
 	/**

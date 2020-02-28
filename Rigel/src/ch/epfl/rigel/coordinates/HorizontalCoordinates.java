@@ -89,10 +89,10 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	public String azOctantName(String n, String e, String s, String w) {
 		StringBuilder string=new StringBuilder();
 
-		RightOpenInterval north1=RightOpenInterval.of(315, 360);
-		ClosedInterval north2=ClosedInterval.of(0, 45);
+		RightOpenInterval north1=RightOpenInterval.of(292.5, 360);
+		RightOpenInterval north2=RightOpenInterval.of(0, 67.5);
 
-		ClosedInterval south=ClosedInterval.of(135, 225);
+		RightOpenInterval south=RightOpenInterval.of(112.5, 247.5);
 
 		RightOpenInterval west=RightOpenInterval.of(202.5, 337.5);
 
