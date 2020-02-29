@@ -24,6 +24,8 @@ public class EclipticToEquatorialCoordinatesTest {
 		
 		assertEquals(0.34095012064184566, test2);
 		
+		
+		
 	}
 
 }

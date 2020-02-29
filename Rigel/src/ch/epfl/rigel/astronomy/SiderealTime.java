@@ -30,7 +30,7 @@ public final class SiderealTime {
 
 
 		double T=Epoch.J2000.julianCenturiesUntil(whenDayInstant);
-		double t=(double) whenInstant.getHour() + whenInstant.getMinute()/60.0 + whenInstant.getSecond()/3600.0;
+		double t= whenInstant.getHour() + whenInstant.getMinute()/60.0 + whenInstant.getSecond()/3600.0;
 		
 		System.out.println("Valeur de t:"+t);
 		System.out.println("Valeur de T:"+T);
