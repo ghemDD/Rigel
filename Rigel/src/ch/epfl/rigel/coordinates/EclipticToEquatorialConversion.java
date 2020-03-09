@@ -23,6 +23,7 @@ public class EclipticToEquatorialConversion implements Function<EclipticCoordina
 		double obl=p.at(julian);
 		cosecl=Math.cos(obl);
 		sinecl=Math.sin(obl);
+		
 	}
 
 	@Override
@@ -30,13 +31,13 @@ public class EclipticToEquatorialConversion implements Function<EclipticCoordina
 		// TODO Auto-generated method stub
 		double exp=Math.sin(t.lon())*cosecl-Math.tan(t.lat())*sinecl;
 		double ralpha=Math.atan2(exp, Math.cos(t.lon()));
-		double alpha= ralpha >=0 ? ralpha : ralpha+TAU;
+		double alpha= normalizePositive(ralpha);
 
 		double term1=Math.sin(t.lat())*cosecl;
 		double term2=Math.cos(t.lat())*sinecl*Math.sin(t.lon());
 
 		double beta=Math.asin(term1+term2);
-
+		
 		return EquatorialCoordinates.of(alpha, beta);
 	}
 
