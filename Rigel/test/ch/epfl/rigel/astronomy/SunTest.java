@@ -17,7 +17,7 @@ public class SunTest {
 		assertEquals(sun.name(), "Soleil");
 		assertEquals(ofDeg(23, 45).toString(), sun.equatorialPos().toString());
 		assertEquals(sun.angularSize(), 23.5);
-		assertEquals(-26.7, sun.magnitude());
+		assertEquals(-26.7f, sun.magnitude());
 		assertEquals(EclipticCoordinates.ofDeg(34, 56).toString(), sun.eclipticPos().toString());
 		assertEquals(-34.5, sun.meanAnomaly());
 	}

@@ -2,10 +2,13 @@ package ch.epfl.rigel.coordinates;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 import static ch.epfl.rigel.coordinates.CartesianCoordinates.*;
 
 import ch.epfl.rigel.math.Polynomial;
+import ch.epfl.test.TestRandomizer;
 
 public class CartesianCoordinatesTest {
 
@@ -23,6 +26,30 @@ public class CartesianCoordinatesTest {
 		assertEquals("(x=2.9990, y=4.1200)", coor3.toString());
 	}
 	
+	@Test
+    void ofWorksWithAllValues(){
+        var rng = TestRandomizer.newRandom();
+        for(int i=0; i<1000; ++i){
+            var x = rng.nextDouble(-1000000, 1000000);
+            var y = rng.nextDouble(-1000000, 1000000);
+            var c = CartesianCoordinates.of(x, y);
+            assertEquals(x, c.x());
+            assertEquals(y, c.y());
+        }
+    }
+
+    @Test
+    void toStringWorksProperly(){
+        var rng = TestRandomizer.newRandom();
+        for(int i=0; i<1000; ++i){
+            var x = rng.nextDouble(-1000000, 1000000);
+            var y = rng.nextDouble(-1000000, 1000000);
+            var c = CartesianCoordinates.of(x, y);
+            var s = String.format(Locale.ROOT, "(x=%.4f, y=%.4f)", x, y);
+            assertEquals(s, c.toString());
+        }
+    }
+    
 	@Test
     void equalsThrowsUOE() {
         assertThrows(UnsupportedOperationException.class, () -> {

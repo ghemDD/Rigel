@@ -35,12 +35,22 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 		return CartesianCoordinates.of(x, y);
 	}
 	
+	/**
+	 * 
+	 * @param hor
+	 * @return
+	 */
 	public CartesianCoordinates circleCenterForParallel(HorizontalCoordinates hor) {
 		double den=sin+Math.sin(hor.alt());
 		
 		return CartesianCoordinates.of(0, cos/den);
 	}
 	
+	/**
+	 * 
+	 * @param parallel
+	 * @return
+	 */
 	public double circleRadiusForParallel(HorizontalCoordinates parallel) {
 		double den=sin+Math.sin(parallel.alt());
 		double p=Math.cos(parallel.alt())/den;
@@ -48,11 +58,21 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 		return p;
 	}
 	
+	/**
+	 * 
+	 * @param rad
+	 * @return
+	 */
 	public double applyToAngle(double rad) {
 		
 		return 2*Math.tan(rad/4);
 	}
 	
+	/**
+	 * 
+	 * @param xy
+	 * @return
+	 */
 	public HorizontalCoordinates inverseApply(CartesianCoordinates xy) {
 		double p=Math.sqrt(xy.x()*xy.x()+xy.y()*xy.y());
 		double sinc=2*p/(p*p+1);
@@ -73,7 +93,6 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 	
 	@Override
 	public String toString() {
-		
 		return String.format(Locale.ROOT, "StereographicProjection Center coordinates "+cent.toString());
 	}
 	

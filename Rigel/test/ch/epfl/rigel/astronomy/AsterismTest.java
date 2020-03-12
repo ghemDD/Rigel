@@ -11,7 +11,6 @@ import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 
 public class AsterismTest {
 
-	
 	@Test
 	void AsterismFailsWithInvalidInput() {
 		assertThrows(IllegalArgumentException.class, () -> {

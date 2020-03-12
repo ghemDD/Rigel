@@ -2,12 +2,14 @@ package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.coordinates.EquatorialCoordinates;
+
 import static ch.epfl.rigel.math.Angle.*;
 
 import java.util.List;
 
 /**
- * 
+ * Modelisation of a planet location
  * @author Nael Ouerghemi
  *
  */
@@ -67,7 +69,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 		double meanEarth=TAU/(365.242191)*daysSinceJ2010/(EARTH.tropic)+ofDeg(EARTH.eps)-ofDeg(EARTH.peri);
 		double realEarth=meanEarth+2*exc*Math.sin(meanEarth);
 		double rEarth=EARTH.half*(1-EARTH.exc*EARTH.exc)/(1+EARTH.exc*Math.cos(realEarth));
-		double lEarth=realEarth+ofDeg(EARTH.peri);
+		double lEarth=realEarth+ofDeg(EARTH.peri); 
 		
 		double pos=Math.asin(Math.sin(l-ofDeg(node))*Math.sin(ofDeg(incli)));
 
@@ -76,7 +78,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 
 		double delta;
 
-		//Superior planets
+		//Superior planets 
 		if (magnitude<-4.40f || magnitude==-1.52f) {
 			delta=lp+Math.atan2(rEarth*Math.sin(lp-lEarth), rp-rEarth*Math.cos(lp-lEarth));
 		}
@@ -86,6 +88,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 			delta=Math.PI+lEarth+Math.atan2(rp*Math.sin(lEarth-lp), rEarth-rp*Math.cos(lEarth-lp));
 		}
 
+		delta=normalizePositive(delta);
 		double beta=Math.atan2(rp*Math.tan(pos)*Math.sin(delta-lp), rEarth*Math.sin(lp-lEarth));
 
 		double p=Math.sqrt(rEarth*rEarth + r*r - 2*rEarth*r*Math.cos(l-lEarth)*Math.cos(pos));
@@ -93,7 +96,28 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 
 		double f=(1+Math.cos(delta-l))/2.0;
 		float mag=(float) (magnitude + 5*Math.log10(r*p/Math.sqrt(f)));
+		EquatorialCoordinates equ=eclipticToEquatorialConversion.apply(EclipticCoordinates.of(delta, beta));
+		
+		//Printers
+		System.out.println("Mean = "+mean);
+		System.out.println("Real anomaly = "+real);
+		System.out.println("Real anomaly = "+real);
+		System.out.println("MeanEarth = "+meanEarth);
+		System.out.println("RealEarth = "+realEarth);
+		System.out.println("R = "+rEarth);
+		System.out.println("L = "+lEarth);
+		
+		System.out.println("Pos = "+pos);
+		System.out.println("lp = "+lp);
+		System.out.println("rp = "+rp);
+		System.out.println("Delta ="+delta+" Beta = "+beta);
+		System.out.println("p = "+p);
+		System.out.println("angular = "+angular);
+		System.out.println("F = "+f);
+		System.out.println("mag = "+mag);
+		System.out.println("Alpha = "+equ.ra()+" Beta = "+equ.dec());
+		
 
-		return new Planet(name, eclipticToEquatorialConversion.apply(EclipticCoordinates.of(delta, beta)), angular, mag);
+		return new Planet(name, equ, angular, mag);
 	}
 }
