@@ -1,30 +1,66 @@
 package ch.epfl.rigel.math;
 
+/**
+ * Represents an Interval
+ * 
+ * @author Nael Ouerghemi (310435)
+ */
 public abstract class Interval {
 
-	private final double bound1;
-	private final double bound2;
+	private final double lowerBound;
+	private final double upperBound;
 
 	protected Interval(double boundA, double boundB) {
-		bound1=boundA;
-		bound2=boundB;
+		lowerBound = boundA;
+		upperBound = boundB;
 	}
 
-	public double low() {return bound1;}
+	/**
+	 * Getter for the lower bound of the interval
+	 * 
+	 * @return lower bound of the interval
+	 */
+	public double low() {return lowerBound;}
 
-	public double high() {return bound2;}
+	/**
+	 * Getter for the upper bound of the interval
+	 * 
+	 * @return upper bound of the interval
+	 */
+	public double high() {return upperBound;}
 
-	public double size() {return bound2-bound1;}
+	/**
+	 * Size of the interval
+	 * 
+	 * @return size of the interval
+	 */
+	public double size() {return upperBound-lowerBound;}
 
+	/**
+	 * Returns true if the value v is in interval, false otherwise
+	 * 
+	 * @param v
+	 * 			value to be tested
+	 * 
+	 * @return true if the value v is in interval, false otherwise
+	 */
 	public abstract boolean contains(double v);
 
+	/**
+	 * @see Object#equals()
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * @see Object#hashCode()
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		throw new UnsupportedOperationException();
 	}
 }

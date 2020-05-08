@@ -1,12 +1,11 @@
 package ch.epfl.rigel.math;
 import static ch.epfl.rigel.Preconditions.checkArgument;
-import static ch.epfl.rigel.Preconditions.checkInInterval;
 
 import java.util.Locale;
 /**
  * A closed Interval
- * @author Nael Ouerghemi
- *
+ * 
+ * @author Nael Ouerghemi (310435)
  */
 public final class ClosedInterval extends Interval {
 
@@ -16,11 +15,15 @@ public final class ClosedInterval extends Interval {
 
 	/**
 	 * Create a closed interval with respect to the two bounds given below
-	 * @param low : lower bound of the interval 
-	 * @param up : upper bound of the interval
+	 * 
+	 * @param low
+	 * 			Lower bound of the interval
+	 *  
+	 * @param up
+	 * 			Upper bound of the interval
+	 * 
 	 * @return the interval [low, up] if the parameters given are correct (low>up);
 	 */
-
 	public static ClosedInterval of(double low, double up) {
 		checkArgument(low<up);
 
@@ -29,29 +32,34 @@ public final class ClosedInterval extends Interval {
 
 	/**
 	 * Create a closed interval of length "size" centered on 0
-	 * @param size : size of the interval 
+	 * 
+	 * @param size
+	 * 			Size of the interval 
+	 * 
 	 * @return the interval [-size/2, size/2] if the parameters given are correct (size>0) 
 	 */
-
 	public static ClosedInterval symmetric(double size) {
 		checkArgument(size>0);
 
 		return new ClosedInterval(-size/2, size/2);
 	}
 
+	/**
+	 * @see Interval#contains(double v)
+	 */
 	@Override
 	public boolean contains(double v) {
-		// TODO Auto-generated method stub
-		if (v>=low() && v<=high())
-			return true;
 
-		return false;
+		return (v>=low() && v<=high());
 	}
 
 	/**
 	 * Clip function
-	 * @param v : antecedent
-	 * @return Value of the clip function with respect to the value v and the current instance of the interval
+	 * 
+	 * @param v
+	 * 			Antecedent
+	 * 
+	 * @return value of the clip function with respect to the value v and the current instance of the interval
 	 */
 	public double clip(double v) {
 
@@ -66,8 +74,7 @@ public final class ClosedInterval extends Interval {
 	}
 
 	/**
-	 * Override of the function toString of Object
-	 * Return the representation string of the interval [lower, upper]
+	 * @see Object#toString()
 	 */
 	@Override 
 	public String toString() {

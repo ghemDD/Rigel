@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import ch.epfl.rigel.math.Angle;
 
-public class EclipticToEquatorialCoordinatesTest {
+public class MyEclipticToEquatorialCoordinatesTest {
 	
 	//obliquité good
 	@Test

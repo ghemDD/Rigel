@@ -1,106 +1,163 @@
 package ch.epfl.rigel.coordinates;
 
+import static ch.epfl.rigel.math.Angle.normalizePositive;
+import static java.lang.Math.asin;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.tan;
+
 import java.util.Locale;
-import static ch.epfl.rigel.math.Angle.*;
 import java.util.function.Function;
 
-import ch.epfl.rigel.math.Angle;
-
 /**
- * Represents a stereographic projection of horizontal coordinates
- * @author Nael Ouerghemi
+ * Represents a stereographic projection 
+ * 
+ * @author Nael Ouerghemi (310435)
  */
 public final class StereographicProjection implements Function<HorizontalCoordinates, CartesianCoordinates> {
 
-	private HorizontalCoordinates cent;
-	private double cos;
-	private double sin;
-	
+	private HorizontalCoordinates center;
+	private double cosAltCenter;
+	private double sinAltCenter;
+
+	/**
+	 * Constructor of StereographicProjection
+	 *  
+	 * @param center
+	 * 			Horizontal Coordinates of the point on which the projection is centered
+	 */
 	public StereographicProjection(HorizontalCoordinates center) {
-		cent=center;
-		cos=Math.cos(cent.alt());
-		sin=Math.sin(cent.alt());
+		this.center = center;
+		cosAltCenter = cos(center.alt());
+		sinAltCenter = sin(center.alt());
 	}
 
+	/**
+	 * Returns the coordinates of the projected point in Cartesian Coordinates
+	 * 
+	 * @param t
+	 * 			Horizontal Coordinates of the original point
+	 * 
+	 * @return coordinates of the projected point in Cartesian Coordinates
+	 */
 	@Override
 	public CartesianCoordinates apply(HorizontalCoordinates t) {
-		// TODO Auto-generated method stub
-		
-		double delta=t.az()-cent.az();
-		double d=1/(1+sin*Math.sin(t.alt())+cos*Math.cos(t.alt())*Math.cos(delta));
-		
-		double x=d*Math.cos(t.alt())*Math.sin(delta);
-		double y=d*(cos*Math.sin(t.alt())-sin*Math.cos(t.alt())*Math.cos(delta));
-		
+		double sinAltCoor = sin(t.alt());
+		double cosAltCoor = cos(t.alt());
+
+		double delta = t.az() - center.az();
+		double cosDelta = cos(delta);
+		double d = 1 / (1 + sinAltCenter*sinAltCoor + cosAltCenter*cosAltCoor*cosDelta);
+
+		double x = d * cosAltCoor * sin(delta);
+		double y = d * (cosAltCenter*sinAltCoor - sinAltCenter*cosAltCoor*cosDelta);
+
 		return CartesianCoordinates.of(x, y);
 	}
-	
+
 	/**
-	 * 
+	 * Returns circle center coordinates corresponding to the projection of the parallel passing through the center
+	 *  
 	 * @param hor
-	 * @return
+	 * 			Horizontal Coordinates through which the parallel is passing
+	 * 
+	 * @return Cartesian Coordinates of the circle center
 	 */
 	public CartesianCoordinates circleCenterForParallel(HorizontalCoordinates hor) {
-		double den=sin+Math.sin(hor.alt());
-		
-		return CartesianCoordinates.of(0, cos/den);
+		double den = sinAltCenter + sin(hor.alt());
+
+		return CartesianCoordinates.of(0, cosAltCenter/den);
 	}
-	
+
 	/**
-	 * 
+	 * Returns circle radius coordinates corresponding to the projection of the parallel passing through the center
+	 *   
 	 * @param parallel
-	 * @return
+	 * 			Horizontal Coordinates through which the parallel is passing
+	 * 
+	 * @return radius of the circle
 	 */
 	public double circleRadiusForParallel(HorizontalCoordinates parallel) {
-		double den=sin+Math.sin(parallel.alt());
-		double p=Math.cos(parallel.alt())/den;
-		
+		double den = sinAltCenter + sin(parallel.alt());
+		double p = cos(parallel.alt())/den;
+
 		return p;
 	}
-	
+
 	/**
+	 * Returns projected diameter given angular size
 	 * 
 	 * @param rad
-	 * @return
+	 * 			Angular size (radians)
+	 * 
+	 * @return projected diameter
 	 */
 	public double applyToAngle(double rad) {
-		
-		return 2*Math.tan(rad/4);
+
+		return 2 * tan(rad/4.0);
 	}
-	
+
 	/**
+	 * Returns the HorizontalCoordinates given the Cartesian Coordinates of the projected point
 	 * 
 	 * @param xy
-	 * @return
+	 * 			CartesianCoordinates of the projected point
+	 * 
+	 * @return original horizontal coordinates 
 	 */
 	public HorizontalCoordinates inverseApply(CartesianCoordinates xy) {
-		double p=Math.sqrt(xy.x()*xy.x()+xy.y()*xy.y());
-		double sinc=2*p/(p*p+1);
-		double cosc=(1-p*p)/(p*p+1);
 		
-		double numdelta=xy.x()*sinc;
-		double dendelta=p*cos*cosc-xy.y()*sin*sinc;
-		double delta=Math.atan2(numdelta, dendelta)+cent.az();
-		delta=normalizePositive(delta);
+		double delta, phi;
 		
-		double term1=cosc*sin;
-		double term2=(xy.y()*sinc*cos)/p;
-		double phi=Math.asin(term1+term2);
+		if (xy.x() == 0 && xy.y()==0) {
+			delta = center.az();
+			phi = sinAltCenter;
+		}
 		
-		System.out.println("Potential az = "+delta+" Potential alt= "+phi);
+		else {
+			double x = xy.x();
+			double y = xy.y();
+
+			double p = sqrt(x*x + y*y);
+			double sinC = 2*p / (p*p + 1);
+			double cosC = (1 - p*p) / (p*p + 1);
+
+			double numdelta = x * sinC;
+			double dendelta = p*cosAltCenter*cosC - y*sinAltCenter*sinC;
+			delta = atan2(numdelta, dendelta) + center.az();
+			delta = normalizePositive(delta);
+
+			double termA = cosC * sinAltCenter;
+			double termB = (y * sinC * cosAltCenter) / p;
+			phi = asin(termA + termB);
+		}
+		
 		return HorizontalCoordinates.of(delta, phi);
 	}
-	
+
+	/**
+	 * @see Object#toString()
+	 */
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "StereographicProjection Center coordinates "+cent.toString());
+		return String.format(Locale.ROOT, "StereographicProjection Center coordinates "+center.toString());
 	}
-	
+
+	/**
+	 * @see Object#equals()
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
 	public boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * @see Object#hashCode()
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
 	public int hashCode() {
 		throw new UnsupportedOperationException();

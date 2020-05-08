@@ -1,123 +1,204 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.EclipticCoordinates;
+
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.atan;
+import static java.lang.Math.asin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.log10;
+import static java.lang.Math.tan;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 
 import static ch.epfl.rigel.math.Angle.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Modelisation of a planet location
- * @author Nael Ouerghemi
- *
+ * Modeling of a planet location
+ * 
+ * @author Nael Ouerghemi (310435)
  */
 public enum PlanetModel implements CelestialObjectModel<Planet>{
 
 	MERCURY("Mercure", 0.24085, 75.5671, 77.612, 0.205627,
-			0.387098, 7.0051, 48.449, 6.74f, -0.42f),
+			0.387098, 7.0051, 48.449, 6.74, -0.42),
 	VENUS("Vénus", 0.615207, 272.30044, 131.54, 0.006812,
-			0.723329, 3.3947, 76.769, 16.92f, -4.40f),
+			0.723329, 3.3947, 76.769, 16.92, -4.40),
 	EARTH("Terre", 0.999996, 99.556772, 103.2055, 0.016671,
 			0.999985, 0, 0, 0, 0),
 	MARS("Mars", 1.880765, 109.09646, 336.217, 0.093348,
-			1.523689, 1.8497, 49.632, 9.36f, -1.52f),
+			1.523689, 1.8497, 49.632, 9.36, -1.52),
 	JUPITER("Jupiter", 11.857911, 337.917132, 14.6633, 0.048907,
-			5.20278, 1.3035, 100.595, 196.74f, -9.40f),
+			5.20278, 1.3035, 100.595, 196.74, -9.40),
 	SATURN("Saturne", 29.310579, 172.398316, 89.567, 0.053853,
-			9.51134, 2.4873, 113.752, 165.60f, -8.88f),
-	URANUS("Uranus", 84.039492, 271.063148, 172.884833, 0.046321,
-			19.21814, 0.773059, 73.926961, 65.80f, -7.19f),
+			9.51134, 2.4873, 113.752, 165.60, -8.88),
+	URANUS("Uranus", 84.039492, 356.135400, 172.884833, 0.046321,
+			19.21814, 0.773059, 73.926961, 65.80, -7.19),
 	NEPTUNE("Neptune", 165.84539, 326.895127, 23.07, 0.010483,
-			30.1985, 1.7673, 131.879, 62.20f, -6.87f);
+			30.1985, 1.7673, 131.879, 62.20, -6.87);
 
-	private PlanetModel(String name, double tropic, double eps, double peri, double exc, double half, double incli, double node, float angularSize, float magnitude) {
-		this.name=name;
-		this.tropic=tropic;
-		this.eps=eps;
-		this.peri=peri;
-		this.exc=exc;
-		this.half=half;
-		this.incli=incli;
-		this.node=node;
-		this.angularSize=angularSize;
-		this.magnitude=magnitude;
+	private PlanetModel(String name, double revPeriod, double lonEpoch, double peri, double exc, double half, double incli, double node, double angularSize, double magnitude) {
+		this.name = name;
+		this.revPeriod = revPeriod;
+		this.lonEpoch = ofDeg(lonEpoch);
+		this.peri = ofDeg(peri);
+		this.exc = exc;
+		this.half = half;
+		this.incli = ofDeg(incli);
+		this.node = ofDeg(node);
+		this.angularSize = angularSize;
+		this.magnitude = magnitude;
 	}
 
-	public static List<PlanetModel> ALL;
+	/**
+	 * Immutable list of all planets used to compute their positions
+	 */
+	public static List<PlanetModel> ALL=List.copyOf(Arrays.asList(PlanetModel.values()));
 	private String name;
-	private double tropic;
-	private double eps;
+	private double revPeriod;
+	private double lonEpoch;
 	private double peri;
 	private double exc;
 	private double half;
 	private double incli;
 	private double node;
-	private float angularSize;
-	private float magnitude;
+	private double angularSize;
+	private double magnitude;
 
+	/**
+	 * Returns a representation of the planet at a given time depending on the epoch J2010 and location
+	 * 
+	 * @param daysSinceJ2010
+	 * 				Number of days between the epoch J2010 and wanted time
+	 * 
+	 * @param eclipticToEquatorialConversion
+	 * 				Conversion from ecliptic to equatorial coordinates used
+	 * 
+	 * @return representation of the sun at a given time depending on the epoch J2010 and location
+	 */
 	@Override
 	public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
-		
-		double mean=TAU/(365.242191)*daysSinceJ2010/(tropic)+ofDeg(eps)-ofDeg(peri);
-		double real=mean+2*exc*Math.sin(mean);
 
-		double r=half*(1-exc*exc)/(1+exc*Math.cos(real));
-		double l=real+ofDeg(peri);
-		
-		double meanEarth=TAU/(365.242191)*daysSinceJ2010/(EARTH.tropic)+ofDeg(EARTH.eps)-ofDeg(EARTH.peri);
-		double realEarth=meanEarth+2*exc*Math.sin(meanEarth);
-		double rEarth=EARTH.half*(1-EARTH.exc*EARTH.exc)/(1+EARTH.exc*Math.cos(realEarth));
-		double lEarth=realEarth+ofDeg(EARTH.peri); 
-		
-		double pos=Math.asin(Math.sin(l-ofDeg(node))*Math.sin(ofDeg(incli)));
+		//Mean anomaly
+		double meanAnomaly = meanAnomaly(daysSinceJ2010, revPeriod, lonEpoch, peri);
 
-		double rp=r*Math.cos(pos);
-		double lp=Math.atan2(Math.asin(l-ofDeg(node))*Math.cos(ofDeg(incli)), Math.cos(l-ofDeg(node)))+ofDeg(node);
+		//Real anomaly
+		double realAnomaly = realAnomaly(meanAnomaly, exc);
 
-		double delta;
+		//Radius (distance from this planet to the sun)
+		double r = radius(realAnomaly, half, exc);
 
-		//Superior planets 
-		if (magnitude<-4.40f || magnitude==-1.52f) {
-			delta=lp+Math.atan2(rEarth*Math.sin(lp-lEarth), rp-rEarth*Math.cos(lp-lEarth));
-		}
+		//Heliocentric longitude
+		double lonHelio = realAnomaly + peri;
 
-		//Inner planets
-		else {
-			delta=Math.PI+lEarth+Math.atan2(rp*Math.sin(lEarth-lp), rEarth-rp*Math.cos(lEarth-lp));
-		}
+		//Previous variables adapted for the Earth : meanAnomaly, realAnomaly, radius, heliocentric longitude
+		double meanAnomalyEarth = meanAnomaly(daysSinceJ2010, EARTH.revPeriod, EARTH.lonEpoch, EARTH.peri);
+		double realAnomalyEarth = realAnomaly(meanAnomalyEarth, EARTH.exc);
+		double rEarth = radius(realAnomalyEarth, EARTH.half, EARTH.exc);
+		double lEarth = realAnomalyEarth + EARTH.peri; 
 
-		delta=normalizePositive(delta);
-		double beta=Math.atan2(rp*Math.tan(pos)*Math.sin(delta-lp), rEarth*Math.sin(lp-lEarth));
+		//Ecliptic heliocentric latitude
+		double repeatedSinTerm = sin(lonHelio - node);
+		double latHelioEcl = asin(repeatedSinTerm * sin(incli));
 
-		double p=Math.sqrt(rEarth*rEarth + r*r - 2*rEarth*r*Math.cos(l-lEarth)*Math.cos(pos));
-		float angular=(float) (angularSize/p);
+		//Ecliptic heliocentric longitude
+		double x = cos(lonHelio - node);
+		double y = repeatedSinTerm * cos(incli);
 
-		double f=(1+Math.cos(delta-l))/2.0;
-		float mag=(float) (magnitude + 5*Math.log10(r*p/Math.sqrt(f)));
-		EquatorialCoordinates equ=eclipticToEquatorialConversion.apply(EclipticCoordinates.of(delta, beta));
-		
-		//Printers
-		System.out.println("Mean = "+mean);
-		System.out.println("Real anomaly = "+real);
-		System.out.println("Real anomaly = "+real);
-		System.out.println("MeanEarth = "+meanEarth);
-		System.out.println("RealEarth = "+realEarth);
-		System.out.println("R = "+rEarth);
-		System.out.println("L = "+lEarth);
-		
-		System.out.println("Pos = "+pos);
-		System.out.println("lp = "+lp);
-		System.out.println("rp = "+rp);
-		System.out.println("Delta ="+delta+" Beta = "+beta);
-		System.out.println("p = "+p);
-		System.out.println("angular = "+angular);
-		System.out.println("F = "+f);
-		System.out.println("mag = "+mag);
-		System.out.println("Alpha = "+equ.ra()+" Beta = "+equ.dec());
-		
+		double lonHelioEcl = atan2(y,x) + node;
 
-		return new Planet(name, equ, angular, mag);
+		//Projection of the radius over the ecliptic
+		double rProj = r * cos(latHelioEcl);
+
+
+		//Superior planets / Inferior planets
+		double comSinTerm = sin(lonHelioEcl-lEarth);
+		double deltaSup = lonHelioEcl + atan2(rEarth*comSinTerm, rProj-rEarth*cos(lonHelioEcl-lEarth));
+		double deltaInf = Math.PI + lEarth + atan2(rProj*sin(lEarth-lonHelioEcl), rEarth-rProj*cos(lEarth-lonHelioEcl));
+
+		double delta = revPeriod >= EARTH.revPeriod ? deltaSup : deltaInf; 
+		delta = normalizePositive(delta);
+
+		//Ecliptic latitude of the Planet
+		double numBeta = rProj * tan(latHelioEcl) * sin(delta-lonHelioEcl);
+		double denBeta = rEarth * comSinTerm;
+		double beta = atan(numBeta / denBeta);
+
+		//Angular Size
+		double p = sqrt(rEarth*rEarth + r*r - 2*rEarth*r*cos(lonHelio - lEarth)*cos(latHelioEcl));
+
+		double angular = ofArcsec(angularSize)/p;
+
+		//Phase
+		double f = (1 + cos(delta-lonHelio))/2.0;
+
+		//Magnitude
+		double mag = magnitude + 5*log10(r*p/sqrt(f));
+
+
+		//Conversion from ecliptic to equatorial Coordinates	
+		EquatorialCoordinates equ = eclipticToEquatorialConversion.apply(EclipticCoordinates.of(delta, beta));
+
+		return new Planet(name, equ, (float) angular, (float) mag);
+	}
+
+	/**
+	 * Returns mean anomaly of the Planet
+	 * 
+	 * @param daysSinceJ2010
+	 * 			Days since epoch J2010
+	 * 
+	 * @param period
+	 * 			Period of revolution (in tropic years)
+	 * 
+	 * @param lonJ2010
+	 * 			Longitude of the Planet at J2010
+	 * 
+	 * @param perigee
+	 * 			Longitude of the perigee
+	 * 			
+	 * @return mean anomaly of the Planet at the given time
+	 * 
+	 */
+	private double meanAnomaly(double daysSinceJ2010, double period, double lonJ2010, double perigee) {
+		return (TAU/365.242191) * (daysSinceJ2010/period) + lonJ2010 - perigee;
+	}
+
+	/**
+	 * Returns real anomaly of the Planet given its mean anomaly
+	 * 
+	 * @param meanAnomaly
+	 * 			Mean anomaly of the Planet
+	 * 
+	 * @param e
+	 * 			Orbital eccentricity
+	 * 
+	 * @return real anomaly of the Planet
+	 */
+	private double realAnomaly(double meanAnomaly, double e) {
+		return meanAnomaly + 2*e*sin(meanAnomaly);
+	}
+
+	/**
+	 * Return the radius of the Planet (distance Planet-Sun) given the real anomaly of the Planet
+	 * 
+	 * @param realAnomaly
+	 * 			Real anomaly of the Planet
+	 * 
+	 * @param h
+	 * 			Semi major axis of the orbit
+	 * 
+	 * @param e
+	 * 			Orbital eccentricity
+	 * 
+	 * @return radius of the Planet (distance Planet-Sun) at the given time
+	 */
+	private double radius(double realAnomaly, double h, double e) {
+		return h * (1 - e*e)/(1 + e*cos(realAnomaly));
 	}
 }

@@ -1,22 +1,21 @@
 package ch.epfl.rigel.coordinates;
 
-import ch.epfl.rigel.math.ClosedInterval;
-
-
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.RightOpenInterval;
+
 import static ch.epfl.rigel.Preconditions.*;
 
 import java.util.Locale;
 
 /**
  * Geographic Coordinates
- * @author Nael Ouerghemi
+ * 
+ * @author Nael Ouerghemi (310435)
  *
  */
 public final class GeographicCoordinates extends SphericalCoordinates {
-	final static RightOpenInterval LONGITUDE_INT=RightOpenInterval.symmetric(360);
-	final static ClosedInterval LATITUDE_INT=ClosedInterval.symmetric(180);
+
+	private static final RightOpenInterval GEO_LONGITUDE_INT_DEG = RightOpenInterval.of(-180, 180);
 
 	private GeographicCoordinates(double longitude, double latitude) {
 		super(longitude, latitude);
@@ -24,8 +23,16 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 
 	/**
 	 * Creation of geographic coordinates with the desired values in degrees
-	 * @param lonDeg : longitude in degrees
-	 * @param latDeg : latitude in degrees
+	 * 
+	 * @param lonDeg
+	 * 			Longitude in degrees
+	 * 
+	 * @param latDeg
+	 * 			Latitude in degrees
+	 * 
+	 * @throws IllegalArgumentException
+	 *			lonDeg/latDeg is not in the interval LONGITUDE_INT_DEG/LATITUDE_INT_DEG
+	 * 			
 	 * @return geographic coordinates with the desired values
 	 */
 	public static GeographicCoordinates ofDeg(double lonDeg, double latDeg) {
@@ -37,40 +44,59 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 
 	/**
 	 * Determine if an angle of value lonDeg (in degrees) is a valid longitude
-	 * @param lonDeg : value of the angle to test in degrees
-	 * @return True if the angle is a valid longitude/ False if not
+	 * 
+	 * @param lonDeg
+	 * 			Value of the angle to test in degrees
+	 * 
+	 * @return True if the angle is a valid longitude
+	 * 		   False if not
 	 */
 	public static boolean isValidLonDeg(double lonDeg) {
-		if (LONGITUDE_INT.contains(lonDeg))
-			return true;
 
-		return false;
+		return GEO_LONGITUDE_INT_DEG.contains(lonDeg);
 	}
 
 	/**
 	 * Determine if an angle of value latDeg (in degrees) is a valid latitude
-	 * @param latDeg : value of the angle to test in degrees
-	 * @return True if the angle is a valid latitude/ False if not
+	 * 
+	 * @param latDeg
+	 * 			Value of the angle to test in degrees
+	 * 
+	 * @return True if the angle is a valid latitude 
+	 * 		   False otherwise
 	 */
 	public static boolean isValidLatDeg(double latDeg) {
-		if (LATITUDE_INT.contains(latDeg))
-			return true;
 
-		return false;
+		return LATITUDE_INT_DEG.contains(latDeg);
 	}
 
+	/**
+	 * @see SphericalCoordinates#lon()
+	 */
 	@Override
 	public double lon() {return super.lon();}
 
+	/**
+	 * @see SphericalCoordinates#lonDeg()
+	 */
 	@Override
 	public double lonDeg() {return super.lonDeg();}
 
+	/**
+	 * @see SphericalCoordinates#lat()
+	 */
 	@Override
 	public double lat() {return super.lat();}
 
+	/**
+	 * @see SphericalCoordinates#latDeg()
+	 */
 	@Override
 	public double latDeg() {return super.latDeg();}
 
+	/**
+	 * @see Object#toString()
+	 */
 	@Override 
 	public String toString() {
 		return String.format(Locale.ROOT, "(lon=%.4f°, lat=%.4f°)", lonDeg(), latDeg());

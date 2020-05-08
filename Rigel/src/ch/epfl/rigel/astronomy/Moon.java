@@ -9,23 +9,40 @@ import java.util.Locale;
 
 /**
  * Represents the Moon at a given instant
- * @author Nael Ouerghemi
- *
+ * 
+ * @author Nael Ouerghemi (310435)
  */
 public final class Moon extends CelestialObject{
 
 	private float phase;
-	
+	private static final ClosedInterval PHASE_INT = ClosedInterval.of(0, 1);
+
+	/**
+	 * Constructor for the moon
+	 * 
+	 * @param equatorialPos 
+	 * 			Equatorial Coordinates of the position of the moon
+	 * 
+	 * @param angularSize 
+	 * 			Angular Size of the moon
+	 * 
+	 * @param magnitude 
+	 * 			Magnitude of the moon
+	 * 
+	 * @param phase 
+	 * 			Phase of the moon
+	 */
 	public Moon(EquatorialCoordinates equatorialPos, float angularSize, float magnitude, float phase) {
 		super("Lune", equatorialPos, angularSize, magnitude);
-		ClosedInterval phaseInt=ClosedInterval.of(0, 1);
-		checkInInterval(phaseInt, phase);
-		this.phase=phase;
+		checkInInterval(PHASE_INT, phase);
+		this.phase = phase;
 	}
-	
+
+	/**
+	 * @see CelestialObject#info()
+	 */
 	@Override
 	public String info() {
 		return String.format(Locale.ROOT, name()+" (%.1f%%)", phase*100);
 	}
-
 }

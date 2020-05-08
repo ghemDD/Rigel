@@ -1,84 +1,88 @@
 package ch.epfl.rigel.coordinates;
 
+import static ch.epfl.rigel.astronomy.SiderealTime.local;
+import static ch.epfl.rigel.math.Angle.normalizePositive;
+import static java.lang.Math.asin;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 import java.time.ZonedDateTime;
-import static ch.epfl.rigel.math.Angle.*;
 import java.util.function.Function;
-
-import ch.epfl.rigel.math.Angle;
-
-import static ch.epfl.rigel.astronomy.SiderealTime.*;
 
 /**
  * Conversion from Equatorial Coordinates to Horizontal Coordinates depending on a certain location
  * (in Geographic Coordinates)
- * @author Nael Ouerghemi
- *
+ * 
+ * @author Nael Ouerghemi (310435)
  */
-public class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates>{
-	private double horangle;
-	private double latobs;
+public final class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates>{
+	private double latObs;
+	private double sinLatObs, cosLatObs;
 	private double time;
 
-
+	/**
+	 * Constructs an EquatorialToHorizontalConversion given a ZonedDateTime and a location in geographic coordinates
+	 * 
+	 * @param when
+	 * 			Zoned date time
+	 * 
+	 * @param where
+	 * 			Geographic coordinates of the point of observation
+	 */
 	public EquatorialToHorizontalConversion(ZonedDateTime when, GeographicCoordinates where) {
-		time=local(when, where);
-		latobs=where.lat();
+		time = local(when, where);
+		latObs = where.lat();
+		sinLatObs = sin(latObs);
+		cosLatObs = cos(latObs);
 	}
 
-	//Temporary for testing purposes only
-	public EquatorialToHorizontalConversion(double horangle, double latobs) {
-		this.horangle=horangle;
-		this.latobs=latobs;
-	}
-	
+	/**
+	 * Returns the conversion from equatorial coordinates to horizontal coordinates
+	 * 
+	 * @param t
+	 * 			Equatorial coordinates
+	 * 
+	 * @return conversion from equatorial coordinates to horizontal coordinates
+	 */
 	@Override
 	public HorizontalCoordinates apply(EquatorialCoordinates t) {
-		// TODO Auto-generated method stub
-		//Constantes publiques 
-		horangle=time-t.ra();
-		double term1=Math.sin(t.dec())*Math.sin(latobs);
-		double term2=Math.cos(t.dec())*Math.cos(latobs)*Math.cos(horangle);
 
-		double h=Math.asin(term1+term2);
-		
-		double den=Math.sin(t.dec())-Math.sin(latobs)*Math.sin(h);
-		double num=-Math.cos(t.dec())*Math.cos(latobs)*Math.sin(horangle);
+		//Repeated sin/cos term
+		double sinCoor = sin(t.dec());
+		double cosCoor = cos(t.dec());
 
-		double raw=Math.atan2(num, den);
-		double az = Angle.normalizePositive(raw);
-		
-		
-		return HorizontalCoordinates.of(az, h);
-	}
-	
-	
-	public HorizontalCoordinates applyTest(EquatorialCoordinates t) {
-		// TODO Auto-generated method stub
-		//Constantes publiques 
-		double term1=Math.sin(t.dec())*Math.sin(latobs);
-		double term2=Math.cos(t.dec())*Math.cos(latobs)*Math.cos(horangle);
+		//Hour angle
+		double horangle = time - t.ra();
 
-		double h=Math.asin(term1+term2);
-		
-		double den=Math.sin(t.dec())-Math.sin(latobs)*Math.sin(h);
-		double num=-Math.cos(t.dec())*Math.cos(latobs)*Math.sin(horangle);
+		//Latitude
+		double termA = sinCoor * sinLatObs;
+		double termB = cosCoor * cosLatObs * cos(horangle);
+		double lat = asin(termA + termB);
 
-		double raw=Math.atan2(num, den);
-		
-		double az = Angle.normalizePositive(raw);
-		
-		return HorizontalCoordinates.of(az, h);
+		//Azimuth
+		double den = sinCoor - sinLatObs*sin(lat);
+		double num = -cosCoor * cosLatObs * sin(horangle);
+		double az = normalizePositive(atan2(num, den));		
+
+		return HorizontalCoordinates.of(az, lat);
 	}
 
-
+	/**
+	 * @see Object#equals()
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
 	public boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * @see Object#hashCode()
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
 	public int hashCode() {
 		throw new UnsupportedOperationException();
 	}
-
 }
