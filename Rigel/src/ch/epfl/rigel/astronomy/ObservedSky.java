@@ -3,6 +3,9 @@ package ch.epfl.rigel.astronomy;
 
 import java.time.ZonedDateTime;
 
+import static ch.epfl.rigel.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
+import static java.lang.Math.abs;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
@@ -25,7 +28,7 @@ import ch.epfl.rigel.coordinates.StereographicProjection;
  */
 public class ObservedSky {
 
-	private final Map<CelestialObject, CartesianCoordinates> map;
+	private final Map<CelestialObject, CartesianCoordinates> celestialCoordinates;
 
 	private final List<Planet> planets;
 	private final List<CartesianCoordinates> planetCartesianPositions;
@@ -74,7 +77,7 @@ public class ObservedSky {
 		planetCartesianPositions = new ArrayList<>();
 		starCartesianPositions = new ArrayList<>();
 		this.catalogue = catalogue;
-		map = new HashMap<CelestialObject, CartesianCoordinates>();
+		celestialCoordinates = new HashMap<CelestialObject, CartesianCoordinates>();
 
 
 		sun = SunModel.SUN.at(daysSinceJ2010, eclToEqu);
@@ -102,7 +105,7 @@ public class ObservedSky {
 		HorizontalCoordinates horConvertedCoordinates = equToHor.apply(object.equatorialPos());
 		CartesianCoordinates projCartCoordinates = projection.apply(horConvertedCoordinates);
 
-		map.put(object, projCartCoordinates);
+		celestialCoordinates.put(object, projCartCoordinates);
 
 		return projCartCoordinates;
 	}
@@ -128,7 +131,7 @@ public class ObservedSky {
 			celestialObjectsPositions[index] = projectedCoordinates.x();
 			celestialObjectsPositions[index + 1] = projectedCoordinates.y();
 			cartesianCoordinates.add(projectedCoordinates);
-			map.put(object, projectedCoordinates);
+			celestialCoordinates.put(object, projectedCoordinates);
 
 			index+=2;
 		}
@@ -297,12 +300,14 @@ public class ObservedSky {
 	 *		   or a empty cell if no celestial object has been found
 	 */
 	public Optional<CelestialObject> objectClosestTo(CartesianCoordinates coordinates, double maxDistance) {
-
+		checkArgument(maxDistance>=0);
+		requireNonNull(coordinates);
+		
 		List<CelestialObject> reducedList = new ArrayList<CelestialObject>(); 
 
 		//First filter to avoid unnecessary computations : checks if the object is in the square of length 2*maxDistance centered in coordinates parameter 
-		for(CelestialObject object : map.keySet()) {
-			if ((map.get(object).x() - coordinates.x() <= maxDistance) && (map.get(object).y() - coordinates.y() <= maxDistance)) {
+		for(CelestialObject object : celestialCoordinates.keySet()) {
+			if ((abs(celestialCoordinates.get(object).x() - coordinates.x()) <= maxDistance) && (abs(celestialCoordinates.get(object).y() - coordinates.y()) <= maxDistance)) {
 				reducedList.add(object);
 			}
 		}
@@ -311,7 +316,7 @@ public class ObservedSky {
 		Optional<CelestialObject> closest = null;
 
 		for(CelestialObject object : reducedList) {
-			double tempDistance = coordinates.distance(map.get(object));
+			double tempDistance = coordinates.distance(celestialCoordinates.get(object));
 
 			if (tempDistance <= minDistance) {
 				minDistance = tempDistance;
