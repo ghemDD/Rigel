@@ -12,9 +12,7 @@ public final class Polynomial {
 	private Polynomial (double coefficientN, double[] coefficientsP) {
 		coefficients = new double[1 + coefficientsP.length];
 		coefficients[0] = coefficientN;
-		double[] temp = new double[coefficientsP.length];
-		System.arraycopy(coefficientsP, 0, temp, 0, temp.length);
-		System.arraycopy(temp, 0, coefficients, 1, temp.length);
+		System.arraycopy(coefficientsP, 0, coefficients, 1, coefficients.length - 1);
 	}
 
 	/**
@@ -116,7 +114,7 @@ public final class Polynomial {
 	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -125,7 +123,7 @@ public final class Polynomial {
 	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		throw new UnsupportedOperationException();
 	}
 }

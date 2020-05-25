@@ -11,8 +11,9 @@ import static ch.epfl.rigel.Preconditions.*;
  */
 public final class Star extends CelestialObject{
 	private static final ClosedInterval COL_INT = ClosedInterval.of(-0.5, 5.5);
-	private int hipparcos;
-	private float color;
+	private final int hipparcos;
+	private final float color;
+	private final double colorTemp;
 
 	/**
 	 * Constructor for Star
@@ -43,6 +44,8 @@ public final class Star extends CelestialObject{
 		checkInInterval(COL_INT, colorIndex);
 		hipparcos = hipparcosId;
 		color = colorIndex;
+		double repeated = 0.92 * color;
+		colorTemp = 4600 * (1/(repeated + 1.7) + 1/(repeated + 0.62));
 	}
 
 	/**
@@ -57,12 +60,5 @@ public final class Star extends CelestialObject{
 	 * 
 	 * @return color temperature of the star 
 	 */
-	public int colorTemperature() {
-		double den1 = 0.92*color + 1.7;
-		double den2 = 0.92*color + 0.62;
-
-		double colorTemp = 4600 * (1/den1 + 1/den2);
-
-		return (int) colorTemp;
-	}
+	public int colorTemperature() {return (int) colorTemp;}
 }

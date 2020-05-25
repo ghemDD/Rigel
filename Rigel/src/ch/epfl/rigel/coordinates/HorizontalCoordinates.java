@@ -28,7 +28,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	private static final RightOpenInterval SOUTH = RightOpenInterval.of(112.5, 247.5);
 	private static final RightOpenInterval WEST = RightOpenInterval.of(202.5, 337.5);
 	private static final RightOpenInterval EAST = RightOpenInterval.of(22.5, 157.5);
-	
+
 	public static final String NORTH_STRING = "N";
 	public static final String SOUTH_STRING = "S";
 	public static final String EAST_STRING = "E";
@@ -48,9 +48,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	 * @param alt
 	 * 			Altitude (in radians)
 	 * 
-	 * @throws IllegalArgumentException
-	 * 			az/alt are not in the interval LONGITUDE_INT/LATITUDE_INT
-	 * 
 	 * @return horizontal coordinates with the desired values
 	 */
 	public static HorizontalCoordinates of(double az, double alt) {
@@ -64,14 +61,11 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	/**
 	 * Creation of horizontal coordinates with the desired values in degrees
 	 * 
-	 * @param az
+	 * @param azDeg
 	 * 			Azimuth (in degrees)
 	 * 
-	 * @param alt
+	 * @param altDeg
 	 * 			Altitude (in degrees)
-	 * 
-	 * @throws IllegalArgumentException
-	 * 			az/alt are not in the respective interval LONGITUDE_INT_DEG/LATITUDE_INT_DEG
 	 * 
 	 * @return horizontal coordinates with the desired values
 	 */

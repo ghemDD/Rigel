@@ -3,20 +3,20 @@ package ch.epfl.rigel.astronomy;
 
 import java.time.ZonedDateTime;
 
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
-import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
-import static ch.epfl.rigel.math.EuclideanDistance.*;
 
 /**
  * Represents the set of all celestial objects visible in the sky
@@ -25,26 +25,25 @@ import static ch.epfl.rigel.math.EuclideanDistance.*;
  */
 public class ObservedSky {
 
-	private List<CelestialObject> celestialObjects;
+	private final Map<CelestialObject, CartesianCoordinates> map;
 
-	private List<Planet> planets;
-	private List<CartesianCoordinates> planetCartesianPositions;
+	private final List<Planet> planets;
+	private final List<CartesianCoordinates> planetCartesianPositions;
 	private double[] planetPositions;
 
-	private StereographicProjection projection;
-	private EclipticToEquatorialConversion eclToEqu;
-	private EquatorialToHorizontalConversion equToHor;
-	Function<EclipticCoordinates,HorizontalCoordinates> eclToHor;
+	private final StereographicProjection projection;
+	private final EclipticToEquatorialConversion eclToEqu;
+	private final EquatorialToHorizontalConversion equToHor;
 
-	private Sun sun;
-	private CartesianCoordinates sunPosition;
+	private final Sun sun;
+	private final CartesianCoordinates sunPosition;
 
-	private Moon moon;
-	private CartesianCoordinates moonPosition;
+	private final Moon moon;
+	private final CartesianCoordinates moonPosition;
 
-	private StarCatalogue catalogue;
-	private List<CartesianCoordinates> starCartesianPositions;
-	private double[] starPositions;
+	private final StarCatalogue catalogue;
+	private final List<CartesianCoordinates> starCartesianPositions;
+	private final double[] starPositions;
 
 	/**
 	 * Constructor for the ObservedSky class containing representing the set of all celestial objects visible in the sky
@@ -63,7 +62,7 @@ public class ObservedSky {
 	 * 
 	 */
 	public ObservedSky(ZonedDateTime date, GeographicCoordinates observationPosition, StereographicProjection stereo, StarCatalogue catalogue) {
-		
+
 		/**
 		 * Coordinates conversions
 		 */
@@ -71,88 +70,26 @@ public class ObservedSky {
 		eclToEqu = new EclipticToEquatorialConversion(date);
 		equToHor = new EquatorialToHorizontalConversion(date, observationPosition);
 		projection = stereo;
-		celestialObjects = new ArrayList<CelestialObject>();
 		planets = new ArrayList<Planet>();
 		planetCartesianPositions = new ArrayList<>();
 		starCartesianPositions = new ArrayList<>();
 		this.catalogue = catalogue;
+		map = new HashMap<CelestialObject, CartesianCoordinates>();
 
-		eclToHor = eclToEqu.andThen(equToHor);
 
-		/**
-		 * Sun position
-		 */
 		sun = SunModel.SUN.at(daysSinceJ2010, eclToEqu);
 		sunPosition = projectSingleCelestialObject(sun);
-		
-		/**
-		//sunPosition = stereo.apply(eclToHor.apply(sun.eclipticPos()));
-		//celestialObjects.add(sun);
-		 */
-
-		/**
-		 * Moon position
-		 */
 
 		moon = MoonModel.MOON.at(daysSinceJ2010, eclToEqu);
 		moonPosition = projectSingleCelestialObject(moon);
-		
-		/**
-		//moonPosition = stereo.apply(equToHor.apply(moon.equatorialPos()));
-		//celestialObjects.add(moon);
-		 */
 
-		/**
-		 * Planets positions
-		 */
-		
 		List<CelestialObject> planetsCelestial = constructPlanetList(daysSinceJ2010);
 		planetPositions = projectListCelestialObject(planetsCelestial, planetCartesianPositions);
-		
-		/**
-		int index = 0;
-		int y = 0;
-		planetPositions = projectListCelestialObject(toArrayCelestialObject(planets));
-		planetPositions = new double[2 * (PlanetModel.ALL.size()-1)];
-		 **/
-		
-		/**
-		 * Star list and positions
-		 */
-		
+
 		List<CelestialObject> starsCelestial = starsCelestialObjects(catalogue);
 		starPositions = projectListCelestialObject(starsCelestial, starCartesianPositions);
-		
-		/**
-		index=0;
-		starPositions = new double[2 * catalogue.stars().size()];
-
-		for(int i = 0; i < catalogue.stars().size(); ++i) { 
-			HorizontalCoordinates conv = equToHor.apply(catalogue.stars().get(i).equatorialPos());
-			starCartesianPositions.add(stereo.apply(conv));
-
-			starPositions[index]= starCartesianPositions.get(i).x();
-			starPositions[index+1] = starCartesianPositions.get(i).y();
-			
-			if (catalogue.stars().get(i).name().equals("Betelgeuse")) { 
-				System.out.println("Betelgeuse "+starCartesianPositions.get(i));
-			}
-			//System.out.print(catalogue.stars().get(i).name()+" ");
-			//System.out.print(catalogue.stars().get(i).equatorialPos()+" ");
-			//System.out.print(" azDeg "+conv.azDeg()+" altDeg "+conv.altDeg());
-			//System.out.println(" x : "+starPositions[index]+" y : "+starPositions[index+1]);
-			//System.out.println(starCartesianPositions.get(i).toString());
-
-			starMap.put(catalogue.stars().get(i), starCartesianPositions.get(i));
-			
-			index +=2;
-		}
-
-		celestialObjects.addAll(catalogue.stars());
-		
-		**/
 	}
-	
+
 	/**
 	 * Projects single celestial objects (Moon and Sun)
 	 * 
@@ -164,15 +101,15 @@ public class ObservedSky {
 	public CartesianCoordinates projectSingleCelestialObject(CelestialObject object) {
 		HorizontalCoordinates horConvertedCoordinates = equToHor.apply(object.equatorialPos());
 		CartesianCoordinates projCartCoordinates = projection.apply(horConvertedCoordinates);
-		
-		celestialObjects.add(object);
-		
+
+		map.put(object, projCartCoordinates);
+
 		return projCartCoordinates;
 	}
-	
+
 	/**
 	 * Projects a list of celestial objects depending on the stereographic projection attribute and conversions
-	 * and adds the object to the list of celestial objects
+	 * and adds the object and his projected position to the Map<CelestialObject, CartesianCoordinates>
 	 * 
 	 * @param objects
 	 * 			Celestial objects to be projected
@@ -180,75 +117,65 @@ public class ObservedSky {
 	 * @return array of double
 	 */
 	public double[] projectListCelestialObject(List<CelestialObject> objects, List<CartesianCoordinates> cartesianCoordinates) {
-		
+
 		int index = 0;
 		double[] celestialObjectsPositions = new double[objects.size() * 2];
-		
+
 		for (CelestialObject object : objects) {
 			HorizontalCoordinates horConverted = equToHor.apply(object.equatorialPos());
 			CartesianCoordinates projectedCoordinates = projection.apply(horConverted);
-			
+
 			celestialObjectsPositions[index] = projectedCoordinates.x();
 			celestialObjectsPositions[index + 1] = projectedCoordinates.y();
 			cartesianCoordinates.add(projectedCoordinates);
-			celestialObjects.add(object);
-			
+			map.put(object, projectedCoordinates);
+
 			index+=2;
-			
 		}
-		
+
 		return celestialObjectsPositions;
 	}
 
 	/**
 	 * Fills the list of planets and returns the list of planets in the form of a List<CelestialObject> to be used in further method projectListCelestialObject
-	 * and adds the list of planets to the list of celestialObjects
+	 * 
+	 * 
 	 * @param daysSinceJ2010
 	 * 			Number of days since the epoch J2010
 	 * 
 	 * @return list of planets in the form of a List<CelestialObject> to be used in further method projectListCelestialObject
 	 */
 	private List<CelestialObject> constructPlanetList(double daysSinceJ2010) {
-		
+
 		List<CelestialObject> planetsCelestialObject = new ArrayList<CelestialObject>();
-		
+
 		for(int i = 0; i < PlanetModel.ALL.size(); ++i) {
 			if (!PlanetModel.ALL.get(i).equals(PlanetModel.EARTH)) {
 				Planet planet = PlanetModel.ALL.get(i).at(daysSinceJ2010, eclToEqu);
 				planets.add(planet);
 				planetsCelestialObject.add(planet);
-
-				//planetCartesianPositions.add(stereo.apply(equToHor.apply(planet.equatorialPos())));
-				//planetPositions[index] = planetCartesianPositions.get(y).x();
-				//planetPositions[index+1] = planetCartesianPositions.get(y).y();
-				//index+=2;
-				//++y;
 			}	
 		}
 
-		celestialObjects.addAll(planets);
-		
 		return planetsCelestialObject;
 	}
-	
+
 	/**
 	 * Returns the list of stars in the form of a List<CelestialObject> to be used in further method projectListCelestialObject
-	 * and the list of stars to the list of celestial objects
+	 * 
 	 * 
 	 * @return list of stars in the form of a List<CelestialObject> to be used in further method projectListCelestialObject
 	 */
 	private List<CelestialObject> starsCelestialObjects(StarCatalogue catalogue) {
 		List<CelestialObject> starsCelestialObjects = new ArrayList<CelestialObject>();
-		
+
 		for (Star star : catalogue.stars()) {
 			starsCelestialObjects.add(star);
 		}
-		
-		celestialObjects.addAll(catalogue.stars());
-		
+
 		return starsCelestialObjects;
 	}
-	
+
 	/**
 	 * Returns the Sun calculated in the constructor
 	 * 
@@ -285,14 +212,6 @@ public class ObservedSky {
 	public double[] planetPositions() {
 		return planetPositions.clone();
 	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public List<CartesianCoordinates> planetCartesianCoordinates() {
-		return planetCartesianPositions;
-	}
 
 	/**
 	 * Getters for the list of the stars
@@ -312,7 +231,7 @@ public class ObservedSky {
 	public double[] starPositions() {
 		return starPositions.clone();
 	}
-	
+
 	/**
 	 * Returns immutable copy of the list of cartesian coordinates of the stars
 	 * @return immutable copy of the list of cartesian coordinates of the stars
@@ -320,7 +239,7 @@ public class ObservedSky {
 	public List<CartesianCoordinates> starCartesianCoordinates() {
 		return List.copyOf(starCartesianPositions);
 	}
-	
+
 	/**
 	 * Returns the Moon calculated in the constructor
 	 * 
@@ -369,6 +288,7 @@ public class ObservedSky {
 	 * 
 	 * @param coordinates
 	 * 				 Coordinates of the point
+	 * 
 	 * @param maxDistance 
 	 * 				 Maximal distance to the point
 	 * 
@@ -377,75 +297,28 @@ public class ObservedSky {
 	 *		   or a empty cell if no celestial object has been found
 	 */
 	public Optional<CelestialObject> objectClosestTo(CartesianCoordinates coordinates, double maxDistance) {
-		//Unify all the celestial objects
-		//First filter of celestial objects 
-		//Less computation of euclidean distance reduce
-		
-		double minDistance = maxDistance;
+
+		List<CelestialObject> reducedList = new ArrayList<CelestialObject>(); 
+
+		//First filter to avoid unnecessary computations : checks if the object is in the square of length 2*maxDistance centered in coordinates parameter 
+		for(CelestialObject object : map.keySet()) {
+			if ((map.get(object).x() - coordinates.x() <= maxDistance) && (map.get(object).y() - coordinates.y() <= maxDistance)) {
+				reducedList.add(object);
+			}
+		}
+
+		double minDistance = Double.MAX_VALUE;
 		Optional<CelestialObject> closest = null;
 
-		/**
-		 * Sun
-		 */
-		//System.out.println("Sun position "+sunPosition());
-		//System.out.println("Coordinates "+coordinates);
-		double sunDistance = cartesianDistance(coordinates, sunPosition());
-
-		if ( sunDistance <= minDistance) {
-			minDistance = sunDistance;
-			closest = Optional.of(sun());
-		}
-
-		/**
-		 * Moon
-		 */
-
-		double moonDistance = cartesianDistance(coordinates, moonPosition());
-
-		if (moonDistance <= minDistance) {
-			minDistance = moonDistance;
-			closest = Optional.of(moon());
-		}
-
-		/**
-		 * Planets : checks if a Planet of the solar System is closer to the point than the closest CelestialObject
-		 * or maximal distance if no celestial object has been found closer to the maximal distance
-		 */
-
-		for(int i=0; i<planets.size(); ++i) {
-			CartesianCoordinates tempCoor = planetCartesianPositions.get(i);
-			double tempDistance = cartesianDistance(coordinates, tempCoor);
+		for(CelestialObject object : reducedList) {
+			double tempDistance = coordinates.distance(map.get(object));
 
 			if (tempDistance <= minDistance) {
 				minDistance = tempDistance;
-				closest = Optional.of(planets.get(i));
-			}
-
-		}
-
-		/**
-		 * Stars : checks if a Star is closer to the point than the closest CelestialObject
-		 * or maximal distance if no celestial object has been found closer to the maximal distance
-		 */
-
-		for(int i=0; i<starCartesianPositions.size(); ++i) {
-			CartesianCoordinates tempCoor = starCartesianPositions.get(i);
-			double tempDistance = cartesianDistance(coordinates, tempCoor);
-			
-			if (catalogue.stars().get(i).name().equals("Betelgeuse")) {
-				System.out.println("Betelgeuse "+tempCoor);
-				System.out.println("Mouse Position "+coordinates); 
-			}
-
-			if (tempDistance <= minDistance) {
-				minDistance = tempDistance;
-				closest = Optional.of(stars().get(i));
+				closest = Optional.of(object);
 			}
 		}
 
-		/**
-		 * If no celestial objects have been found closer to the maximal Distance
-		 */
 		if (closest==null)
 			closest = Optional.empty();
 

@@ -22,8 +22,7 @@ public final class Preconditions {
 	 */
 	public static void checkArgument(boolean isTrue) {
 		if (!isTrue)
-			throw new IllegalArgumentException();
-		//Descriptive string
+			throw new IllegalArgumentException("Argument not checked");
 	}
 
 	/**
@@ -43,7 +42,7 @@ public final class Preconditions {
 			return value;
 
 		else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Value not in interval");
 		}
 	} 
 }

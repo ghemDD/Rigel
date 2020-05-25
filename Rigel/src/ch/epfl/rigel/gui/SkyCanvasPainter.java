@@ -1,12 +1,11 @@
 package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.Asterism;
+
 import ch.epfl.rigel.astronomy.CelestialObject;
-import ch.epfl.rigel.astronomy.Moon;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.Planet;
 import ch.epfl.rigel.astronomy.Star;
-import ch.epfl.rigel.astronomy.Sun;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
@@ -17,22 +16,23 @@ import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.transform.Transform;
-import static ch.epfl.rigel.math.Angle.*;
-
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Paints the sky on the canvas
+ * 
+ * @author Nael Ouerghemi (310435)
+ */
 public class SkyCanvasPainter {
 
-	private Canvas canvas;
-	private GraphicsContext graphicsContext;
+	private final Canvas canvas;
+	private final GraphicsContext graphicsContext;
 	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
-	private Map<Star, CartesianCoordinates> starTransformed;
-	private Map<Star, Double> starRadius;
+	private final Map<Star, CartesianCoordinates> starTransformed;
+	private final Map<Star, Double> starRadius;
 	private double[] starPoints;
 
 	/**
@@ -67,9 +67,9 @@ public class SkyCanvasPainter {
 	 */
 	public void drawSky(ObservedSky sky, StereographicProjection projection, Transform transform) {	
 		clear();
+		transformStars(sky, projection, transform);
 		drawAsterisms(sky, projection, transform);
 		drawStars(sky, projection, transform);
-		//testPath(transform);
 		drawHorizon(sky, projection, transform);
 		drawPlanets(sky, projection, transform);
 		drawSun(sky, projection, transform);
@@ -99,26 +99,14 @@ public class SkyCanvasPainter {
 		graphicsContext.setFill(Color.LIGHTGRAY);
 
 		for (int i = 0; i<sky.planets().size(); ++i) {
-
 			Planet tempPlanet = sky.planets().get(i);
 			double planetSize = diskSize(projection, tempPlanet);
 			Point2D planetDistance = transform.deltaTransform(0, planetSize); 
 			double diameter = planetDistance.magnitude();
 
-			/**
-			 * Debugging
-			 */
-			//System.out.print(tempPlanet.name()+" "+diameter);	
-			//System.out.println(" Planet X "+destPoints[y]+" Planet Y "+destPoints[y+1]);
-
 			graphicsContext.fillOval(destPoints[y] - diameter/2, destPoints[y+1] - diameter/2, diameter, diameter);
 			y+=2;
 		}
-
-		/**
-		 * Debugging
-		 */
-		//canvas.getGraphicsContext2D().setStroke(Color.LIGHTGRAY);
 	}
 
 	/**
@@ -136,17 +124,15 @@ public class SkyCanvasPainter {
 	public void drawStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
 
 		for(Star star : sky.stars()) {
-
 			int temperature = star.colorTemperature();
 			Color starColor = BlackBodyColor.colorForTemperature(temperature);
 
 			double diameter = starRadius.get(star);
 			double x = starTransformed.get(star).x();
-			double y1 = starTransformed.get(star).y();
+			double y = starTransformed.get(star).y();
 
 			graphicsContext.setFill(starColor);
-			graphicsContext.fillOval(x - diameter/2, y1 - diameter/2, diameter, diameter);
-
+			graphicsContext.fillOval(x - diameter/2, y - diameter/2, diameter, diameter);
 		}
 	}
 
@@ -165,44 +151,41 @@ public class SkyCanvasPainter {
 	 */
 	public void drawSun(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		CartesianCoordinates sunCoor = sky.sunPosition();
-
 		double sunSize = projection.applyToAngle(Angle.ofDeg(0.5));
 		Point2D sunPoint = transform.transform(sunCoor.x(), sunCoor.y());
 		double diameter = transform.deltaTransform(0, sunSize)
 				.magnitude();
 		double x = sunPoint.getX();
 		double y = sunPoint.getY();
+		double[] diameters = new double[3];
+		Color[] colors = new Color[3];
 
-		//Sort ovals based on diameters		
+		//Sort ovals based on diameters
+		// 2 + diameter > 2.2 * diameter <=> diameter < (2.0/1.2)
 
 		if (diameter < (2.0/1.2)) {	
-			graphicsContext.setFill(Color.YELLOW);
-			graphicsContext.fillOval(x - (2 + diameter)/2, y - (2 + diameter)/2, 2 + diameter, 2 + diameter);
+			colors[0] = Color.YELLOW;
+			diameters[0] = 2 + diameter;
 
-			graphicsContext.setFill(Color.YELLOW.deriveColor(1, 1, 1, 0.25));
-			graphicsContext.fillOval(x - (2.2 * diameter)/2, y - (2.2 * diameter)/2, 2.2 * diameter, 2.2 * diameter);
+			colors[1] = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
+			diameters[1] = 2.2 * diameter;	
 		}
 
 		else {
-			graphicsContext.setFill(Color.YELLOW.deriveColor(1, 1, 1, 0.25));
-			graphicsContext.fillOval(x - (2.2 * diameter)/2, y - (2.2 * diameter)/2, 2.2 * diameter, 2.2 * diameter);
+			colors[0] = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
+			diameters[0] = 2.2 * diameter;
 
-			graphicsContext.setFill(Color.YELLOW);
-			graphicsContext.fillOval(x - (2 + diameter)/2, y - (2 + diameter)/2, 2 + diameter, 2 + diameter);
+			colors[1] = Color.YELLOW;
+			diameters[1] = 2 + diameter;
 		}
 
+		colors[2] = Color.WHITE;
+		diameters[2] = diameter;
 
-		canvas.getGraphicsContext2D().setFill(Color.WHITE);
-		canvas.getGraphicsContext2D().fillOval(x - diameter/2, y - diameter/2, diameter, diameter);
-
-		/**
-		 * Debugging
-		 */
-		//System.out.println("Sun diameter "+diameter);
-		//System.out.println("Sun diameter 2 "+ 2.2*diameter);
-		//System.out.println("Sun diameter 3 "+ diameter+2);
-		//System.out.println("Sun X "+x);
-		//System.out.println("Sun Y "+y);
+		for(int i = 0; i < diameters.length; ++i) {
+			canvas.getGraphicsContext2D().setFill(colors[i]);
+			canvas.getGraphicsContext2D().fillOval(x - diameters[i]/2, y - diameters[i]/2, diameters[i], diameters[i]);
+		}
 	}
 
 	/**
@@ -219,9 +202,10 @@ public class SkyCanvasPainter {
 	 * 
 	 */
 	public void drawMoon(ObservedSky sky, StereographicProjection projection, Transform transform) {
-		Moon moon = sky.moon();
+		//Moon moon = sky.moon();
 		CartesianCoordinates moonCoor = sky.moonPosition();
 
+		//Moon size based on method diskSize or applyToAngle ?
 		double moonSize = projection.applyToAngle(Angle.ofDeg(0.5));
 		Point2D moonPoint = transform.transform(moonCoor.x(), moonCoor.y());
 		double diameter = transform.deltaTransform(0, moonSize)
@@ -231,14 +215,6 @@ public class SkyCanvasPainter {
 
 		canvas.getGraphicsContext2D().setFill(Color.WHITE);
 		canvas.getGraphicsContext2D().fillOval(x - diameter/2, y - diameter/2, diameter, diameter);
-
-		/**
-		 * Debugging
-		 */
-		//Angular Size of the Moon or Angle.ofDeg(0.5) 
-		//System.out.println("Moon diameter "+diameter);
-		//System.out.println("Moon X "+x);
-		//System.out.println("Moon Y "+y);
 	}
 
 	/**
@@ -256,44 +232,31 @@ public class SkyCanvasPainter {
 	 */
 	public void drawAsterisms(ObservedSky sky, StereographicProjection projection, Transform transform) {
 
-		//Asterism trace
-		//Translation not taken into account
-		transformStars(sky, projection, transform);
 		graphicsContext.setStroke(Color.BLUE);
 		graphicsContext.setLineWidth(1.0);
 
 		for(Asterism asterism : sky.asterisms()) {
-			//System.out.println(asterism.stars());
 			List<Integer> list = sky.asterismIndices(asterism);
 
 			for(int i = 0; i < list.size()-1; ++i) {
 
 				graphicsContext.beginPath();
 
-				Star s1 = sky.stars().get(list.get(i));
-
-				double d1 = starRadius.get(s1);
 				double x1 = starPoints[2*(list.get(i))];
 				double y1 = starPoints[2*(list.get(i)) + 1];
 
-				Star s2 = sky.stars().get(list.get(i+1));
-
-				double d2 = starRadius.get(s2);
 				double x2 = starPoints[2*(list.get(i+1))];
 				double y2 = starPoints[2*(list.get(i+1)) + 1];
 
-				//System.out.println("Star 1 = "+s1.name() + " Star 2 = "+s2.name());
+				if ((canvas.getBoundsInLocal().contains(x1, y1) || canvas.getBoundsInLocal().contains(x2, y2))) {
 
-				if ((canvas.getBoundsInLocal().contains(x1, y1) 
-						|| canvas.getBoundsInLocal().contains(x2, y2))) {
-
-					//System.out.println("x1 "+x1+" y1 "+y1);
-					//System.out.println("x2 "+x2+" y2 "+y2);	
 					graphicsContext.moveTo(x1, y1);
 					graphicsContext.lineTo(x2, y2);
 					graphicsContext.stroke();
-				}	
+				}
 			}
+
+			graphicsContext.closePath();
 		}
 	}
 
@@ -311,48 +274,19 @@ public class SkyCanvasPainter {
 	 * 
 	 */
 	public void transformStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
-		//Stars
+
 		starPoints = new double[sky.starPositions().length];
-
-
 		transform.transform2DPoints(sky.starPositions(), 0, starPoints, 0, starPoints.length/2);
 		int y = 0;
 
-		//System.out.println(Arrays.toString(sky.starPositions()));
-		//System.out.println(Arrays.toString(starPoints));
-
 		for(Star star : sky.stars()) {
-			starTransformed.put(star, CartesianCoordinates.of(starPoints[y], starPoints[y+1]));
 			double starSize = diskSize(projection, star);
 			Point2D starDistance = transform.deltaTransform(starSize, 0);
-			double distance = starDistance.magnitude();
-			starRadius.put(star, distance);
+			double diameter = starDistance.magnitude();
+			starTransformed.put(star, CartesianCoordinates.of(starPoints[y], starPoints[y+1]));
+			starRadius.put(star, diameter);
 			y+=2;
-
-			/**
-			 * Debugging
-			 */
-			//System.out.println("Magnitude : "+distance);
-			//System.out.println("Distance : "+starDistance.distance(0, 0));
-			//double distance = starDistance.distance(0, 0);
-			//System.out.println(distance);
 		}
-	}
-
-
-	public void testPath(Transform transform) {
-		canvas.getGraphicsContext2D().setStroke(Color.BLUE);
-		canvas.getGraphicsContext2D().beginPath();
-		canvas.getGraphicsContext2D().setLineWidth(1.0);
-
-		Point2D origin = transform.transform(0.345, 0.223);
-		canvas.getGraphicsContext2D().setLineWidth(1.0);
-		canvas.getGraphicsContext2D().moveTo(origin.getX(), origin.getY());
-		canvas.getGraphicsContext2D().lineTo(720.7839926018132, 368.9557635185101);
-		canvas.getGraphicsContext2D().stroke();
-		//canvas.getGraphicsContext2D().moveTo(origin.getX(), origin.getY());
-		//canvas.getGraphicsContext2D().lineTo(327.45, 435.67);
-		//canvas.getGraphicsContext2D().stroke();
 	}
 
 	/**
@@ -397,17 +331,6 @@ public class SkyCanvasPainter {
 
 			graphicsContext.fillText(cardinalPointName, transformedCardinalPoint.getX(), transformedCardinalPoint.getY());
 		}
-
-		/**
-		 * Debugging
-		 */
-		 //String cardinal = obs.azOctantName("N", "E", "S", "W");
-
-		//System.out.println(sky.observationPosition());
-		//System.out.println(centerPoint.getX() - transRadius);
-		//System.out.println(centerPoint.getY() - transRadius);
-		//System.out.println(southPoint.getX());
-		//System.out.println(transRadius * 2);
 	}
 
 	/**
@@ -425,9 +348,6 @@ public class SkyCanvasPainter {
 
 		double mp = MAGNITUDE_INT.clip(object.magnitude());	
 		double factor = (99 - 17*mp)/ 140.0;
-
-		//System.out.println(object.name());
-		//System.out.println(object.magnitude());
 
 		return factor * proj.applyToAngle(Angle.ofDeg(0.5));
 	}

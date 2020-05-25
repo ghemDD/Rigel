@@ -13,8 +13,8 @@ import ch.epfl.rigel.math.RightOpenInterval;
  */
 abstract class SphericalCoordinates {
 
-	private double lon;
-	private double lat;
+	private final double lon;
+	private final double lat;
 	static final RightOpenInterval LONGITUDE_INT = RightOpenInterval.of(0, Angle.TAU);
 	static final RightOpenInterval LONGITUDE_INT_DEG = RightOpenInterval.of(0, 360);
 	static final ClosedInterval LATITUDE_INT = ClosedInterval.symmetric(Math.PI);
@@ -35,7 +35,6 @@ abstract class SphericalCoordinates {
 
 	/**
 	 * @see Object#equals()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public final boolean equals(Object o) {
@@ -44,11 +43,9 @@ abstract class SphericalCoordinates {
 
 	/**
 	 * @see Object#hashCode()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public final int hashCode() {
 		throw new UnsupportedOperationException();
 	}
-
 }

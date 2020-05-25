@@ -22,7 +22,8 @@ import ch.epfl.rigel.math.Polynomial;
  */
 
 public final class EclipticToEquatorialConversion implements Function<EclipticCoordinates, EquatorialCoordinates>{
-	private double cosEcl, sinEcl;
+	private final double cosEcl, sinEcl;
+	private final static Polynomial POLY = Polynomial.of(ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815),  ofDMS(23, 26, 21.45)); 
 
 	/**
 	 * Constructor for EclipticToEquatorialConversion given a ZonedDate
@@ -30,10 +31,9 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
 	 * @param when 
 	 * 			Date of the conversion 
 	 */
-	public EclipticToEquatorialConversion(ZonedDateTime when) {
-		Polynomial p = Polynomial.of(ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815),  ofDMS(23, 26, 21.45));
+	public EclipticToEquatorialConversion(ZonedDateTime when) { 
 		double julian = Epoch.J2000.julianCenturiesUntil(when);
-		double obl = p.at(julian);
+		double obl = POLY.at(julian);
 		cosEcl = cos(obl);
 		sinEcl = sin(obl);
 	}
@@ -52,19 +52,18 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
 		double sinLonCoor = sin(t.lon());
 
 		double exp = sinLonCoor*cosEcl - tan(t.lat())*sinEcl;
-		double alpha = normalizePositive( atan2(exp, cos(t.lon())) );
+		double lon = normalizePositive( atan2(exp, cos(t.lon())) );
 
 		double termA = sin(t.lat()) * cosEcl;
 		double termB = cos(t.lat()) * sinEcl * sinLonCoor;
 
-		double beta = asin(termA + termB);
+		double lat = asin(termA + termB);
 
-		return EquatorialCoordinates.of(alpha, beta);
+		return EquatorialCoordinates.of(lon, lat);
 	}
 
 	/**
 	 * @see Object#equals()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public boolean equals(Object o) {
@@ -73,11 +72,9 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
 
 	/**
 	 * @see Object#hashCode()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public int hashCode() {
 		throw new UnsupportedOperationException();
 	}
-
 }

@@ -1,6 +1,7 @@
 package ch.epfl.rigel.coordinates;
 
 import static ch.epfl.rigel.astronomy.SiderealTime.local;
+
 import static ch.epfl.rigel.math.Angle.normalizePositive;
 import static java.lang.Math.asin;
 import static java.lang.Math.atan2;
@@ -17,9 +18,8 @@ import java.util.function.Function;
  * @author Nael Ouerghemi (310435)
  */
 public final class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates>{
-	private double latObs;
-	private double sinLatObs, cosLatObs;
-	private double time;
+	private final double sinLatObs, cosLatObs;
+	private final double time;
 
 	/**
 	 * Constructs an EquatorialToHorizontalConversion given a ZonedDateTime and a location in geographic coordinates
@@ -32,7 +32,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
 	 */
 	public EquatorialToHorizontalConversion(ZonedDateTime when, GeographicCoordinates where) {
 		time = local(when, where);
-		latObs = where.lat();
+		double latObs = where.lat();
 		sinLatObs = sin(latObs);
 		cosLatObs = cos(latObs);
 	}
@@ -58,19 +58,19 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
 		//Latitude
 		double termA = sinCoor * sinLatObs;
 		double termB = cosCoor * cosLatObs * cos(horangle);
-		double lat = asin(termA + termB);
+		double latTerm = termA + termB;
 
 		//Azimuth
-		double den = sinCoor - sinLatObs*sin(lat);
+		double den = sinCoor - sinLatObs*latTerm;
 		double num = -cosCoor * cosLatObs * sin(horangle);
-		double az = normalizePositive(atan2(num, den));		
+		double az = normalizePositive(atan2(num, den));
+		double lat = asin(latTerm);
 
 		return HorizontalCoordinates.of(az, lat);
 	}
 
 	/**
 	 * @see Object#equals()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public boolean equals(Object o) {
@@ -79,7 +79,6 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
 
 	/**
 	 * @see Object#hashCode()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public int hashCode() {

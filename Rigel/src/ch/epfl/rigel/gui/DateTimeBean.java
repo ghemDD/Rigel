@@ -5,30 +5,31 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+/**
+ * Bean containing the time information
+ * 
+ * @author Nael Ouerghemi (310435)
+ */
 public final class DateTimeBean {
 
-	//Initial value of property (not the property itself) equal to null
-	//Default value or at construction
-	private ObjectProperty<LocalDate> dateProperty = new SimpleObjectProperty<LocalDate>();
-	private ObjectProperty<LocalTime> timeProperty = new SimpleObjectProperty<LocalTime>();
-	private ObjectProperty<ZoneId> zoneProperty = new SimpleObjectProperty<ZoneId>();
-	//ObjectBinding maybe ?
-	private ObjectProperty<ZonedDateTime> zdtProperty = new SimpleObjectProperty<ZonedDateTime>();
+	private final ObjectProperty<LocalDate> dateProperty;
+	private final ObjectProperty<LocalTime> timeProperty;
+	private final ObjectProperty<ZoneId> zoneProperty;
+	private final ObjectBinding<ZonedDateTime> zdtProperty;
 
 	public DateTimeBean() {
 		dateProperty = new SimpleObjectProperty<LocalDate>();
 		timeProperty = new SimpleObjectProperty<LocalTime>();
 		zoneProperty = new SimpleObjectProperty<ZoneId>();
-		zdtProperty = new SimpleObjectProperty<ZonedDateTime>();
+		zdtProperty = Bindings.createObjectBinding(() -> ZonedDateTime.of(dateProperty.get(), timeProperty.get(), zoneProperty.get()), dateProperty, timeProperty, zoneProperty) ;
 	}
 
-	/**
-	 * Time property
-	 */
-
+	//TIME PROPERTY
 	/**
 	 * Getter for the time property
 	 * 
@@ -52,10 +53,8 @@ public final class DateTimeBean {
 	 */
 	public void setTime(LocalTime timeParameter) {timeProperty.set(timeParameter);}
 
-	/**
-	 * Date property
-	 */
 
+	//DATE PROPERTY
 	/**
 	 * Getter for date property
 	 * 
@@ -78,10 +77,7 @@ public final class DateTimeBean {
 	 */
 	public void setDate(LocalDate dateParameter) {dateProperty.set(dateParameter);}
 
-	/**
-	 * ZonedDateTime property 
-	 */
-
+	//ZONED DATE TIME PROPERTY
 	/**
 	 * Getter for the value of zonedDateTime property
 	 * 
@@ -99,7 +95,6 @@ public final class DateTimeBean {
 	 * 
 	 */
 	public void setZonedDateTime(ZonedDateTime zdtParam) {
-		zdtProperty.set(zdtParam);
 		dateProperty.set(zdtParam.toLocalDate());
 		timeProperty.set(LocalTime.of(zdtParam.getHour(),
 				zdtParam.getMinute(), 
@@ -113,12 +108,10 @@ public final class DateTimeBean {
 	 * 
 	 * @return zonedDateTime property
 	 */
-	public ObjectProperty<ZonedDateTime> getZonedDateTimeProperty() {return zdtProperty;}
+	public ObjectBinding<ZonedDateTime> getZonedDateTimeProperty() {return zdtProperty;}
 
-	/**
-	 * Zone property
-	 */
 
+	//ZONE PROPERTY
 	/**
 	 * Getter for zone property
 	 * 
@@ -140,5 +133,4 @@ public final class DateTimeBean {
 	 * 			Value to be set in
 	 */
 	public void setZone(ZoneId zoneParameter) {zoneProperty.set(zoneParameter);}
-
 }

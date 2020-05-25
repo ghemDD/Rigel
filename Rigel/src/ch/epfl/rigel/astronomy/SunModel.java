@@ -20,8 +20,6 @@ public enum SunModel implements CelestialObjectModel<Sun>{
 
 	SUN;
 
-	private SunModel() {}
-
 	private static final double LON_EPOCH = ofDeg(279.557208);
 	private static final double PERI = ofDeg(283.112438);
 	private static final double E = 0.016705;

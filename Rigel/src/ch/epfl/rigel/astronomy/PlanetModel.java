@@ -42,33 +42,38 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 	NEPTUNE("Neptune", 165.84539, 326.895127, 23.07, 0.010483,
 			30.1985, 1.7673, 131.879, 62.20, -6.87);
 
+	/**
+	 * Immutable list of all planets used to compute their positions
+	 */
+	public final static List<PlanetModel> ALL=List.copyOf(Arrays.asList(PlanetModel.values()));
+	private final String name;
+	private final double lonEpoch;
+	private final double peri;
+	private final double exc;
+	private final double half;
+	private final double incli;
+	private final double node;
+	private final double magnitude;
+	private final double cosIncli, sinIncli;
+	private final double arcAngularSize;
+	private final double termAnomaly;
+	private final double excSquared;
+
 	private PlanetModel(String name, double revPeriod, double lonEpoch, double peri, double exc, double half, double incli, double node, double angularSize, double magnitude) {
 		this.name = name;
-		this.revPeriod = revPeriod;
 		this.lonEpoch = ofDeg(lonEpoch);
 		this.peri = ofDeg(peri);
 		this.exc = exc;
 		this.half = half;
 		this.incli = ofDeg(incli);
 		this.node = ofDeg(node);
-		this.angularSize = angularSize;
 		this.magnitude = magnitude;
+		cosIncli = cos(this.incli);
+		sinIncli = sin(this.incli);
+		arcAngularSize = ofArcsec(angularSize);
+		termAnomaly = (TAU/365.242191) / revPeriod;
+		excSquared = exc * exc;
 	}
-
-	/**
-	 * Immutable list of all planets used to compute their positions
-	 */
-	public static List<PlanetModel> ALL=List.copyOf(Arrays.asList(PlanetModel.values()));
-	private String name;
-	private double revPeriod;
-	private double lonEpoch;
-	private double peri;
-	private double exc;
-	private double half;
-	private double incli;
-	private double node;
-	private double angularSize;
-	private double magnitude;
 
 	/**
 	 * Returns a representation of the planet at a given time depending on the epoch J2010 and location
@@ -84,31 +89,24 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 	@Override
 	public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
-		//Mean anomaly
-		double meanAnomaly = meanAnomaly(daysSinceJ2010, revPeriod, lonEpoch, peri);
-
-		//Real anomaly
-		double realAnomaly = realAnomaly(meanAnomaly, exc);
-
-		//Radius (distance from this planet to the sun)
-		double r = radius(realAnomaly, half, exc);
-
-		//Heliocentric longitude
-		double lonHelio = realAnomaly + peri;
+		double meanAnomaly = this.meanAnomaly(daysSinceJ2010);
+		double realAnomaly = this.realAnomaly(meanAnomaly);
+		double r = this.radius(realAnomaly);
+		double lonHelio = this.longitudeHelio(realAnomaly);
 
 		//Previous variables adapted for the Earth : meanAnomaly, realAnomaly, radius, heliocentric longitude
-		double meanAnomalyEarth = meanAnomaly(daysSinceJ2010, EARTH.revPeriod, EARTH.lonEpoch, EARTH.peri);
-		double realAnomalyEarth = realAnomaly(meanAnomalyEarth, EARTH.exc);
-		double rEarth = radius(realAnomalyEarth, EARTH.half, EARTH.exc);
-		double lEarth = realAnomalyEarth + EARTH.peri; 
+		double meanAnomalyEarth = EARTH.meanAnomaly(daysSinceJ2010);
+		double realAnomalyEarth = EARTH.realAnomaly(meanAnomalyEarth);
+		double rEarth = EARTH.radius(realAnomalyEarth);
+		double lEarth = EARTH.longitudeHelio(realAnomalyEarth); 
 
 		//Ecliptic heliocentric latitude
 		double repeatedSinTerm = sin(lonHelio - node);
-		double latHelioEcl = asin(repeatedSinTerm * sin(incli));
+		double latHelioEcl = asin(repeatedSinTerm * sinIncli);
 
 		//Ecliptic heliocentric longitude
 		double x = cos(lonHelio - node);
-		double y = repeatedSinTerm * cos(incli);
+		double y = repeatedSinTerm * cosIncli;
 
 		double lonHelioEcl = atan2(y,x) + node;
 
@@ -118,10 +116,10 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 
 		//Superior planets / Inferior planets
 		double comSinTerm = sin(lonHelioEcl-lEarth);
-		double deltaSup = lonHelioEcl + atan2(rEarth*comSinTerm, rProj-rEarth*cos(lonHelioEcl-lEarth));
-		double deltaInf = Math.PI + lEarth + atan2(rProj*sin(lEarth-lonHelioEcl), rEarth-rProj*cos(lEarth-lonHelioEcl));
 
-		double delta = revPeriod >= EARTH.revPeriod ? deltaSup : deltaInf; 
+		//First expression corresponds to the latitude of a superior planet while the second expression corresponds to inferior planets (avoids calculating both latitude but less readable)
+		double delta = half >= EARTH.half ? lonHelioEcl + atan2(rEarth*comSinTerm, rProj-rEarth*cos(lonHelioEcl-lEarth)) 
+		: Math.PI + lEarth + atan2(rProj*sin(lEarth-lonHelioEcl), rEarth-rProj*cos(lEarth-lonHelioEcl)); 
 		delta = normalizePositive(delta);
 
 		//Ecliptic latitude of the Planet
@@ -132,7 +130,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 		//Angular Size
 		double p = sqrt(rEarth*rEarth + r*r - 2*rEarth*r*cos(lonHelio - lEarth)*cos(latHelioEcl));
 
-		double angular = ofArcsec(angularSize)/p;
+		double angular = arcAngularSize/p;
 
 		//Phase
 		double f = (1 + cos(delta-lonHelio))/2.0;
@@ -152,21 +150,12 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 	 * 
 	 * @param daysSinceJ2010
 	 * 			Days since epoch J2010
-	 * 
-	 * @param period
-	 * 			Period of revolution (in tropic years)
-	 * 
-	 * @param lonJ2010
-	 * 			Longitude of the Planet at J2010
-	 * 
-	 * @param perigee
-	 * 			Longitude of the perigee
 	 * 			
 	 * @return mean anomaly of the Planet at the given time
 	 * 
 	 */
-	private double meanAnomaly(double daysSinceJ2010, double period, double lonJ2010, double perigee) {
-		return (TAU/365.242191) * (daysSinceJ2010/period) + lonJ2010 - perigee;
+	private double meanAnomaly(double daysSinceJ2010) {
+		return termAnomaly * (daysSinceJ2010) + lonEpoch - peri;
 	}
 
 	/**
@@ -180,25 +169,31 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 	 * 
 	 * @return real anomaly of the Planet
 	 */
-	private double realAnomaly(double meanAnomaly, double e) {
-		return meanAnomaly + 2*e*sin(meanAnomaly);
+	private double realAnomaly(double meanAnomaly) {
+		return meanAnomaly + 2*exc*sin(meanAnomaly);
 	}
 
 	/**
-	 * Return the radius of the Planet (distance Planet-Sun) given the real anomaly of the Planet
+	 * Returns the radius of the Planet (distance Planet-Sun) given the real anomaly of the Planet
 	 * 
 	 * @param realAnomaly
 	 * 			Real anomaly of the Planet
 	 * 
-	 * @param h
-	 * 			Semi major axis of the orbit
-	 * 
-	 * @param e
-	 * 			Orbital eccentricity
-	 * 
 	 * @return radius of the Planet (distance Planet-Sun) at the given time
 	 */
-	private double radius(double realAnomaly, double h, double e) {
-		return h * (1 - e*e)/(1 + e*cos(realAnomaly));
+	private double radius(double realAnomaly) {
+		return half * (1 - excSquared)/(1 + exc*cos(realAnomaly));
+	}
+
+	/**
+	 * Returns heliocentric longitude
+	 * 
+	 * @param realAnomaly
+	 * 			Real anomaly of the Planet
+	 * 
+	 * @return heliocentric longitude
+	 */
+	private double longitudeHelio(double realAnomaly) {
+		return realAnomaly + peri;
 	}
 }

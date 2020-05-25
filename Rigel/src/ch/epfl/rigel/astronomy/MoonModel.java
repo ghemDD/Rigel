@@ -28,6 +28,8 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
 	private static final double I = ofDeg(5.145396);
 	private static final double E = 0.0549;
 	private static final double MOON_FROM_EARTH = ofDeg(0.5181);
+	private static final double COS_INCLI = cos(I);
+	private static final double SIN_INCLI = sin(I); 
 
 	/**
 	 * Returns a representation of the moon at a given time depending on the epoch J2010 and location
@@ -77,12 +79,12 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
 
 		//Ecliptic longitude of Moon
 		double comSinTerm = sin(lonReal - nodeCor);
-		double ylon = comSinTerm * cos(I);
+		double ylon = comSinTerm * COS_INCLI;
 		double xlon = cos(lonReal - nodeCor);
 		double lonMoon = normalizePositive(atan2(ylon , xlon) + nodeCor);
 
 		//Ecliptic latitude of Moon
-		double termlat = comSinTerm * sin(I);
+		double termlat = comSinTerm * SIN_INCLI;
 		double latMoon = asin(termlat);
 
 

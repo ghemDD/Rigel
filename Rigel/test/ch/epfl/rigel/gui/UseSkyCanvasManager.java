@@ -45,7 +45,7 @@ public final class UseSkyCanvasManager extends Application {
 	      ViewingParametersBean viewingParametersBean =
 		new ViewingParametersBean();
 	      viewingParametersBean.setCenter(
-		HorizontalCoordinates.ofDeg(180, 42));
+		HorizontalCoordinates.ofDeg(180.000000000001, 42));
 	      viewingParametersBean.setFieldOfViewDeg(70);
 
 	      SkyCanvasManager canvasManager = new SkyCanvasManager(

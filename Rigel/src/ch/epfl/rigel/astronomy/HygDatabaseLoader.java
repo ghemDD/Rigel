@@ -37,27 +37,34 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader{
 			while(currentLine!=null) {
 
 				data = currentLine.split(",");
-				int hip = data[Columns.HIP.ordinal()].equals("") ? 0 : Integer.parseInt(data[Columns.HIP.ordinal()]);
 
-				StringBuilder build = new StringBuilder();
-				String bayer = data[Columns.BAYER.ordinal()].isBlank() ? "?" : data[Columns.BAYER.ordinal()];
-				String con = data[Columns.CON.ordinal()];
-
-				String altName = build.append(bayer)
-						.append(" ")
-						.append(con)
-						.toString();
+				String hip = data[Columns.HIP.ordinal()];
+				int hipId = hip.isEmpty() ? 0 : Integer.parseInt(hip);
+				
+                String mag = data[Columns.MAG.ordinal()];
+                float magni = mag.isEmpty() ? 0 : Float.parseFloat(mag);
+                
+                String index = data[Columns.CI.ordinal()];
+                float color = index.isEmpty() ? 0 : Float.parseFloat(index);
+                
+                String bay = data[Columns.BAYER.ordinal()];
+                String bayer = bay.isEmpty() ? "?" : bay;
+                 
+                String con = data[Columns.CON.ordinal()];
+				
+                StringBuilder build = new StringBuilder();
+                String altName = build.append(bayer)
+									  .append(" ")
+									  .append(con)
+									  .toString();
 
 				String raw = data[Columns.PROPER.ordinal()];
 				String name = raw.isEmpty() ? altName : raw;
+				
+				double ra = Double.parseDouble(data[Columns.RARAD.ordinal()]);
+                double dec = Double.parseDouble(data[Columns.DECRAD.ordinal()]);
 
-				double ra = data[Columns.RARAD.ordinal()].isEmpty() ? 0 : Double.parseDouble(data[Columns.RARAD.ordinal()]);
-				double dec = data[Columns.DECRAD.ordinal()].isEmpty() ? 0 : Double.parseDouble(data[Columns.DECRAD.ordinal()]);
-
-				float mag = data[Columns.MAG.ordinal()].isEmpty() ? 0 : Float.parseFloat(data[Columns.MAG.ordinal()]);
-				float color = data[Columns.CI.ordinal()].isEmpty() ? 0 : Float.parseFloat(data[Columns.CI.ordinal()]);
-
-				builder.addStar(new Star(hip, name, of(ra, dec), mag, color));
+				builder.addStar(new Star(hipId, name, of(ra, dec), magni, color));
 
 				currentLine = b.readLine();
 			} 

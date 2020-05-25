@@ -14,8 +14,8 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Sun extends CelestialObject{
 
-	private EclipticCoordinates eclipticPos;
-	private float meanAnomaly;
+	private final EclipticCoordinates eclipticPos;
+	private final float meanAnomaly;
 
 	/**
 	 * Constructor of the sun
@@ -37,9 +37,8 @@ public final class Sun extends CelestialObject{
 	 */
 	public Sun(EclipticCoordinates eclipticPos, EquatorialCoordinates equatorialPos, float angularSize, float meanAnomaly) {
 		super("Soleil", equatorialPos, angularSize, -26.7f);
-		requireNonNull(eclipticPos);
+		this.eclipticPos = requireNonNull(eclipticPos);
 		this.meanAnomaly = meanAnomaly;
-		this.eclipticPos = eclipticPos;
 	}
 
 	/**

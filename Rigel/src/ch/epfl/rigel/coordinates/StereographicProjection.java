@@ -18,9 +18,9 @@ import java.util.function.Function;
  */
 public final class StereographicProjection implements Function<HorizontalCoordinates, CartesianCoordinates> {
 
-	private HorizontalCoordinates center;
-	private double cosAltCenter;
-	private double sinAltCenter;
+	private final HorizontalCoordinates center;
+	private final double cosAltCenter;
+	private final double sinAltCenter;
 
 	/**
 	 * Constructor of StereographicProjection
@@ -108,21 +108,23 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 	 * @return original horizontal coordinates 
 	 */
 	public HorizontalCoordinates inverseApply(CartesianCoordinates xy) {
-		
+
 		double delta, phi;
-		
+
 		if (xy.x() == 0 && xy.y()==0) {
 			delta = center.az();
 			phi = sinAltCenter;
 		}
-		
+
 		else {
 			double x = xy.x();
 			double y = xy.y();
 
 			double p = sqrt(x*x + y*y);
-			double sinC = 2*p / (p*p + 1);
-			double cosC = (1 - p*p) / (p*p + 1);
+			double pSquared = p * p;
+
+			double sinC = 2*p / (pSquared + 1);
+			double cosC = (1 - pSquared) / (pSquared + 1);
 
 			double numdelta = x * sinC;
 			double dendelta = p*cosAltCenter*cosC - y*sinAltCenter*sinC;
@@ -133,7 +135,7 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 			double termB = (y * sinC * cosAltCenter) / p;
 			phi = asin(termA + termB);
 		}
-		
+
 		return HorizontalCoordinates.of(delta, phi);
 	}
 
@@ -147,19 +149,17 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 
 	/**
 	 * @see Object#equals()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * @see Object#hashCode()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		throw new UnsupportedOperationException();
 	}
 }

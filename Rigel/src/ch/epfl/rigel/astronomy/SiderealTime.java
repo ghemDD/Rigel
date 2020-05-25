@@ -15,10 +15,11 @@ import ch.epfl.rigel.math.Polynomial;
  * @author Nael Ouerghemi (310435)
  */
 public final class SiderealTime {
-	
+
 	private static final double MILLIS_PER_HOUR = 3600.0 * 1000.0;
+	private static final Polynomial GREENWICH_S0 = Polynomial.of(0.000025862, 2400.051336, 6.697374558);
 	private SiderealTime() {}
-	
+
 	/**
 	 * Compute the sidereal time of Greenwich depending on the date when
 	 * 
@@ -29,22 +30,19 @@ public final class SiderealTime {
 	 */
 	public static double greenwich(ZonedDateTime when) {
 		when = when.withZoneSameInstant(ZoneId.of("UTC"));
-		ZonedDateTime whenDayInstant = when.truncatedTo(ChronoUnit.DAYS);
-		ZonedDateTime whenInstant = when.truncatedTo(ChronoUnit.NANOS);
+		ZonedDateTime whenDayInstant = when.truncatedTo(ChronoUnit.DAYS); 
 
 		double julian = Epoch.J2000.julianCenturiesUntil(whenDayInstant);
 
 		//Number of millisSeconds (decimal) from the beginning of the day (whenDayInstant) to the hour of the day (whenDayInstant)
-		double decimalTime = whenDayInstant.until(whenInstant, ChronoUnit.MILLIS);
+		double decimalTime = whenDayInstant.until(when, ChronoUnit.MILLIS);
 
 		//Number of hours in decimal from the beginning of the day (whenDayInstant) to the hour of the day (whenDayInstant)
 		double t1 = decimalTime/MILLIS_PER_HOUR;
 
-		Polynomial greenwichSo = Polynomial.of(0.000025862, 2400.051336, 6.697374558);
-		double so = greenwichSo.at(julian);
+		double so = GREENWICH_S0.at(julian);
 
-		Polynomial greenwichSone = Polynomial.of(1.002737909, 0);
-		double s1 =  greenwichSone.at(t1);
+		double s1 =  1.002737909 * t1;
 
 		double sg = so + s1;
 

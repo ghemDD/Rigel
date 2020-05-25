@@ -14,9 +14,9 @@ import ch.epfl.rigel.math.ClosedInterval;
 import javafx.scene.paint.Color;
 
 /**
- * Converts the temperature of a Star to a Color 
+ * Converts the temperature of a Star to a Color
+ *  
  * @author Nael Ouerghemi (310435)
- *
  */
 public class BlackBodyColor {
 	private static final ClosedInterval COLOR_INT = ClosedInterval.of(1000, 40000);
@@ -25,7 +25,8 @@ public class BlackBodyColor {
 	private BlackBodyColor(){}
 
 	/**
-	 * Builds the Map<Integer, String> mapping the temperature of the Star and the subsequent color given the resource file 
+	 * Builds the Map<Integer, String> mapping the temperature of the Star and the subsequent color given the resource file
+	 *  
 	 * @return Map<Integer, String> mapping the temperature of the Star and the subsequent color
 	 */
 	private static Map<Integer, String> tempColorMap() {
@@ -33,31 +34,19 @@ public class BlackBodyColor {
 		try (InputStream inputStream= BlackBodyColor.class
 				.getResourceAsStream("/bbr_color.txt")) {
 			InputStreamReader r= new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-			BufferedReader b= new BufferedReader(r);
+			BufferedReader b = new BufferedReader(r);
 			String currentLine = b.readLine();
 
 			while(currentLine!=null) {
-
 				if (!ignoreLine(currentLine)) {
 					int temp = 0;
-
-					if (currentLine.charAt(1) == ' ') {
-						temp = Integer.parseInt(currentLine.substring(2, 6));
-						//System.out.println(currentLine.substring(80, 87));
-						map.put(temp, currentLine.substring(80, 87));
-					}
-
-					else {
-						temp = Integer.parseInt(currentLine.substring(1, 6));
-						//System.out.println(currentLine.substring(80, 87));
-						map.put(temp, currentLine.substring(80, 87));
-					}
+					temp = Integer.parseInt(currentLine.substring(1, 6).trim());
+					map.put(temp, currentLine.substring(80, 87));
 				}
-
 				currentLine = b.readLine();
 			}
 
-			return map;
+			return Map.copyOf(map);
 
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -93,7 +82,6 @@ public class BlackBodyColor {
 
 		String hexString = MAP.get(tempMultiple);
 		Color color = Color.web(hexString);
-		//System.out.print(tempMultiple+" "+hexString+" ");
 
 		return color;
 	}

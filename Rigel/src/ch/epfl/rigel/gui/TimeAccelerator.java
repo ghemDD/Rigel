@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 
 /**
- * Represents an time accelerator 
+ * Represents a time accelerator 
  * 
  * @author Nael Ouerghemi (310435)
  */

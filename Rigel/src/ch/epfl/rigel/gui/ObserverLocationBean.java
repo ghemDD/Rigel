@@ -3,16 +3,19 @@ package ch.epfl.rigel.gui;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableObjectValue;
 
+/**
+ * Bean containing the observer's location
+ * 
+ * @author Nael Ouerghemi (310435)
+ */
 public class ObserverLocationBean {
 
-	private ObjectProperty<Double> lonDegProperty;
-	private ObjectProperty<Double> latDegProperty;
-	private ObjectBinding<GeographicCoordinates> geographicCoordinatesProperty;
+	private final ObjectProperty<Double> lonDegProperty;
+	private final ObjectProperty<Double> latDegProperty;
+	private final ObjectBinding<GeographicCoordinates> geographicCoordinatesProperty;
 
 
 	public ObserverLocationBean() {
@@ -21,7 +24,7 @@ public class ObserverLocationBean {
 		geographicCoordinatesProperty = Bindings.createObjectBinding(() -> ( GeographicCoordinates.ofDeg(lonDegProperty.get(), latDegProperty.get())), lonDegProperty, latDegProperty);
 	}
 
-	// Lon Deg Property
+	// LON DEG PROPERTY
 	/**
 	 * Setter for lonDegProperty
 	 * 
@@ -51,7 +54,7 @@ public class ObserverLocationBean {
 		return lonDegProperty;
 	}
 
-	// Lat Deg Property
+	// LAT DEG PROPERTY
 	/**
 	 * Setter for latDegProperty
 	 * 
@@ -81,7 +84,7 @@ public class ObserverLocationBean {
 		return latDegProperty;
 	}
 
-	// Geographic Coordinates Property
+	// GEOGRAPHIC COORDINATES BINDING
 	/**
 	 * Getter for the value of geographicCoordinatesProperty
 	 * 

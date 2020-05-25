@@ -9,6 +9,7 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
+import ch.epfl.rigel.math.RightOpenInterval;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -16,30 +17,38 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
 
+/**
+ * Manages the canvas
+ * 
+ * @author Nael Ouerghemi (310435)
+ *
+ */
 public class SkyCanvasManager {
 
 	private Canvas canvas;
 
 	//Internal links
-	private ObjectBinding<StereographicProjection> projection;
-	private ObjectBinding<Transform> planeToCanvas;
-	private ObjectBinding<ObservedSky> observedSky;
-	private ObjectProperty<CartesianCoordinates> mousePosition;
-	private ObjectBinding<CartesianCoordinates> inverseTransformedMouse;
-	private ObjectBinding<HorizontalCoordinates> mouseHorizontalPosition;
+	private final ObjectBinding<StereographicProjection> projection;
+	private final ObjectBinding<Transform> planeToCanvas;
+	private final ObjectBinding<ObservedSky> observedSky;
+	private final ObjectProperty<CartesianCoordinates> mousePosition;
+	private final ObjectBinding<CartesianCoordinates> inverseTransformedMouse;
+	private final ObjectBinding<HorizontalCoordinates> mouseHorizontalPosition;
 
 	//External links
-	public ObjectBinding<Double> mouseAzDeg;
-	public ObjectBinding<Double> mouseAltDeg;
-	public ObjectBinding<CelestialObject> objectUnderMouse;
+	public final ObjectBinding<Double> mouseAzDeg;
+	public final ObjectBinding<Double> mouseAltDeg;
+	public final ObjectBinding<CelestialObject> objectUnderMouse;
 
+	//Intervals
 	private static final ClosedInterval ALT_INT = ClosedInterval.of(5, 90);
+	private static final RightOpenInterval LON_INT = RightOpenInterval.of(0, 360);
 	private static final ClosedInterval FOV_INT = ClosedInterval.of(30, 150);
 
 	public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dateTimeBean, ObserverLocationBean observerLocationBean, ViewingParametersBean viewingParametersBean) {
-		//Modularisation constructor
 		canvas = new Canvas(800, 600);
 		SkyCanvasPainter painter = new SkyCanvasPainter(canvas);
 
@@ -53,13 +62,10 @@ public class SkyCanvasManager {
 		DoubleBinding dilatation = Bindings.createDoubleBinding(() -> (dilatationFactor(projection.get(), viewingParametersBean.getFieldOfViewDeg())), 
 				projection, viewingParametersBean.getFieldOfViewDegProperty());
 
-		System.out.println("Dilatation "+dilatation.get());
-
 		planeToCanvas = Bindings.createObjectBinding(() -> {
-			Transform scale = Transform.scale(dilatation.get(), -dilatation.get());
+			Transform scale = Transform.scale(dilatation.get(), - dilatation.get());
 			Transform translate = Transform.translate(canvas.getWidth()/2, canvas.getHeight()/2);
 
-			//return Transform.affine(dilatation.get(), 0, 0, -dilatation.get(), canvas.getWidth()/2, canvas.getHeight()/2);
 			return translate.createConcatenation(scale);
 		}, dilatation);
 
@@ -68,15 +74,18 @@ public class SkyCanvasManager {
 		mousePosition.set(CartesianCoordinates.of(0, 0));
 
 		inverseTransformedMouse = Bindings.createObjectBinding(() -> {
-			double mousePositionX = mousePosition.get().x();
-			double mousePositionY = mousePosition.get().y();
 
-			Point2D invertedMousePosition = planeToCanvas.get().inverseTransform(mousePositionX, mousePositionY);
+			try {
+				Point2D invertedMousePosition = planeToCanvas.get().inverseTransform(mousePosition.get().x(), mousePosition.get().y());
 
-			return CartesianCoordinates.of(invertedMousePosition.getX(), invertedMousePosition.getY());
+				return CartesianCoordinates.of(invertedMousePosition.getX(), invertedMousePosition.getY());
+			}
+
+			catch (NonInvertibleTransformException e){
+				return CartesianCoordinates.of(0, 0);
+			}
+
 		}, mousePosition, planeToCanvas);
-
-
 
 		objectUnderMouse = Bindings.createObjectBinding(() -> observedSky.get().objectClosestTo(inverseTransformedMouse.get(), 10).get(), 
 				observedSky, inverseTransformedMouse);
@@ -98,17 +107,15 @@ public class SkyCanvasManager {
 
 			switch(event.getCode()) {
 			case LEFT :
-				//Use reduce of the right-open interval class
 				lon -= 10;
-				lon = lon < 0 ? lon + 360.0 : lon;
+				lon = LON_INT.reduce(lon);
 
 				viewingParametersBean.setCenterLonDeg(lon);
 				break;
 
 			case RIGHT :
-				//Use reduce of the right-open interval class
 				lon += 10;
-				lon = lon >= 360.0 ? lon - 360.0 : lon;
+				lon = LON_INT.reduce(lon);
 
 				viewingParametersBean.setCenterLonDeg(lon);
 				break;
@@ -141,7 +148,6 @@ public class SkyCanvasManager {
 		});
 
 		canvas.setOnMouseMoved((event) -> {
-			//Stack in property to compute the closest celestial object
 			double x = event.getX();
 			double y = event.getX();
 
@@ -164,12 +170,14 @@ public class SkyCanvasManager {
 		canvas.widthProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
 		canvas.heightProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
 		dateTimeBean.getZonedDateTimeProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
-		inverseTransformedMouse.addListener((o) ->  {
-			//System.out.println("Mouse Position "+inverseTransformedMouse.get());
-		});
 		observerLocationBean.getGeographicCoordinatesBinding().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
 		viewingParametersBean.getFieldOfViewDegProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
 		viewingParametersBean.getCenterCoordinatesProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
+
+		//Debugging
+		inverseTransformedMouse.addListener((o) ->  {
+			//System.out.println("Mouse Position "+inverseTransformedMouse.get());
+		});
 	}
 
 	/**

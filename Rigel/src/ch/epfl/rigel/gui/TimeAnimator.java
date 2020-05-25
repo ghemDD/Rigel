@@ -17,9 +17,9 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public final class TimeAnimator extends AnimationTimer {
 
-	private DateTimeBean dateInstant;
-	private SimpleObjectProperty<TimeAccelerator> acceleratorProperty;
-	private SimpleBooleanProperty running;
+	private final DateTimeBean dateInstant;
+	private final SimpleObjectProperty<TimeAccelerator> acceleratorProperty;
+	private final SimpleBooleanProperty running;
 	private boolean first;
 	private long lastTimePassed;
 
@@ -42,7 +42,7 @@ public final class TimeAnimator extends AnimationTimer {
 	@Override
 	public void handle(long now) {
 
-		if (first == true) {
+		if (first) {
 			lastTimePassed = now;
 			first = false;
 		}

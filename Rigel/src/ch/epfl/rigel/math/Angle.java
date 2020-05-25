@@ -37,12 +37,12 @@ public final class Angle {
 	 * Number of radians per minute
 	 */
 	public final static double RAD_PER_MIN = ofDeg(1.0/60.0);
-	
+
 	/**
 	 * Number of seconds per minutes
 	 */
 	public final static int SEC_PER_MIN = 60;
-	
+
 	/**
 	 * Number of minutes per degree
 	 */
@@ -52,7 +52,7 @@ public final class Angle {
 	 * Number of radians per second
 	 */
 	public final static double RAD_PER_SEC = ofDeg(1.0/3600.0);
-	
+
 	private static final RightOpenInterval NORMAL = RightOpenInterval.of(0,  TAU);
 
 	private Angle() {}
@@ -66,7 +66,7 @@ public final class Angle {
 	 * @return Normalization of the angle on the interval [O, TAU[
 	 */
 	public static double normalizePositive(double rad) {
-		
+
 		return NORMAL.reduce(rad);
 	}
 

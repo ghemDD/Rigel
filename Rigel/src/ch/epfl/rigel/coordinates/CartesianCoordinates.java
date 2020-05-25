@@ -1,14 +1,15 @@
 package ch.epfl.rigel.coordinates;
 
 import java.util.Locale;
+import static java.lang.Math.sqrt;
 /**
  * Represents Cartesian Coordinates
  * 
  * @author Nael Ouerghemi (310435)
  */
 public final class CartesianCoordinates {
-	private double x;
-	private double y;
+	private final double x;
+	private final double y;
 
 	private CartesianCoordinates(double abs, double ord) {
 		x = abs;
@@ -42,14 +43,19 @@ public final class CartesianCoordinates {
 	 * @return y ordinate
 	 */
 	public double y() {return y;}
-	
+
 	/**
+	 * Computes the cartesian distance between this coordinates and coor coordinates
 	 * 
 	 * @param coor
-	 * @return
+	 * 			Target of computation
+	 * 
+	 * @return cartesian distance between this coordinates and coor coordinates
 	 */
 	public double distance(CartesianCoordinates coor) {
-		return 0;
+		double distance = (x() - coor.x())*(x() - coor.x()) + (y() - coor.y())*(y() - coor.y());
+
+		return sqrt(distance);
 	}
 
 	/**
@@ -62,19 +68,17 @@ public final class CartesianCoordinates {
 
 	/**
 	 * @see Object#equals()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * @see Object#hashCode()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		throw new UnsupportedOperationException();
 	}
 }

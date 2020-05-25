@@ -1,6 +1,11 @@
 package ch.epfl.rigel.gui;
 import static java.time.Duration.ofSeconds;
 
+/**
+ * Enumeration of various accelerators
+ * 
+ * @author Nael Ouerghemi (310435)
+ */
 public enum NamedTimeAccelerator {
 
 	TIMES_1("1×", TimeAccelerator.continuous(1)),
@@ -10,13 +15,13 @@ public enum NamedTimeAccelerator {
 	DAY("jour", TimeAccelerator.discrete(1, ofSeconds(32))),
 	SIDEREAL_DAY("jour sidéral", TimeAccelerator.discrete(1, ofSeconds(30)));
 
+	private String name;
+	private TimeAccelerator accelerator;
+
 	private NamedTimeAccelerator(String name, TimeAccelerator accelerator) {
 		this.name = name;
 		this.accelerator = accelerator;
 	}
-
-	private String name;
-	private TimeAccelerator accelerator;
 
 	/**
 	 *	Getter for the name of the pair

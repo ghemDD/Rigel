@@ -14,7 +14,7 @@ import java.util.Locale;
  */
 public final class Moon extends CelestialObject{
 
-	private float phase;
+	private final float phase;
 	private static final ClosedInterval PHASE_INT = ClosedInterval.of(0, 1);
 
 	/**
@@ -34,8 +34,7 @@ public final class Moon extends CelestialObject{
 	 */
 	public Moon(EquatorialCoordinates equatorialPos, float angularSize, float magnitude, float phase) {
 		super("Lune", equatorialPos, angularSize, magnitude);
-		checkInInterval(PHASE_INT, phase);
-		this.phase = phase;
+		this.phase = (float) checkInInterval(PHASE_INT, phase);
 	}
 
 	/**
