@@ -34,7 +34,7 @@ import javafx.scene.transform.Transform;
 public class SkyCanvasManager {
 
 	private Canvas canvas;
-	//TESTTESTTESTTESTTESTTEST
+	//STONKS
 	//Internal links
 	private final ObjectBinding<StereographicProjection> projection;
 	private final ObjectBinding<Transform> planeToCanvas;
