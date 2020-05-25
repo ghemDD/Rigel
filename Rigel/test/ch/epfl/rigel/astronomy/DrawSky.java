@@ -16,6 +16,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
@@ -56,7 +57,7 @@ public final class DrawSky extends Application {
 	      SkyCanvasPainter painter =
 		new SkyCanvasPainter(canvas);
 
-	      painter.drawSky(sky, projection, planeToCanvas);
+	      painter.drawSky(sky, projection, planeToCanvas, Color.BLACK);
 	      //painter.drawSun(sky, projection, planeToCanvas);
 
 	      WritableImage fxImage =
