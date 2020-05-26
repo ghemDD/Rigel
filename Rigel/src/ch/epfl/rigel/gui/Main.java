@@ -32,6 +32,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -46,11 +47,11 @@ public final class Main extends Application {
 	
 	private ObjectBinding<ZoneId> boxZoneId;
 	
-	DatePicker datePicker;
-	TextFormatter<Number> latTextFormatter;
-	TextFormatter<Number> lonTextFormatter;
-	TextFormatter<LocalTime> timeFormatter;
-	DateTimeBean dateTimeBean;
+	private DatePicker datePicker;
+	private TextFormatter<Number> latTextFormatter;
+	private TextFormatter<Number> lonTextFormatter;
+	private TextFormatter<LocalTime> timeFormatter;
+	private DateTimeBean dateTimeBean;
 	
 	private ObjectProperty<TimeAccelerator> accelerator = new SimpleObjectProperty<>(
 			NamedTimeAccelerator.TIMES_300.getAccelerator());
@@ -371,6 +372,9 @@ public final class Main extends Application {
 	        
 	        primaryStage.setScene(new Scene(mainPane));
 	        primaryStage.setTitle("Rigel");
+	        
+	        Image icon = new Image("file:excla.png");
+	        primaryStage.getIcons().add(icon);
 			
 			primaryStage.show();
 			
