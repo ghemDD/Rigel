@@ -139,7 +139,7 @@ public final class Main extends Application {
 			lonTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
 			
 			
-			
+			obsPosBox.getChildren().addAll(lonLabel, lonTextField);
 			
 			
 			Label latLabel = new Label("Latitude (°) :");
