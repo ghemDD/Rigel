@@ -33,8 +33,8 @@ import javafx.scene.transform.Transform;
  */
 public class SkyCanvasManager {
 
-	private Canvas canvas;
-	//gecgecgec
+	private final Canvas canvas;
+	
 	//Internal links
 	private final ObjectBinding<StereographicProjection> projection;
 	private final ObjectBinding<Transform> planeToCanvas;
@@ -277,7 +277,7 @@ public class SkyCanvasManager {
 		//else if (minutes)
 		
 		
-		return BlackBodyColor.colorForTemperature(3200);
+		return Color.web("#020b0f");
 	}
 
 	/**
@@ -286,5 +286,21 @@ public class SkyCanvasManager {
 	 * @return binding objectUnderMouse
 	 */
 	public ObjectBinding<CelestialObject> objectUnderMouseProperty() {return objectUnderMouse;}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public ObjectBinding<Double> mouseAzDegProperty() {
+		return mouseAzDeg;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public ObjectBinding<Double> mouseAltDegProperty() {
+		return mouseAltDeg;
+	}
 }
 

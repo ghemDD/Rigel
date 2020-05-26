@@ -3,7 +3,9 @@ package ch.epfl.rigel.gui;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 /**
@@ -13,14 +15,14 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public class ObserverLocationBean {
 
-	private final ObjectProperty<Double> lonDegProperty;
-	private final ObjectProperty<Double> latDegProperty;
+	private final DoubleProperty lonDegProperty;
+	private final DoubleProperty latDegProperty;
 	private final ObjectBinding<GeographicCoordinates> geographicCoordinatesProperty;
 
 
 	public ObserverLocationBean() {
-		lonDegProperty = new SimpleObjectProperty<Double>();
-		latDegProperty = new SimpleObjectProperty<Double>();
+		lonDegProperty = new SimpleDoubleProperty();
+		latDegProperty = new SimpleDoubleProperty();
 		geographicCoordinatesProperty = Bindings.createObjectBinding(() -> ( GeographicCoordinates.ofDeg(lonDegProperty.get(), latDegProperty.get())), lonDegProperty, latDegProperty);
 	}
 
@@ -50,7 +52,7 @@ public class ObserverLocationBean {
 	 * 
 	 * @return property lonDegProperty
 	 */
-	public ObjectProperty<Double> getLonDegProperty() {
+	public DoubleProperty getLonDegProperty() {
 		return lonDegProperty;
 	}
 
@@ -80,7 +82,7 @@ public class ObserverLocationBean {
 	 * 
 	 * @return property latDegProperty
 	 */
-	public ObjectProperty<Double> getLatDegProperty() {
+	public DoubleProperty getLatDegProperty() {
 		return latDegProperty;
 	}
 
