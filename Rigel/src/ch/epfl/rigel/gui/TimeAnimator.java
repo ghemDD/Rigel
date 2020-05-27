@@ -3,12 +3,12 @@ package ch.epfl.rigel.gui;
 
 import java.time.ZonedDateTime;
 
+
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 
 /**
  * Represents a time animator
@@ -22,7 +22,8 @@ public final class TimeAnimator extends AnimationTimer {
 	private final SimpleObjectProperty<TimeAccelerator> acceleratorProperty;
 	private final SimpleBooleanProperty running;
 	private boolean first;
-	private long lastTimePassed;
+	private long firstTimePassed;
+	private ZonedDateTime dateFirst;
 
 	/**
 	 * Constructor for time animator
@@ -35,6 +36,7 @@ public final class TimeAnimator extends AnimationTimer {
 		this.dateInstant  = dateInstant;
 		running = new SimpleBooleanProperty();
 		acceleratorProperty = new SimpleObjectProperty<TimeAccelerator>();
+		dateFirst = null;
 	}
 
 	/**
@@ -42,18 +44,17 @@ public final class TimeAnimator extends AnimationTimer {
 	 */
 	@Override
 	public void handle(long now) {
-
+		
 		if (first) {
-			lastTimePassed = now;
+			firstTimePassed = now;
 			first = false;
+			dateFirst = dateInstant.getZonedDateTime();
 		}
 
-		long delta = now - lastTimePassed;
+		long delta = now - firstTimePassed;
 
-		ZonedDateTime date = dateInstant.getZonedDateTime();
-		ZonedDateTime adjustedDate = acceleratorProperty.get().adjust(date, delta);
+		ZonedDateTime adjustedDate = acceleratorProperty.get().adjust(dateFirst, delta);
 		dateInstant.setZonedDateTime(adjustedDate);
-		lastTimePassed = now;
 	}
 
 	/**

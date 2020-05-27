@@ -1,11 +1,6 @@
 package ch.epfl.rigel.gui;
 
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-
-import ch.epfl.rigel.astronomy.Asterism;
 import ch.epfl.rigel.astronomy.CelestialObject;
-
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
@@ -21,7 +16,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.paint.Color;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
 
@@ -53,11 +47,6 @@ public class SkyCanvasManager {
 	private static final RightOpenInterval LON_INT = RightOpenInterval.of(0, 360);
 	private static final ClosedInterval FOV_INT = ClosedInterval.of(30, 150);
 	
-	//Bonus
-	private final ObjectProperty<CartesianCoordinates> mousePositionOnPressed;
-	private final ObjectBinding<Color> skyColor;
-	private final ObjectProperty<Asterism> selectedAsterism;
-
 	public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dateTimeBean, ObserverLocationBean observerLocationBean, ViewingParametersBean viewingParametersBean) {
 		canvas = new Canvas(800, 600);
 		SkyCanvasPainter painter = new SkyCanvasPainter(canvas);
@@ -83,10 +72,6 @@ public class SkyCanvasManager {
 		mousePosition = new SimpleObjectProperty<CartesianCoordinates>();
 		mousePosition.set(CartesianCoordinates.of(0, 0));
 		
-		mousePositionOnPressed = new SimpleObjectProperty<CartesianCoordinates>();
-		mousePositionOnPressed.set(CartesianCoordinates.of(0, 0));
-		skyColor = Bindings.createObjectBinding(() -> (computeColor(dateTimeBean.getZonedDateTime())), dateTimeBean.getZonedDateTimeProperty()); 
-		selectedAsterism = new SimpleObjectProperty<Asterism>();
 
 		inverseTransformedMouse = Bindings.createObjectBinding(() -> {
 
@@ -124,6 +109,7 @@ public class SkyCanvasManager {
 			case LEFT :
 				lon -= 10;
 				lon = LON_INT.reduce(lon);
+				System.out.println("LEFT");
 
 				viewingParametersBean.setCenterLonDeg(lon);
 				break;
@@ -131,6 +117,7 @@ public class SkyCanvasManager {
 			case RIGHT :
 				lon += 10;
 				lon = LON_INT.reduce(lon);
+				System.out.println("RIGHT");
 
 				viewingParametersBean.setCenterLonDeg(lon);
 				break;
@@ -138,6 +125,7 @@ public class SkyCanvasManager {
 			case UP : 
 				alt +=5;
 				alt = ALT_INT.clip(alt);
+				System.out.println("UP");
 
 				viewingParametersBean.setCenterAltDeg(alt);
 				break;
@@ -145,6 +133,7 @@ public class SkyCanvasManager {
 			case DOWN : 
 				alt -= 5;
 				alt = ALT_INT.clip(alt);
+				System.out.println("Down");
 
 				viewingParametersBean.setCenterAltDeg(alt);
 				break;
@@ -161,8 +150,6 @@ public class SkyCanvasManager {
 			if (event.isPrimaryButtonDown())
 				canvas.requestFocus();
 			
-			//Bonus
-			mousePositionOnPressed.set(CartesianCoordinates.of(event.getX(), event.getY()));
 		});
 
 		canvas.setOnMouseMoved((event) -> {
@@ -172,36 +159,7 @@ public class SkyCanvasManager {
 			mousePosition.set(CartesianCoordinates.of(x, y));
 		});
 		
-		/**
-		 * Bonus 
-		 */
-		canvas.setOnMouseDragged((event) -> {
-			
-			double lon = viewingParametersBean.getCenterLonDeg();
-			double alt = viewingParametersBean.getCenterAltDeg();
-			
-			double deltaX = mousePositionOnPressed.get().x() - event.getX();
-			double deltaY = mousePositionOnPressed.get().y() - event.getY();
-			System.out.println("x "+deltaX+ " y "+deltaY);
-			
-			lon += deltaX/2;
-			lon = LON_INT.reduce(lon);
-			
-			alt += -deltaY/2;
-			alt = ALT_INT.clip(alt);
-			
-			mousePositionOnPressed.set(CartesianCoordinates.of(event.getX(), event.getY()));
-			viewingParametersBean.setCenterAltDeg(alt);
-			viewingParametersBean.setCenterLonDeg(lon);
-			
-			event.consume();
-		});
 		
-		/**
-		 * 
-		 */
-		
-
 		canvas.setOnScroll( (event) -> {
 			double fov = viewingParametersBean.getFieldOfViewDeg();
 			double x = event.getDeltaX();
@@ -212,27 +170,44 @@ public class SkyCanvasManager {
 			viewingParametersBean.setFieldOfViewDeg(fov);
 		});
 
-		painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get());
+		System.out.println("Original :");
+		System.out.println("Field of view : "+viewingParametersBean.getFieldOfViewDeg());
+		System.out.println("View coor : "+viewingParametersBean.getCenterCoordinates());
+		System.out.println("Obs coor : "+observerLocationBean.getGeographicCoordinates());
+		System.out.println("Date : "+dateTimeBean.getZonedDateTime());
 
 		//Listeners preconditions
-		canvas.widthProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get()));
-		canvas.heightProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get()));
-		dateTimeBean.getZonedDateTimeProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get()));
-		observerLocationBean.getGeographicCoordinatesBinding().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get()));
-		viewingParametersBean.getFieldOfViewDegProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get()));
-		viewingParametersBean.getCenterCoordinatesProperty().addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get()));
+		canvas.widthProperty().addListener((o) ->{
+			System.out.println("Width New : "+canvas.widthProperty().get());
+			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
+		});
 		
-		//BONUS
-		skyColor.addListener((o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get()));
-		selectedAsterism.addListener((o) -> {
-			//for (double i = 0.0; i<)
-			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), skyColor.get());
+		canvas.heightProperty().addListener((o) -> {
+			System.out.println("Height New : "+canvas.heightProperty().get());
+			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
+		});
+		
+		dateTimeBean.getZonedDateTimeProperty().addListener((o) -> {
+			System.out.println("Date : "+dateTimeBean.getZonedDateTime());
+			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
+		});
+		
+		observerLocationBean.getGeographicCoordinatesBinding().addListener((o) -> {
+			System.out.println("Obs coor : "+observerLocationBean.getGeographicCoordinates());
+			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
+		});
+		
+		viewingParametersBean.getFieldOfViewDegProperty().addListener((o) -> {
+			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
+			System.out.println("Field of view : "+viewingParametersBean.getFieldOfViewDeg());
+			
+		});
+		
+		viewingParametersBean.getCenterCoordinatesProperty().addListener((o) -> {
+			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
+			System.out.println("View coor : "+viewingParametersBean.getCenterCoordinates());
 		});
 
-		//Debugging
-		inverseTransformedMouse.addListener((o) ->  {
-			//System.out.println("Mouse Position "+inverseTransformedMouse.get());
-		});
 	}
 
 	/**
@@ -259,26 +234,6 @@ public class SkyCanvasManager {
 		return canvas;
 	}
 	
-	/**
-	 * 
-	 * @param time
-	 * 
-	 * @return
-	 */
-	private Color computeColor(ZonedDateTime time) {
-		ZonedDateTime timeDayInstant = time.truncatedTo(ChronoUnit.DAYS);
-		int minutes = (int) timeDayInstant.until(time, ChronoUnit.MINUTES);
-		
-		if (minutes < 300 || minutes > 1260) {
-			//Night color
-			return Color.web("#020b0f");
-		}
-		
-		//else if (minutes)
-		
-		
-		return Color.web("#020b0f");
-	}
 
 	/**
 	 * Getter for objectUnderMouse property

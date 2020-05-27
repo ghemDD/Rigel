@@ -1,6 +1,7 @@
 package ch.epfl.rigel.gui;
 
 import java.io.BufferedReader;
+import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,7 +47,7 @@ public class BlackBodyColor {
 				currentLine = b.readLine();
 			}
 
-			return Map.copyOf(map);
+			return map;
 
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -76,8 +77,9 @@ public class BlackBodyColor {
 	 * @return Color given the temperature of the Star
 	 */
 	public static Color colorForTemperature(double temperature) {
+		requireNonNull(MAP);
 		checkInInterval(COLOR_INT, temperature);
-
+		
 		int tempMultiple = (int) (Math.round(temperature/100.0)*100);
 
 		String hexString = MAP.get(tempMultiple);

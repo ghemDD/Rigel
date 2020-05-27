@@ -48,8 +48,8 @@ public class SkyCanvasPainter {
 		starRadius = new HashMap<Star, Double>();
 	}
 
-	public void clear(Color color) {
-		graphicsContext.setFill(color);
+	public void clear() {
+		graphicsContext.setFill(Color.BLACK);
 		graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
@@ -65,8 +65,8 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			Transform used
 	 */
-	public void drawSky(ObservedSky sky, StereographicProjection projection, Transform transform, Color color) {	
-		clear(color);
+	public void drawSky(ObservedSky sky, StereographicProjection projection, Transform transform) {	
+		clear();
 		transformStars(sky, projection, transform);
 		drawAsterisms(sky, projection, transform);
 		drawStars(sky, projection, transform);

@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import ch.epfl.rigel.astronomy.AsterismLoader;
@@ -42,6 +43,11 @@ import javafx.stage.Stage;
 import javafx.util.converter.LocalTimeStringConverter;
 import javafx.util.converter.NumberStringConverter;
 
+/**
+ * Main class of the program
+ * 
+ * @author Tanguy Marbot
+ */
 public final class Main extends Application {
 	private StringBinding objectUnderMouseString;
 	
@@ -52,6 +58,9 @@ public final class Main extends Application {
 	private TextFormatter<Number> lonTextFormatter;
 	private TextFormatter<LocalTime> timeFormatter;
 	private DateTimeBean dateTimeBean;
+	private ObserverLocationBean observerLocationBean;
+	private ZonedDateTime when;
+	private ComboBox<String> zoneIdRoll;
 	
 	private ObjectProperty<TimeAccelerator> accelerator = new SimpleObjectProperty<>(
 			NamedTimeAccelerator.TIMES_300.getAccelerator());
@@ -75,11 +84,8 @@ public final class Main extends Application {
 			.loadFrom(hs, HygDatabaseLoader.INSTANCE)
 			.loadFrom(ast, AsterismLoader.INSTANCE)
 			.build();
-		      
-
-		      
-		      
-	        ZonedDateTime when = ZonedDateTime.now();
+		            
+	        when = ZonedDateTime.now();
 			dateTimeBean = new DateTimeBean();
 			dateTimeBean.setZonedDateTime(when);
 			
@@ -88,7 +94,7 @@ public final class Main extends Application {
 			
 			accelerator.addListener((p,o,n) -> timeAnimator.setAccelerator(n));
 
-			ObserverLocationBean observerLocationBean = new ObserverLocationBean();
+			observerLocationBean = new ObserverLocationBean();
 		    observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(6.57, 46.52));
 	
 		    ViewingParametersBean viewingParametersBean = new ViewingParametersBean();
@@ -99,225 +105,19 @@ public final class Main extends Application {
 			primaryStage.setMinWidth(800);
 			primaryStage.setMinHeight(600);
 			
-			
 			HBox controlBar = new HBox();
 			controlBar.setStyle("-fx-spacing: 4; -fx-padding: 4;");
 	
-			HBox obsPosBox = new HBox();
-			obsPosBox.setStyle("-fx-spacing: inherit; -fx-alignment: baseline-left;");
-			
-			
-			Label lonLabel = new Label("Longitude (°) :");
-	
-			// a modulariser après
-			NumberStringConverter stringConverter =
-					  new NumberStringConverter("#0.00");
-			UnaryOperator<TextFormatter.Change> lonFilter = (change -> {
-			    try {
-			      String newText =
-				change.getControlNewText();
-			      double newLonDeg =
-				stringConverter.fromString(newText).doubleValue();
-			      return GeographicCoordinates.isValidLonDeg(newLonDeg)
-				? change
-				: null;
-			    } catch (Exception e) {
-			      return null;
-			    }
-			  });
-	
-			lonTextFormatter =
-			  new TextFormatter<>(stringConverter, 0, lonFilter);
-			lonTextFormatter.valueProperty().setValue(6.57);
-			observerLocationBean.getLonDegProperty().bind(lonTextFormatter.valueProperty());
-			
-			TextField lonTextField =
-			  new TextField();
-			
-			
-			lonTextField.setTextFormatter(lonTextFormatter);		
-					
-			lonTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
-			
-			
-			obsPosBox.getChildren().addAll(lonLabel, lonTextField);
-			
-			
-			Label latLabel = new Label("Latitude (°) :");
-	
-			UnaryOperator<TextFormatter.Change> latFilter = (change -> {
-			    try {
-			      String newText =
-				change.getControlNewText();
-			      double newLatDeg =
-				stringConverter.fromString(newText).doubleValue();
-			      return GeographicCoordinates.isValidLatDeg(newLatDeg)
-				? change
-				: null;
-			    } catch (Exception e) {
-			      return null;
-			    }
-			  });
-	
-			latTextFormatter =
-			  new TextFormatter<>(stringConverter, 0, latFilter);
-	
-			observerLocationBean.getLatDegProperty().bind(latTextFormatter.valueProperty());
-
-			latTextFormatter.valueProperty().setValue(46.52);
-
-			
-			TextField latTextField =
-			  new TextField();
-			latTextField.setTextFormatter(latTextFormatter);
-			
-				
-			
-			latTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
-			
-			
-			obsPosBox.getChildren().addAll(latLabel, latTextField);
-			
-			
-			HBox whenBox = new HBox();
-			whenBox.setStyle("-fx-spacing: inherit; -fx-alignment: baseline-left;" );
-			
-			Label dateLabel = new Label("Date: ");
-			
-			datePicker = new DatePicker();
-			dateTimeBean.dateProperty().bindBidirectional(datePicker.valueProperty());
-			datePicker.valueProperty().set(when.toLocalDate());
-			datePicker.setStyle("-fx-pref-width: 120");
-			
-			
-			
-			Label hourLabel = new Label("Heure: ");
-			
-			
-			
-			DateTimeFormatter hmsFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-			LocalTimeStringConverter hourStringConverter = new LocalTimeStringConverter(hmsFormatter, hmsFormatter);
-			timeFormatter = new TextFormatter<>(hourStringConverter);
-			
-			timeFormatter.valueProperty().setValue(when.toLocalTime());
-			
-			dateTimeBean.timeProperty().bindBidirectional(timeFormatter.valueProperty());
-			
-			TextField hourTextField = new TextField();
-			hourTextField.setTextFormatter(timeFormatter);
-			hourTextField.setStyle("-fx-pref-width: 75;  -fx-alignment: baseline-right;");
-			
-			
-			ComboBox<String> zoneIdRoll = new ComboBox<String>();
-			
-			zoneIdRoll.valueProperty().set(when.getZone().toString());;
-			zoneIdRoll.getItems().addAll(SORTED_ZONEIDS);
-			zoneIdRoll.setStyle(" -fx-pref-width: 180;");
-			
-			boxZoneId = 
-					Bindings.createObjectBinding(() ->  ZoneId.of(zoneIdRoll.valueProperty().get()) , zoneIdRoll.valueProperty());
-			dateTimeBean.zoneProperty().bind(boxZoneId);
-			
-			whenBox.getChildren().addAll(dateLabel, datePicker, hourLabel, hourTextField, zoneIdRoll);
-			
-			whenBox.disableProperty().bind(timeAnimator.getRunning());
-			
-			
-			HBox timeBox = new HBox();
-			timeBox.setStyle("-fx-spacing: inherit;");
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			ComboBox<NamedTimeAccelerator> acceleratorRoll = new ComboBox<NamedTimeAccelerator>();
-			acceleratorRoll.setValue(NamedTimeAccelerator.TIMES_300);
-			List<NamedTimeAccelerator> listAccelerator = Arrays.asList(NamedTimeAccelerator.values());
-			acceleratorRoll.setItems(javafx.collections.FXCollections.observableList(listAccelerator));
-			
-			
-			accelerator.bind(Bindings.select(acceleratorRoll.valueProperty(), "accelerator" ));
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-		
-			try(InputStream fontStream = getClass()
-					  .getResourceAsStream("/Font Awesome 5 Free-Solid-900.otf");){
-				Font fontAwesome = Font.loadFont(fontStream, 15);
-				
-				
-				String resetString = "\uf0e2";
-				String playString = "\uf04b";
-				String pauseString = "\uf04c";
-				
-				Button resetButton = new Button(resetString);
-				resetButton.setFont(fontAwesome);
-				
-				resetButton.setOnMouseClicked(e ->{
-				unBindAllDateTimeBean();
-				dateTimeBean.setZonedDateTime(when);
-				bindAllDateTimeBean();
-				});
-				
-				Button playButton = new Button(playString);
-				playButton.setFont(fontAwesome);
-				
-				playButton.setOnMouseClicked(e-> {
-				unBindAllDateTimeBean();
-				timeAnimator.start();}
-						);
-				
-				Button pauseButton = new Button(pauseString);
-				pauseButton.setFont(fontAwesome);
-				
-				pauseButton.setOnMouseClicked(e-> {
-					bindAllDateTimeBean();
-					timeAnimator.stop();
-				});
-
-				
-				timeBox.getChildren().addAll(acceleratorRoll, resetButton, playButton, pauseButton);
-				fontStream.close();
-			} catch( IOException e) {
-				  throw new UncheckedIOException(e);
-			}
-			
-			
+			HBox obsPosBox = coordControlBar();
+			HBox whenBox = dateControlBar();
+			HBox timeBox = timeControlBar();
 			
 			Separator separator = new Separator();
-			Separator separator1 = new Separator();
-			controlBar.getChildren().addAll(obsPosBox, separator, whenBox,separator1, timeBox);
-			
-			
+			Separator separatorSec = new Separator();
+			controlBar.getChildren().addAll(obsPosBox, separator, whenBox, separatorSec, timeBox);
 			
 			System.out.println("catalogue: " + catalogue.toString());
-	
 			System.out.println("dateTimeBean: " + dateTimeBean.getZonedDateTime().toString());
-			
 			System.out.println("observerLocationBean: " + observerLocationBean.getGeographicCoordinates().toString());
 
 			
@@ -335,47 +135,29 @@ public final class Main extends Application {
 	
 			sky.widthProperty().bind(root.widthProperty());
 			sky.heightProperty().bind(root.heightProperty());
-	
-	
-			
-			
-			
-			
 			
 			Text fieldOfViewText = new Text();
-			
-			
-		
 			fieldOfViewText.textProperty().setValue("Champ de vue: 100°");
-			
-			fieldOfViewText.textProperty().bind(Bindings.format("Champ de vue : %.1f°", 
-					viewingParametersBean.getFieldOfViewDegProperty()));
+			fieldOfViewText.textProperty().bind(Bindings.format("Champ de vue : %.1f°", viewingParametersBean.getFieldOfViewDegProperty()));
 			
 		    objectUnderMouseString = Bindings.createStringBinding(
 					() -> canvasManager.objectUnderMouseProperty().getValue().info(), canvasManager.objectUnderMouseProperty());
 			
 			Text closestObjectText = new Text();
-			
 			closestObjectText.textProperty().bind(objectUnderMouseString);
 			
 			Text mousePosition = new Text();
 			mousePosition.textProperty().bind(Bindings.format("Azimut : %.1f°, hauteur : %.1f°", 
 							canvasManager.mouseAzDegProperty(), 
 							canvasManager.mouseAltDegProperty()));
-			
-			
+				
 			BorderPane informationBar = new BorderPane(closestObjectText, null,mousePosition ,null, fieldOfViewText )		;	
 			informationBar.setStyle("-fx-padding: 4; -fx-background-color: white;");
 			
 	        BorderPane mainPane = new BorderPane(root, controlBar, null, informationBar, null);
 
-	        
 	        primaryStage.setScene(new Scene(mainPane));
 	        primaryStage.setTitle("Rigel");
-	        
-	        Image icon = new Image("file:excla.png");
-	        primaryStage.getIcons().add(icon);
-			
 			primaryStage.show();
 			
 			sky.requestFocus();
@@ -383,28 +165,188 @@ public final class Main extends Application {
 		}
 	}
 	
-	
-	private final static List<String> sortedZoneIds() {
+	/**
+	 * 
+	 * @return
+	 */
+	private HBox coordControlBar() {
 		
+		HBox obsPosBox = new HBox();
+		obsPosBox.setStyle("-fx-spacing: inherit; -fx-alignment: baseline-left;");
+		
+		Label lonLabel = new Label("Longitude (°) :");
+		lonTextFormatter = createNumberFormatter(GeographicCoordinates::isValidLonDeg);
+		lonTextFormatter.valueProperty().setValue(6.57);
+		TextField lonTextField = new TextField();
+		lonTextField.setTextFormatter(lonTextFormatter);				
+		lonTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
+		
+		
+		Label latLabel = new Label("Latitude (°) :");
+		latTextFormatter = createNumberFormatter(GeographicCoordinates::isValidLatDeg);
+		latTextFormatter.valueProperty().setValue(46.52);
+		TextField latTextField = new TextField();
+		latTextField.setTextFormatter(latTextFormatter);
+		latTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
+		
+		observerLocationBean.getLonDegProperty().bind(lonTextFormatter.valueProperty());
+		observerLocationBean.getLatDegProperty().bind(latTextFormatter.valueProperty());
+		obsPosBox.getChildren().addAll(lonLabel, lonTextField, latLabel, latTextField);
+		
+		return obsPosBox;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private HBox dateControlBar() {
+		HBox whenBox = new HBox();
+		whenBox.setStyle("-fx-spacing: inherit; -fx-alignment: baseline-left;" );
+		
+		Label dateLabel = new Label("Date: ");
+		
+		datePicker = new DatePicker();
+		dateTimeBean.dateProperty().bindBidirectional(datePicker.valueProperty());
+		datePicker.valueProperty().set(when.toLocalDate());
+		datePicker.setStyle("-fx-pref-width: 120");
+		
+		Label hourLabel = new Label("Heure: ");
+		
+		DateTimeFormatter hmsFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+		LocalTimeStringConverter hourStringConverter = new LocalTimeStringConverter(hmsFormatter, hmsFormatter);
+		
+		timeFormatter = new TextFormatter<>(hourStringConverter);	
+		timeFormatter.valueProperty().setValue(when.toLocalTime());
+		dateTimeBean.timeProperty().bindBidirectional(timeFormatter.valueProperty());
+		
+		TextField hourTextField = new TextField();
+		hourTextField.setTextFormatter(timeFormatter);
+		hourTextField.setStyle("-fx-pref-width: 75;  -fx-alignment: baseline-right;");
+		
+		zoneIdRoll = new ComboBox<String>();
+		
+		zoneIdRoll.valueProperty().set(when.getZone().toString());
+		zoneIdRoll.getItems().addAll(SORTED_ZONEIDS);
+		zoneIdRoll.setStyle(" -fx-pref-width: 180;");
+		
+		boxZoneId = Bindings.createObjectBinding(() ->  ZoneId.of(zoneIdRoll.valueProperty().get()) , zoneIdRoll.valueProperty());
+		dateTimeBean.zoneProperty().bind(boxZoneId);
+		
+		whenBox.getChildren().addAll(dateLabel, datePicker, hourLabel, hourTextField, zoneIdRoll);
+		whenBox.disableProperty().bind(timeAnimator.getRunning());
+		
+		return whenBox;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private HBox timeControlBar() {
+		HBox timeBox = new HBox();
+		timeBox.setStyle("-fx-spacing: inherit;");			
+		
+		ComboBox<NamedTimeAccelerator> acceleratorRoll = new ComboBox<NamedTimeAccelerator>();
+		acceleratorRoll.setValue(NamedTimeAccelerator.TIMES_300);
+		List<NamedTimeAccelerator> listAccelerator = Arrays.asList(NamedTimeAccelerator.values());
+		acceleratorRoll.setItems(javafx.collections.FXCollections.observableList(listAccelerator));
+		accelerator.bind(Bindings.select(acceleratorRoll.valueProperty(), "accelerator" ));
+		
+		try(InputStream fontStream = getClass()
+				  .getResourceAsStream("/Font Awesome 5 Free-Solid-900.otf");){
+			Font fontAwesome = Font.loadFont(fontStream, 15);	
+			String resetString = "\uf0e2";
+			String playString = "\uf04b";
+			String pauseString = "\uf04c";
+			
+			Button resetButton = new Button(resetString);
+			resetButton.setFont(fontAwesome);
+			
+			resetButton.setOnMouseClicked(e ->{
+			unBindAllDateTimeBean();
+			zoneIdRoll.valueProperty().set(when.getZone().toString());
+			dateTimeBean.setZonedDateTime(when);
+			bindAllDateTimeBean();
+			});
+			
+			Button playButton = new Button(playString);
+			playButton.setFont(fontAwesome);
+			
+			playButton.setOnMouseClicked(e-> {
+			unBindAllDateTimeBean();
+			timeAnimator.start();});
+			
+			Button pauseButton = new Button(pauseString);
+			pauseButton.setFont(fontAwesome);
+			
+			pauseButton.setOnMouseClicked(e-> {
+				bindAllDateTimeBean();
+				timeAnimator.stop();
+			});
+
+			
+			timeBox.getChildren().addAll(acceleratorRoll, resetButton, playButton, pauseButton);
+			fontStream.close();
+		
+		} catch( IOException e) {
+			  throw new UncheckedIOException(e);
+		}
+		
+		return timeBox;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private final static List<String> sortedZoneIds() {	
 		List<String> IdsList = new ArrayList<String>();
 		IdsList.addAll(ZoneId.getAvailableZoneIds());
 		java.util.Collections.sort(IdsList);
 		return  IdsList;
-
 	}
 	
-	
+	/**
+	 * Creates a number formatter given the predicate
+	 * 
+	 * @return number formatter given the predicate
+	 */
+	private TextFormatter<Number> createNumberFormatter(Predicate<Double> predicate) {
+		NumberStringConverter stringConverter = new NumberStringConverter("#0.00");
+		UnaryOperator<TextFormatter.Change> coorFilter = (change -> {
+		    try {
+		      String newText =
+			change.getControlNewText();
+		      double newCoorDeg =
+			stringConverter.fromString(newText).doubleValue();
+		      return predicate.test(newCoorDeg)
+			? change
+			: null;
+		    } catch (Exception e) {
+		      return null;
+		    }
+		  });
+		
+		 return new TextFormatter<>(stringConverter, 0, coorFilter);
+	}
+		
+	/**
+	 * 
+	 */
 	private void bindAllDateTimeBean() {
 		dateTimeBean.timeProperty().bindBidirectional(timeFormatter.valueProperty());
 		dateTimeBean.dateProperty().bindBidirectional(datePicker.valueProperty());
 		dateTimeBean.zoneProperty().bind(boxZoneId);
-
 	}
+	
+	/**
+	 * 
+	 */
 	private void unBindAllDateTimeBean() {
 		dateTimeBean.timeProperty().unbind();
 		dateTimeBean.dateProperty().unbind();
 		dateTimeBean.zoneProperty().unbind();
-
 	}
 	
 }
