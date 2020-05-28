@@ -15,12 +15,11 @@ import javafx.beans.property.SimpleObjectProperty;
  * 
  * @author Nael Ouerghemi (310435)
  * @author Tanguy Marbot (316756)
- *
  */
 public final class TimeAnimator extends AnimationTimer {
 
 	private final DateTimeBean dateInstant;
-	private final SimpleObjectProperty<TimeAccelerator> acceleratorProperty;
+	private final SimpleObjectProperty<TimeAccelerator> accelerator;
 	private final SimpleBooleanProperty running;
 	private boolean first;
 	private long firstTimePassed;
@@ -36,7 +35,7 @@ public final class TimeAnimator extends AnimationTimer {
 	public TimeAnimator(DateTimeBean dateInstant) {
 		this.dateInstant  = dateInstant;
 		running = new SimpleBooleanProperty();
-		acceleratorProperty = new SimpleObjectProperty<TimeAccelerator>();
+		accelerator = new SimpleObjectProperty<TimeAccelerator>();
 		dateFirst = null;
 	}
 
@@ -54,7 +53,7 @@ public final class TimeAnimator extends AnimationTimer {
 
 		long delta = now - firstTimePassed;
 
-		ZonedDateTime adjustedDate = acceleratorProperty.get().adjust(dateFirst, delta);
+		ZonedDateTime adjustedDate = accelerator.get().adjust(dateFirst, delta);
 		dateInstant.setZonedDateTime(adjustedDate);
 	}
 
@@ -80,12 +79,12 @@ public final class TimeAnimator extends AnimationTimer {
 	/**
 	 * Setter for the time accelerator
 	 * 
-	 * @param accel
+	 * @param accelerator
 	 * 			Accelerator to be set in
 	 * 
 	 */
 	public void setAccelerator(TimeAccelerator accel) {
-		acceleratorProperty.set(accel);
+		accelerator.set(accel);
 	}
 
 	/**
@@ -94,7 +93,7 @@ public final class TimeAnimator extends AnimationTimer {
 	 * @return time accelerator
 	 */
 	public TimeAccelerator getAccelerator() {
-		return acceleratorProperty.get();
+		return accelerator.get();
 	}
 
 	/**
@@ -103,7 +102,7 @@ public final class TimeAnimator extends AnimationTimer {
 	 * @return accelerator property
 	 */
 	public ObjectProperty<TimeAccelerator> getAcceleratorProperty() {
-		return acceleratorProperty;
+		return accelerator;
 	}
 
 	/**
