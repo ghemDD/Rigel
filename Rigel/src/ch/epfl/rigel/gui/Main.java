@@ -61,7 +61,7 @@ public final class Main extends Application {
 	private ZonedDateTime when;
 	private ComboBox<String> zoneIdRoll;
 	private SkyCanvasManager canvasManager;
-	
+	private boolean play; 
 	private ObjectProperty<TimeAccelerator> accelerator = new SimpleObjectProperty<>(
 			NamedTimeAccelerator.TIMES_300.getAccelerator());
 
@@ -268,24 +268,27 @@ public final class Main extends Application {
 		List<NamedTimeAccelerator> listAccelerator = Arrays.asList(NamedTimeAccelerator.values());
 		acceleratorRoll.setItems(javafx.collections.FXCollections.observableList(listAccelerator));
 		accelerator.bind(Bindings.select(acceleratorRoll.valueProperty(), "accelerator" ));
+		acceleratorRoll.disableProperty().bind(timeAnimator.getRunning());
 		
 		try(InputStream fontStream = getClass()
 				  .getResourceAsStream("/Font Awesome 5 Free-Solid-900.otf");){
 			Font fontAwesome = Font.loadFont(fontStream, 15);	
+			Button playPauseButton = new Button(PLAY_STRING);
+			playPauseButton.setFont(fontAwesome);
+			playPauseButton.setOnMouseClicked(e-> {
+				if(play == true) {
+					unBindAllDateTimeBean();
+					timeAnimator.start();
+					play = false;
+					playPauseButton.setText(PAUSE_STRING);
+				} else if(play == false) {
+					bindAllDateTimeBean();
+					timeAnimator.stop();
+					playPauseButton.setText(PLAY_STRING);
+					play = true;
+				}
+			;});
 			
-			Button playButton = new Button(PLAY_STRING);
-			playButton.setFont(fontAwesome);
-			playButton.setOnMouseClicked(e-> {
-			unBindAllDateTimeBean();
-			timeAnimator.start();});
-			
-			Button pauseButton = new Button(PAUSE_STRING);
-			pauseButton.setFont(fontAwesome);
-			
-			pauseButton.setOnMouseClicked(e-> {
-				bindAllDateTimeBean();
-				timeAnimator.stop();
-			});
 			
 			Button resetButton = new Button(RESET_STRING);
 			resetButton.setFont(fontAwesome);		
@@ -296,7 +299,7 @@ public final class Main extends Application {
 			
 			resetButton.disableProperty().bind(timeAnimator.getRunning());
 			
-			timeBox.getChildren().addAll(acceleratorRoll, resetButton, playButton, pauseButton);
+			timeBox.getChildren().addAll(acceleratorRoll, resetButton, playPauseButton);
 			
 			fontStream.close();		
 		
@@ -396,6 +399,7 @@ public final class Main extends Application {
 	 * Method resetting the conditions of observation : viewing parameters, acceleration and observer's informations
 	 */
 	private void resetStartProcess() {
+		play = true;
 		when = ZonedDateTime.now();
 		dateTimeBean = new DateTimeBean();
 		dateTimeBean.setZonedDateTime(when);
