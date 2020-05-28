@@ -29,7 +29,6 @@ import ch.epfl.rigel.coordinates.StereographicProjection;
 public class ObservedSky {
 
 	private final Map<CelestialObject, CartesianCoordinates> celestialCoordinates;
-
 	private final List<Planet> planets;
 	private final List<CartesianCoordinates> planetCartesianPositions;
 	private double[] planetPositions;
@@ -307,7 +306,10 @@ public class ObservedSky {
 
 		//First filter to avoid unnecessary computations : checks if the object is in the square of length 2*maxDistance centered in coordinates parameter 
 		for(CelestialObject object : celestialCoordinates.keySet()) {
-			if ((abs(celestialCoordinates.get(object).x() - coordinates.x()) <= maxDistance) && (abs(celestialCoordinates.get(object).y() - coordinates.y()) <= maxDistance)) {
+			boolean deltaX = abs(celestialCoordinates.get(object).x() - coordinates.x()) <= maxDistance;
+			boolean deltaY = abs(celestialCoordinates.get(object).y() - coordinates.y()) <= maxDistance;
+			
+			if (deltaX && deltaY) {
 				reducedList.add(object);
 			}
 		}

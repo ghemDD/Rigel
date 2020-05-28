@@ -47,8 +47,12 @@ public class SkyCanvasManager {
 	private static final RightOpenInterval LON_INT = RightOpenInterval.of(0, 360);
 	private static final ClosedInterval FOV_INT = ClosedInterval.of(30, 150);
 	
+	//Incrementations/Decrementations
+	private static final double ALT_INC = 5.0;
+	private static final double LON_INC = 10.0;
+	
 	public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dateTimeBean, ObserverLocationBean observerLocationBean, ViewingParametersBean viewingParametersBean) {
-		canvas = new Canvas(800, 600);
+		canvas = new Canvas();
 		SkyCanvasPainter painter = new SkyCanvasPainter(canvas);
 
 		//Bindings
@@ -57,16 +61,16 @@ public class SkyCanvasManager {
 
 		observedSky = Bindings.createObjectBinding(() -> new ObservedSky(dateTimeBean.getZonedDateTime(), observerLocationBean.getGeographicCoordinates(), projection.get(), catalogue), 
 				dateTimeBean.getZonedDateTimeProperty(), observerLocationBean.getGeographicCoordinatesBinding(), projection);
-
-		DoubleBinding dilatation = Bindings.createDoubleBinding(() -> (dilatationFactor(projection.get(), viewingParametersBean.getFieldOfViewDeg())), 
-				projection, viewingParametersBean.getFieldOfViewDegProperty());
+		
+		DoubleBinding dilatation = Bindings.createDoubleBinding(() -> (dilatationFactor(projection.get(), viewingParametersBean.getFieldOfViewDeg())), projection, viewingParametersBean.getFieldOfViewDegProperty(), canvas.widthProperty());
 
 		planeToCanvas = Bindings.createObjectBinding(() -> {
 			Transform scale = Transform.scale(dilatation.get(), - dilatation.get());
 			Transform translate = Transform.translate(canvas.getWidth()/2, canvas.getHeight()/2);
 
 			return translate.createConcatenation(scale);
-		}, dilatation);
+			
+		}, dilatation, canvas.widthProperty(), canvas.heightProperty());
 
 		//Initialization Mouse Position
 		mousePosition = new SimpleObjectProperty<CartesianCoordinates>();
@@ -107,7 +111,7 @@ public class SkyCanvasManager {
 
 			switch(event.getCode()) {
 			case LEFT :
-				lon -= 10;
+				lon -= LON_INC;
 				lon = LON_INT.reduce(lon);
 				System.out.println("LEFT");
 
@@ -115,7 +119,7 @@ public class SkyCanvasManager {
 				break;
 
 			case RIGHT :
-				lon += 10;
+				lon += LON_INC;
 				lon = LON_INT.reduce(lon);
 				System.out.println("RIGHT");
 
@@ -123,7 +127,7 @@ public class SkyCanvasManager {
 				break;
 
 			case UP : 
-				alt +=5;
+				alt += ALT_INC;
 				alt = ALT_INT.clip(alt);
 				System.out.println("UP");
 
@@ -131,7 +135,7 @@ public class SkyCanvasManager {
 				break;
 
 			case DOWN : 
-				alt -= 5;
+				alt -= ALT_INC;
 				alt = ALT_INT.clip(alt);
 				System.out.println("Down");
 
@@ -175,6 +179,7 @@ public class SkyCanvasManager {
 		System.out.println("View coor : "+viewingParametersBean.getCenterCoordinates());
 		System.out.println("Obs coor : "+observerLocationBean.getGeographicCoordinates());
 		System.out.println("Date : "+dateTimeBean.getZonedDateTime());
+		System.out.println("Dilatation : "+dilatation.doubleValue());
 
 		//Listeners preconditions
 		canvas.widthProperty().addListener((o) ->{
@@ -206,6 +211,11 @@ public class SkyCanvasManager {
 		viewingParametersBean.getCenterCoordinatesProperty().addListener((o) -> {
 			painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
 			System.out.println("View coor : "+viewingParametersBean.getCenterCoordinates());
+		});
+		
+		dilatation.addListener((o) -> {
+			//painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get());
+			System.out.println("New dilatation : "+dilatation);
 		});
 
 	}

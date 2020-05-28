@@ -33,7 +33,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
-import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -49,10 +48,9 @@ import javafx.util.converter.NumberStringConverter;
  * @author Tanguy Marbot
  */
 public final class Main extends Application {
+	
 	private StringBinding objectUnderMouseString;
-	
 	private ObjectBinding<ZoneId> boxZoneId;
-	
 	private DatePicker datePicker;
 	private TextFormatter<Number> latTextFormatter;
 	private TextFormatter<Number> lonTextFormatter;
@@ -62,6 +60,7 @@ public final class Main extends Application {
 	private ViewingParametersBean viewingParametersBean;
 	private ZonedDateTime when;
 	private ComboBox<String> zoneIdRoll;
+	private SkyCanvasManager canvasManager;
 	
 	private ObjectProperty<TimeAccelerator> accelerator = new SimpleObjectProperty<>(
 			NamedTimeAccelerator.TIMES_300.getAccelerator());
@@ -71,6 +70,7 @@ public final class Main extends Application {
 	private static final double START_LON_GEO = 6.57 ;
 	private static final double START_LAT_GEO = 46.52 ;
 
+	//CANVAS
 	private static final double MIN_WIDTH = 800;
 	private static final double MIN_HEIGHT = 600;
 
@@ -78,18 +78,42 @@ public final class Main extends Application {
 	private static final double START_AZ_HOR = 180.000000000001;
 	private static final double START_ALT_HOR = 15.0;
 	private static final double START_FIELD_OF_VIEW_DEG = 100.0;
+	
+	//FONTS
+	private static final String RESET_STRING = "\uf0e2";
+	private static final String PLAY_STRING = "\uf04b";
+	private static final String PAUSE_STRING = "\uf04c";
 
 	private static final List<String> SORTED_ZONEIDS =  sortedZoneIds();
 	
-	 private InputStream resourceStream(String resourceName) {
+	private InputStream resourceStream(String resourceName) {
 		    return getClass().getResourceAsStream(resourceName);
 		  }
 	
+	/**
+	* Sort the ID zones in natural order
+	* 
+	* @return ID zones sorted list
+	*/
+	private final static List<String> sortedZoneIds() {	
+			List<String> IdsList = new ArrayList<String>();
+			IdsList.addAll(ZoneId.getAvailableZoneIds());
+			java.util.Collections.sort(IdsList);
+			return  IdsList;
+		}
+	
+		
+	/**
+	 * Main method of the application
+	 * 
+	 * @param args
+	 * 			Parameters given at launch
+	 */
 	public static void main(String[] args) { launch(args); }
 	
 
 	/**
-	 * This method sets all nodes and initializes all the properties used in the applications 
+	 * This method sets all nodes and initializes all the properties used in the application 
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -100,75 +124,32 @@ public final class Main extends Application {
 			.loadFrom(ast, AsterismLoader.INSTANCE)
 			.build();
 		            
-	        when = ZonedDateTime.now();
-			dateTimeBean = new DateTimeBean();
-			dateTimeBean.setZonedDateTime(when);
-			
-			timeAnimator = new TimeAnimator(dateTimeBean);
-			timeAnimator.setAccelerator(NamedTimeAccelerator.TIMES_300.getAccelerator());
-			
-			accelerator.addListener((p,o,n) -> timeAnimator.setAccelerator(n));
-
-			observerLocationBean = new ObserverLocationBean();
-		    observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(START_LON_GEO, START_LAT_GEO));
-	
-		    viewingParametersBean = new ViewingParametersBean();
-			viewingParametersBean.setCenter(HorizontalCoordinates.ofDeg(START_AZ_HOR, START_ALT_HOR));
-			viewingParametersBean.setFieldOfViewDeg(START_FIELD_OF_VIEW_DEG);
-
+	        resetStartProcess();
 			primaryStage.setMinWidth(MIN_WIDTH);
 			primaryStage.setMinHeight(MIN_HEIGHT);
 			
-			HBox controlBar = new HBox();
-			controlBar.setStyle("-fx-spacing: 4; -fx-padding: 4;");
-	
-			HBox obsPosBox = coordControlBar();
-			HBox whenBox = dateControlBar();
-			HBox timeBox = timeControlBar();
+			//TOP CONTROL BAR
+			HBox controlBar = controlBar();
 			
-			Separator separator = new Separator();
-			Separator separatorSec = new Separator();
-			controlBar.getChildren().addAll(obsPosBox, separator, whenBox, separatorSec, timeBox);
-			
-			System.out.println("catalogue: " + catalogue.toString());
-			System.out.println("dateTimeBean: " + dateTimeBean.getZonedDateTime().toString());
-			System.out.println("observerLocationBean: " + observerLocationBean.getGeographicCoordinates().toString());
-			
-			SkyCanvasManager canvasManager = new SkyCanvasManager(
+			//SKY PANE
+			canvasManager = new SkyCanvasManager(
 					catalogue,
 					dateTimeBean,
 					observerLocationBean,
 					viewingParametersBean);
 	
 			Canvas sky = canvasManager.canvas();
-			Pane skyPane = new Pane();
-					
+			Pane skyPane = new Pane();		
 			skyPane.getChildren().addAll(sky);
-			
 			BorderPane root = new BorderPane(skyPane);
-	
 			sky.widthProperty().bind(root.widthProperty());
 			sky.heightProperty().bind(root.heightProperty());
 			
-			Text fieldOfViewText = new Text();
-			fieldOfViewText.textProperty().setValue("Champ de vue: 100°");
-			fieldOfViewText.textProperty().bind(Bindings.format("Champ de vue : %.1f°", viewingParametersBean.getFieldOfViewDegProperty()));
+			//BOTTOM CONTROL BAR
+			BorderPane informationBar = infoBar();
 			
-		    objectUnderMouseString = Bindings.createStringBinding(
-					() -> canvasManager.objectUnderMouseProperty().getValue().info(), canvasManager.objectUnderMouseProperty());
-			
-			Text closestObjectText = new Text();
-			closestObjectText.textProperty().bind(objectUnderMouseString);
-			
-			Text mousePosition = new Text();
-			mousePosition.textProperty().bind(Bindings.format("Azimut : %.1f°, hauteur : %.1f°", 
-							canvasManager.mouseAzDegProperty(), 
-							canvasManager.mouseAltDegProperty()));
-				
-			BorderPane informationBar = new BorderPane(closestObjectText, null,mousePosition ,null, fieldOfViewText )		;	
-			informationBar.setStyle("-fx-padding: 4; -fx-background-color: white;");
-			
-	        BorderPane mainPane = new BorderPane(root, controlBar, null, informationBar, null);
+			//MAIN 
+			BorderPane mainPane = new BorderPane(root, controlBar, null, informationBar, null);
 
 	        primaryStage.setScene(new Scene(mainPane));
 	        primaryStage.setTitle("Rigel");
@@ -179,8 +160,30 @@ public final class Main extends Application {
 	}
 	
 	/**
+	 * Instantiate the top control bar of the interface composed of : the observation position information, the date information and time control
 	 * 
-	 * @return the Hbox corresponding to the control of coordinates bar, on top 
+	 * @return top control bar of the interface
+	 */
+	private HBox controlBar() {
+		HBox controlBar = new HBox();
+		controlBar.setStyle("-fx-spacing: 4; -fx-padding: 4;");
+
+		HBox obsPosBox = coordControlBar();
+		HBox whenBox = dateControlBar();
+		HBox timeBox = timeControlBar();
+		
+		Separator separator = new Separator();
+		Separator separatorSec = new Separator();
+		
+		controlBar.getChildren().addAll(obsPosBox, separator, whenBox, separatorSec, timeBox);
+		
+		return controlBar;
+	}
+	
+	/**
+	 * Instantiate the HBox corresponding to the control of coordinates bar, part of the top control bar
+	 * 
+	 * @return the HBox corresponding to the control of coordinates bar 
 	 */
 	private HBox coordControlBar() {
 		
@@ -194,13 +197,12 @@ public final class Main extends Application {
 		lonTextField.setTextFormatter(lonTextFormatter);				
 		lonTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
 		
-		
 		Label latLabel = new Label("Latitude (°) :");
 		latTextFormatter = createNumberFormatter(GeographicCoordinates::isValidLatDeg);
 		latTextFormatter.valueProperty().setValue(START_LAT_GEO);
 		TextField latTextField = new TextField();
 		latTextField.setTextFormatter(latTextFormatter);
-		latTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
+		latTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;");
 		
 		bindAllobserverLocationBean();
 		obsPosBox.getChildren().addAll(lonLabel, lonTextField, latLabel, latTextField);
@@ -209,8 +211,9 @@ public final class Main extends Application {
 	}
 	
 	/**
+	 * Instantiate the HBox corresponding to the date control bar, part of the top control bar
 	 * 
-	 * @return the Hbox corresponding to the date control bar, on top 
+	 * @return the HBox corresponding to the date control bar 
 	 */
 	private HBox dateControlBar() {
 		HBox whenBox = new HBox();
@@ -252,8 +255,9 @@ public final class Main extends Application {
 	}
 	
 	/**
+	 * Instantiate the HBox corresponding to the time control bar, part of the top control bar
 	 * 
-	 * @return the Hbox corresponding to the time control bar, on top 
+	 * @return the HBox corresponding to the time control bar 
 	 */
 	private HBox timeControlBar() {
 		HBox timeBox = new HBox();
@@ -268,17 +272,14 @@ public final class Main extends Application {
 		try(InputStream fontStream = getClass()
 				  .getResourceAsStream("/Font Awesome 5 Free-Solid-900.otf");){
 			Font fontAwesome = Font.loadFont(fontStream, 15);	
-			String resetString = "\uf0e2";
-			String playString = "\uf04b";
-			String pauseString = "\uf04c";
-
-			Button playButton = new Button(playString);
+			
+			Button playButton = new Button(PLAY_STRING);
 			playButton.setFont(fontAwesome);
 			playButton.setOnMouseClicked(e-> {
 			unBindAllDateTimeBean();
 			timeAnimator.start();});
 			
-			Button pauseButton = new Button(pauseString);
+			Button pauseButton = new Button(PAUSE_STRING);
 			pauseButton.setFont(fontAwesome);
 			
 			pauseButton.setOnMouseClicked(e-> {
@@ -286,32 +287,51 @@ public final class Main extends Application {
 				timeAnimator.stop();
 			});
 			
-			Button resetButton = new Button(resetString);
+			Button resetButton = new Button(RESET_STRING);
 			resetButton.setFont(fontAwesome);		
-			resetButton.setOnMouseClicked(e ->{
-					
-				resetProcess();				
-
-
+			
+			resetButton.setOnMouseClicked(e ->{	
+				resetButtonProcess();				
 			});	
+			
 			resetButton.disableProperty().bind(timeAnimator.getRunning());
+			
 			timeBox.getChildren().addAll(acceleratorRoll, resetButton, playButton, pauseButton);
+			
 			fontStream.close();		
-		} catch( IOException e) {
-			  throw new UncheckedIOException(e);
+		
+		} catch(IOException e) {
+			throw new UncheckedIOException(e);
 		}		
+		
 		return timeBox;
 	}
 	
 	/**
+	 * Instantiate the BorderPane corresponding to the information bar, containing the information the FOV, closest celestial object to the mouse and mouse position
 	 * 
-	 * @return the id zones sorted
+	 * @return the BorderPane corresponding to the information bar, 
 	 */
-	private final static List<String> sortedZoneIds() {	
-		List<String> IdsList = new ArrayList<String>();
-		IdsList.addAll(ZoneId.getAvailableZoneIds());
-		java.util.Collections.sort(IdsList);
-		return  IdsList;
+	private BorderPane infoBar() {
+		Text fieldOfViewText = new Text();
+		fieldOfViewText.textProperty().setValue("Champ de vue: 100°");
+		fieldOfViewText.textProperty().bind(Bindings.format("Champ de vue : %.1f°", viewingParametersBean.getFieldOfViewDegProperty()));
+		
+	    objectUnderMouseString = Bindings.createStringBinding(
+				() -> canvasManager.objectUnderMouseProperty().getValue().info(), canvasManager.objectUnderMouseProperty());
+		
+		Text closestObjectText = new Text();
+		closestObjectText.textProperty().bind(objectUnderMouseString);
+		
+		Text mousePosition = new Text();
+		mousePosition.textProperty().bind(Bindings.format("Azimut : %.1f°, hauteur : %.1f°", 
+						canvasManager.mouseAzDegProperty(), 
+						canvasManager.mouseAltDegProperty()));
+			
+		BorderPane informationBar = new BorderPane(closestObjectText, null,mousePosition ,null, fieldOfViewText );	
+		informationBar.setStyle("-fx-padding: 4; -fx-background-color: white;");
+		
+		return informationBar;
 	}
 	
 	/**
@@ -337,7 +357,8 @@ public final class Main extends Application {
 		
 		 return new TextFormatter<>(stringConverter, 0, coorFilter);
 	}
-		
+	
+	
 	/**
 	 * Binds all the date time bean properties
 	 */
@@ -355,37 +376,40 @@ public final class Main extends Application {
 		dateTimeBean.dateProperty().unbind();
 		dateTimeBean.zoneProperty().unbind();
 	}
-	
-	/**
-	 * Unbinds all the observerlocation  bean properties
-	 */	
-	private void unBindAllobserverLocationBean() {
-		observerLocationBean.getLatDegProperty().unbind();
-		observerLocationBean.getLonDegProperty().unbind();
-	}
-	
-	/**
-	 * binds all the observerlocation  bean properties
-	 */	
+	 	
 	private void bindAllobserverLocationBean() {
 		observerLocationBean.getLonDegProperty().bind(lonTextFormatter.valueProperty());
 		observerLocationBean.getLatDegProperty().bind(latTextFormatter.valueProperty());
 	}
-	
+		
 	/**
-	 * the reset process which constist of unbinding all properties setting the start values and binding again
+	 * the reset process which consist of unbinding all properties setting the start values and binding again
 	 */	
-	private void resetProcess() {
+	private void resetButtonProcess() {
 		unBindAllDateTimeBean();
 		zoneIdRoll.valueProperty().set(when.getZone().toString());
 		dateTimeBean.setZonedDateTime(when);
 		bindAllDateTimeBean();
-		unBindAllobserverLocationBean();
-		observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(START_LON_GEO, START_LAT_GEO));
-		bindAllobserverLocationBean();
+	}
+
+	/**
+	 * Method resetting the conditions of observation : viewing parameters, acceleration and observer's informations
+	 */
+	private void resetStartProcess() {
+		when = ZonedDateTime.now();
+		dateTimeBean = new DateTimeBean();
+		dateTimeBean.setZonedDateTime(when);
+		
+		timeAnimator = new TimeAnimator(dateTimeBean);
+		timeAnimator.setAccelerator(NamedTimeAccelerator.TIMES_300.getAccelerator());	
+		accelerator.addListener((p,o,n) -> timeAnimator.setAccelerator(n));
+		
+		observerLocationBean = new ObserverLocationBean();
+	    observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(START_LON_GEO, START_LAT_GEO));
+	    
+	    viewingParametersBean = new ViewingParametersBean();
 		viewingParametersBean.setCenter(HorizontalCoordinates.ofDeg(START_AZ_HOR, START_ALT_HOR));
 		viewingParametersBean.setFieldOfViewDeg(START_FIELD_OF_VIEW_DEG);
 	}
-
 		
 }
