@@ -59,6 +59,7 @@ public final class Main extends Application {
 	private TextFormatter<LocalTime> timeFormatter;
 	private DateTimeBean dateTimeBean;
 	private ObserverLocationBean observerLocationBean;
+	private ViewingParametersBean viewingParametersBean;
 	private ZonedDateTime when;
 	private ComboBox<String> zoneIdRoll;
 	
@@ -66,6 +67,17 @@ public final class Main extends Application {
 			NamedTimeAccelerator.TIMES_300.getAccelerator());
 
 	private TimeAnimator timeAnimator;
+	
+	private static final double START_LON_GEO = 6.57 ;
+	private static final double START_LAT_GEO = 46.52 ;
+
+	private static final double MIN_WIDTH = 800;
+	private static final double MIN_HEIGHT = 600;
+
+	
+	private static final double START_AZ_HOR = 180.000000000001;
+	private static final double START_ALT_HOR = 15.0;
+	private static final double START_FIELD_OF_VIEW_DEG = 100.0;
 
 	private static final List<String> SORTED_ZONEIDS =  sortedZoneIds();
 	
@@ -76,6 +88,9 @@ public final class Main extends Application {
 	public static void main(String[] args) { launch(args); }
 	
 
+	/**
+	 * This method sets all nodes and initializes all the properties used in the applications 
+	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		try (InputStream hs = resourceStream("/hygdata_v3.csv");
@@ -95,15 +110,14 @@ public final class Main extends Application {
 			accelerator.addListener((p,o,n) -> timeAnimator.setAccelerator(n));
 
 			observerLocationBean = new ObserverLocationBean();
-		    observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(6.57, 46.52));
+		    observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(START_LON_GEO, START_LAT_GEO));
 	
-		    ViewingParametersBean viewingParametersBean = new ViewingParametersBean();
-			viewingParametersBean.setCenter(HorizontalCoordinates.ofDeg(180.000000000001, 15));
-				      viewingParametersBean.setFieldOfViewDeg(100);
-		      
-		      
-			primaryStage.setMinWidth(800);
-			primaryStage.setMinHeight(600);
+		    viewingParametersBean = new ViewingParametersBean();
+			viewingParametersBean.setCenter(HorizontalCoordinates.ofDeg(START_AZ_HOR, START_ALT_HOR));
+			viewingParametersBean.setFieldOfViewDeg(START_FIELD_OF_VIEW_DEG);
+
+			primaryStage.setMinWidth(MIN_WIDTH);
+			primaryStage.setMinHeight(MIN_HEIGHT);
 			
 			HBox controlBar = new HBox();
 			controlBar.setStyle("-fx-spacing: 4; -fx-padding: 4;");
@@ -119,7 +133,6 @@ public final class Main extends Application {
 			System.out.println("catalogue: " + catalogue.toString());
 			System.out.println("dateTimeBean: " + dateTimeBean.getZonedDateTime().toString());
 			System.out.println("observerLocationBean: " + observerLocationBean.getGeographicCoordinates().toString());
-
 			
 			SkyCanvasManager canvasManager = new SkyCanvasManager(
 					catalogue,
@@ -131,6 +144,7 @@ public final class Main extends Application {
 			Pane skyPane = new Pane();
 					
 			skyPane.getChildren().addAll(sky);
+			
 			BorderPane root = new BorderPane(skyPane);
 	
 			sky.widthProperty().bind(root.widthProperty());
@@ -161,13 +175,12 @@ public final class Main extends Application {
 			primaryStage.show();
 			
 			sky.requestFocus();
-			
 		}
 	}
 	
 	/**
 	 * 
-	 * @return
+	 * @return the Hbox corresponding to the control of coordinates bar, on top 
 	 */
 	private HBox coordControlBar() {
 		
@@ -176,7 +189,7 @@ public final class Main extends Application {
 		
 		Label lonLabel = new Label("Longitude (°) :");
 		lonTextFormatter = createNumberFormatter(GeographicCoordinates::isValidLonDeg);
-		lonTextFormatter.valueProperty().setValue(6.57);
+		lonTextFormatter.valueProperty().setValue(START_LON_GEO);
 		TextField lonTextField = new TextField();
 		lonTextField.setTextFormatter(lonTextFormatter);				
 		lonTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
@@ -184,13 +197,12 @@ public final class Main extends Application {
 		
 		Label latLabel = new Label("Latitude (°) :");
 		latTextFormatter = createNumberFormatter(GeographicCoordinates::isValidLatDeg);
-		latTextFormatter.valueProperty().setValue(46.52);
+		latTextFormatter.valueProperty().setValue(START_LAT_GEO);
 		TextField latTextField = new TextField();
 		latTextField.setTextFormatter(latTextFormatter);
 		latTextField.setStyle("-fx-pref-width: 60; -fx-alignment: baseline-right;" );
 		
-		observerLocationBean.getLonDegProperty().bind(lonTextFormatter.valueProperty());
-		observerLocationBean.getLatDegProperty().bind(latTextFormatter.valueProperty());
+		bindAllobserverLocationBean();
 		obsPosBox.getChildren().addAll(lonLabel, lonTextField, latLabel, latTextField);
 		
 		return obsPosBox;
@@ -198,7 +210,7 @@ public final class Main extends Application {
 	
 	/**
 	 * 
-	 * @return
+	 * @return the Hbox corresponding to the date control bar, on top 
 	 */
 	private HBox dateControlBar() {
 		HBox whenBox = new HBox();
@@ -241,7 +253,7 @@ public final class Main extends Application {
 	
 	/**
 	 * 
-	 * @return
+	 * @return the Hbox corresponding to the time control bar, on top 
 	 */
 	private HBox timeControlBar() {
 		HBox timeBox = new HBox();
@@ -259,20 +271,9 @@ public final class Main extends Application {
 			String resetString = "\uf0e2";
 			String playString = "\uf04b";
 			String pauseString = "\uf04c";
-			
-			Button resetButton = new Button(resetString);
-			resetButton.setFont(fontAwesome);
-			
-			resetButton.setOnMouseClicked(e ->{
-			unBindAllDateTimeBean();
-			zoneIdRoll.valueProperty().set(when.getZone().toString());
-			dateTimeBean.setZonedDateTime(when);
-			bindAllDateTimeBean();
-			});
-			
+
 			Button playButton = new Button(playString);
 			playButton.setFont(fontAwesome);
-			
 			playButton.setOnMouseClicked(e-> {
 			unBindAllDateTimeBean();
 			timeAnimator.start();});
@@ -284,21 +285,27 @@ public final class Main extends Application {
 				bindAllDateTimeBean();
 				timeAnimator.stop();
 			});
-
 			
+			Button resetButton = new Button(resetString);
+			resetButton.setFont(fontAwesome);		
+			resetButton.setOnMouseClicked(e ->{
+					
+				resetProcess();				
+
+
+			});	
+			resetButton.disableProperty().bind(timeAnimator.getRunning());
 			timeBox.getChildren().addAll(acceleratorRoll, resetButton, playButton, pauseButton);
-			fontStream.close();
-		
+			fontStream.close();		
 		} catch( IOException e) {
 			  throw new UncheckedIOException(e);
-		}
-		
+		}		
 		return timeBox;
 	}
 	
 	/**
 	 * 
-	 * @return
+	 * @return the id zones sorted
 	 */
 	private final static List<String> sortedZoneIds() {	
 		List<String> IdsList = new ArrayList<String>();
@@ -332,7 +339,7 @@ public final class Main extends Application {
 	}
 		
 	/**
-	 * 
+	 * Binds all the date time bean properties
 	 */
 	private void bindAllDateTimeBean() {
 		dateTimeBean.timeProperty().bindBidirectional(timeFormatter.valueProperty());
@@ -341,7 +348,7 @@ public final class Main extends Application {
 	}
 	
 	/**
-	 * 
+	 * Unbinds all the date time bean properties
 	 */
 	private void unBindAllDateTimeBean() {
 		dateTimeBean.timeProperty().unbind();
@@ -349,4 +356,36 @@ public final class Main extends Application {
 		dateTimeBean.zoneProperty().unbind();
 	}
 	
+	/**
+	 * Unbinds all the observerlocation  bean properties
+	 */	
+	private void unBindAllobserverLocationBean() {
+		observerLocationBean.getLatDegProperty().unbind();
+		observerLocationBean.getLonDegProperty().unbind();
+	}
+	
+	/**
+	 * binds all the observerlocation  bean properties
+	 */	
+	private void bindAllobserverLocationBean() {
+		observerLocationBean.getLonDegProperty().bind(lonTextFormatter.valueProperty());
+		observerLocationBean.getLatDegProperty().bind(latTextFormatter.valueProperty());
+	}
+	
+	/**
+	 * the reset process which constist of unbinding all properties setting the start values and binding again
+	 */	
+	private void resetProcess() {
+		unBindAllDateTimeBean();
+		zoneIdRoll.valueProperty().set(when.getZone().toString());
+		dateTimeBean.setZonedDateTime(when);
+		bindAllDateTimeBean();
+		unBindAllobserverLocationBean();
+		observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(START_LON_GEO, START_LAT_GEO));
+		bindAllobserverLocationBean();
+		viewingParametersBean.setCenter(HorizontalCoordinates.ofDeg(START_AZ_HOR, START_ALT_HOR));
+		viewingParametersBean.setFieldOfViewDeg(START_FIELD_OF_VIEW_DEG);
+	}
+
+		
 }
