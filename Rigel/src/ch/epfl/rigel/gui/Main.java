@@ -121,7 +121,7 @@ public final class Main extends Application {
 	 * This method sets all nodes and initializes all the properties used in the application
 	 * 
 	 * @throws Exception
-	 * 			If an exception is found 
+	 * 			If an exception is found in the application
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {

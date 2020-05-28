@@ -78,6 +78,9 @@ public class BlackBodyColor {
 	 * @throws NullPointerException
 	 * 			If the map associating temperatures with colors is null
 	 * 
+	 * @throws IllegalArgumentException
+	 * 			If the temperature is not in the closed interval [1000, 40000]
+	 * 
 	 * @return Color given the temperature of the Star
 	 */
 	public static Color colorForTemperature(double temperature) {

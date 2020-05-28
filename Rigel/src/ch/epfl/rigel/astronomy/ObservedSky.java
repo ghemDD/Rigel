@@ -188,6 +188,9 @@ public class ObservedSky {
 	 * @throws NullPointerException
 	 * 				 If the coordinates are null
 	 * 
+	 * @throws IllegalArgumentException
+	 * 				If the maxDistance is negative
+	 * 
 	 * @return cell containing either the closest celestial object to the point given 
 	 * 		   if the distance between the two is inferior to maxDistance
 	 *		   or a empty cell if no celestial object has been found
