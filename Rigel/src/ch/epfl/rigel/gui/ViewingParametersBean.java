@@ -7,9 +7,9 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
 /**
- * Bean the informations of the conditions of observation
+ * Bean containing the informations of the conditions of observation
  * 
- * @author Nael Ouerghemi (310435)
+ * @author Tanguy Marbot (316756)
  */
 public class ViewingParametersBean {
 
@@ -25,7 +25,9 @@ public class ViewingParametersBean {
 		fieldOfViewDeg = new SimpleDoubleProperty();
 		lonDeg = new SimpleDoubleProperty();
 		altDeg = new SimpleDoubleProperty();
-		centerCoordinates = Bindings.createObjectBinding(() -> HorizontalCoordinates.ofDeg(lonDeg.getValue(), altDeg.getValue()), lonDeg, altDeg);
+		centerCoordinates = Bindings.createObjectBinding(
+				() -> HorizontalCoordinates.ofDeg(lonDeg.getValue(), altDeg.getValue()), 
+				lonDeg, altDeg);
 	}
 
 	//FIELD OF VIEW PROPERTY

@@ -17,10 +17,13 @@ import javafx.beans.property.SimpleObjectProperty;
  * @author Tanguy Marbot (316756)
  */
 public final class TimeAnimator extends AnimationTimer {
-
+	
+	//Properties
 	private final DateTimeBean dateInstant;
 	private final SimpleObjectProperty<TimeAccelerator> accelerator;
 	private final SimpleBooleanProperty running;
+	
+	//Initial conditions inn method handle()
 	private boolean first;
 	private long firstTimePassed;
 	private ZonedDateTime dateFirst;

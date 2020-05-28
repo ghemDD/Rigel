@@ -90,7 +90,11 @@ public final class Main extends Application {
 	private static final String RESET_STRING = "\uf0e2";
 	private static final String PLAY_STRING = "\uf04b";
 	private static final String PAUSE_STRING = "\uf04c";
-
+	
+	//FILES PATH
+	private static final String STARS_PATH = "/hygdata_v3.csv";
+	private static final String AST_PATH = "/asterisms.txt";
+	
 	private static final List<String> SORTED_ZONEIDS = sortedZoneIds();
 
 	/**
@@ -105,10 +109,6 @@ public final class Main extends Application {
 		return  IdsList;
 	}
 
-	private InputStream resourceStream(String resourceName) {
-		return getClass().getResourceAsStream(resourceName);
-	}
-
 	/**
 	 * Main method of the application
 	 * 
@@ -116,7 +116,6 @@ public final class Main extends Application {
 	 * 			Parameters given at launch
 	 */
 	public static void main(String[] args) { launch(args); }
-
 
 	/**
 	 * This method sets all nodes and initializes all the properties used in the application
@@ -126,8 +125,8 @@ public final class Main extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		try (InputStream hs = resourceStream("/hygdata_v3.csv");
-				InputStream ast = resourceStream("/asterisms.txt")) {
+		try (InputStream hs = resourceStream(STARS_PATH);
+				InputStream ast = resourceStream(AST_PATH)) {
 
 			resetStartProcess();
 
@@ -167,6 +166,10 @@ public final class Main extends Application {
 
 			sky.requestFocus();
 		} 
+	}
+	
+	private InputStream resourceStream(String resourceName) {
+		return getClass().getResourceAsStream(resourceName);
 	}
 
 	/**

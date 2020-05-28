@@ -31,8 +31,8 @@ public final class DateTimeBean {
 		time = new SimpleObjectProperty<LocalTime>();
 		zone = new SimpleObjectProperty<ZoneId>();
 		zonedDateTime = Bindings.createObjectBinding(
-				() -> ZonedDateTime.of(date.get(), 
-						time.get(), zone.get()), date, time, zone) ;
+				() -> ZonedDateTime.of(date.get(), time.get(), zone.get()), 
+				date, time, zone) ;
 	}
 
 	//TIME PROPERTY

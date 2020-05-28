@@ -32,7 +32,7 @@ public class ObservedSky {
 	private final Map<CelestialObject, CartesianCoordinates> celestialCoordinates;
 	private final List<Planet> planets;
 	private final List<CartesianCoordinates> planetCartesianPositions;
-	private double[] planetPositions;
+	private final double[] planetPositions;
 
 	private final StereographicProjection projection;
 	private final EclipticToEquatorialConversion eclToEqu;
@@ -75,7 +75,6 @@ public class ObservedSky {
 		starCartesianPositions = new ArrayList<>();
 		this.catalogue = catalogue;
 		celestialCoordinates = new HashMap<CelestialObject, CartesianCoordinates>();
-
 
 		sun = SunModel.SUN.at(daysSinceJ2010, eclToEqu);
 		sunPosition = projectSingleCelestialObject(sun);
@@ -139,7 +138,6 @@ public class ObservedSky {
 	/**
 	 * Fills the list of planets and returns the list of planets in the form of a List<CelestialObject> to be used in further method projectListCelestialObject
 	 * 
-	 * 
 	 * @param daysSinceJ2010
 	 * 			Number of days since the epoch J2010
 	 * 
@@ -149,9 +147,9 @@ public class ObservedSky {
 
 		List<CelestialObject> planetsCelestialObject = new ArrayList<CelestialObject>();
 
-		for(int i = 0; i < PlanetModel.ALL.size(); ++i) {
-			if (!PlanetModel.ALL.get(i).equals(PlanetModel.EARTH)) {
-				Planet planet = PlanetModel.ALL.get(i).at(daysSinceJ2010, eclToEqu);
+		for(PlanetModel planetMod : PlanetModel.ALL) {
+			if (!planetMod.equals(PlanetModel.EARTH)) {
+				Planet planet = planetMod.at(daysSinceJ2010, eclToEqu);
 				planets.add(planet);
 				planetsCelestialObject.add(planet);
 			}	
@@ -176,6 +174,58 @@ public class ObservedSky {
 		return starsCelestialObjects;
 	}
 
+	/**
+	 * Returns a cell containing either the closest celestial object to the point given 
+	 * if the distance between the two is inferior to maxDistance
+	 * or a empty cell if no celestial object has been found
+	 * 
+	 * @param coordinates
+	 * 				 Coordinates of the point
+	 * 
+	 * @param maxDistance 
+	 * 				 Maximal distance to the point
+	 * 
+	 * @throws NullPointerException
+	 * 				 If the coordinates are null
+	 * 
+	 * @return cell containing either the closest celestial object to the point given 
+	 * 		   if the distance between the two is inferior to maxDistance
+	 *		   or a empty cell if no celestial object has been found
+	 */
+	public Optional<CelestialObject> objectClosestTo(CartesianCoordinates coordinates, double maxDistance) {
+		checkArgument(maxDistance>=0);
+		requireNonNull(coordinates);
+
+		List<CelestialObject> reducedList = new ArrayList<CelestialObject>(); 
+
+		//First filter to avoid unnecessary computations : checks if the object is in the square of length 2*maxDistance centered in coordinates parameter 
+		for(CelestialObject object : celestialCoordinates.keySet()) {
+			boolean deltaX = abs(celestialCoordinates.get(object).x() - coordinates.x()) <= maxDistance;
+			boolean deltaY = abs(celestialCoordinates.get(object).y() - coordinates.y()) <= maxDistance;
+
+			if (deltaX && deltaY) {
+				reducedList.add(object);
+			}
+		}
+
+		double minDistance = Double.MAX_VALUE;
+		Optional<CelestialObject> closest = null;
+
+		for(CelestialObject object : reducedList) {
+			double tempDistance = coordinates.distance(celestialCoordinates.get(object));
+
+			if (tempDistance <= minDistance) {
+				minDistance = tempDistance;
+				closest = Optional.of(object);
+			}
+		}
+
+		if (closest == null)
+			closest = Optional.empty();
+
+		return closest;
+	}
+	
 	/**
 	 * Returns the Sun calculated in the constructor
 	 * 
@@ -234,6 +284,7 @@ public class ObservedSky {
 
 	/**
 	 * Returns immutable copy of the list of cartesian coordinates of the stars
+	 * 
 	 * @return immutable copy of the list of cartesian coordinates of the stars
 	 */
 	public List<CartesianCoordinates> starCartesianCoordinates() {
@@ -260,6 +311,7 @@ public class ObservedSky {
 
 	/**
 	 * Returns the set of asterisms of the StarCatalogue
+	 * 
 	 * @return Set of asterisms of the StarCatalogue
 	 */
 	public Set<Asterism> asterisms() {
@@ -274,65 +326,8 @@ public class ObservedSky {
 	 * 
 	 * @return List of star indices related to the asterism
 	 * 
-	 * @throws IllegalArgumentException 
-	 * 				if asterism given is not in the catalogue
 	 */
 	public List<Integer> asterismIndices(Asterism asterism) {
 		return catalogue.asterismIndices(asterism);
-	}
-
-	/**
-	 * Returns a cell containing either the closest celestial object to the point given 
-	 * if the distance between the two is inferior to maxDistance
-	 * or a empty cell if no celestial object has been found
-	 * 
-	 * @param coordinates
-	 * 				 Coordinates of the point
-	 * 
-	 * @param maxDistance 
-	 * 				 Maximal distance to the point
-	 * 
-	 * @throws IllegalArgumentException
-	 * 				 If the maxDistance is negative
-	 * 
-	 * @throws NullPointerException
-	 * 				 If the coordinates are null
-	 * 
-	 * @return cell containing either the closest celestial object to the point given 
-	 * 		   if the distance between the two is inferior to maxDistance
-	 *		   or a empty cell if no celestial object has been found
-	 */
-	public Optional<CelestialObject> objectClosestTo(CartesianCoordinates coordinates, double maxDistance) {
-		checkArgument(maxDistance>=0);
-		requireNonNull(coordinates);
-
-		List<CelestialObject> reducedList = new ArrayList<CelestialObject>(); 
-
-		//First filter to avoid unnecessary computations : checks if the object is in the square of length 2*maxDistance centered in coordinates parameter 
-		for(CelestialObject object : celestialCoordinates.keySet()) {
-			boolean deltaX = abs(celestialCoordinates.get(object).x() - coordinates.x()) <= maxDistance;
-			boolean deltaY = abs(celestialCoordinates.get(object).y() - coordinates.y()) <= maxDistance;
-
-			if (deltaX && deltaY) {
-				reducedList.add(object);
-			}
-		}
-
-		double minDistance = Double.MAX_VALUE;
-		Optional<CelestialObject> closest = null;
-
-		for(CelestialObject object : reducedList) {
-			double tempDistance = coordinates.distance(celestialCoordinates.get(object));
-
-			if (tempDistance <= minDistance) {
-				minDistance = tempDistance;
-				closest = Optional.of(object);
-			}
-		}
-
-		if (closest == null)
-			closest = Optional.empty();
-
-		return closest;
 	}
 }

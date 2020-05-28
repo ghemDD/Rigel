@@ -28,33 +28,29 @@ import javafx.scene.transform.Transform;
  * @author Nael Ouerghemi (310435)
  */
 public class SkyCanvasPainter {
-
+	
+	//Canvas
 	private final Canvas canvas;
 	private final GraphicsContext graphicsContext;
-	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
+	
+	//Star transform
 	private final Map<Star, CartesianCoordinates> starTransformed;
 	private final Map<Star, Double> starRadius;
 	private double[] starPoints;
-
+	
+	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
+	
 	/**
 	 * Constructor for skyCanvasPainter
 	 * 
 	 * @param canvas
-	 * 			Canvas on which are printed the celestial object
+	 * 			Canvas on which the celestial objects are printed 
 	 */
 	public SkyCanvasPainter(Canvas canvas) {
 		this.canvas = canvas;
 		graphicsContext = this.canvas.getGraphicsContext2D();
 		starTransformed = new HashMap<Star, CartesianCoordinates>();
 		starRadius = new HashMap<Star, Double>();
-	}
-
-	/**
-	 * Clears the canvas by filling with black rectangle adapted to the dimensions of the canvas
-	 */
-	public void clear() {
-		graphicsContext.setFill(Color.BLACK);
-		graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
 	/**
@@ -79,6 +75,14 @@ public class SkyCanvasPainter {
 		drawSun(sky, projection, transform);
 		drawMoon(sky, projection, transform);
 	}
+	
+	/**
+	 * Clears the canvas by filling with black rectangle adapted to the dimensions of the canvas
+	 */
+	private void clear() {
+		graphicsContext.setFill(Color.BLACK);
+		graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+	}
 
 	/**
 	 * Draw all the Planets
@@ -92,7 +96,7 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			2D Transform
 	 */
-	public void drawPlanets(ObservedSky sky, StereographicProjection projection, Transform transform) {
+	private void drawPlanets(ObservedSky sky, StereographicProjection projection, Transform transform) {
 
 		double[] destPoints = new double[sky.planetPositions().length];
 		int size = destPoints.length/2;
@@ -121,7 +125,7 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			2D Transform
 	 */
-	public void drawStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
+	private void drawStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		for(Star star : sky.stars()) {
 			int temperature = star.colorTemperature();
 			Color starColor = colorForTemperature(temperature);
@@ -147,7 +151,7 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			2D transform
 	 */
-	public void drawSun(ObservedSky sky, StereographicProjection projection, Transform transform) {
+	private void drawSun(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		CartesianCoordinates sunCoor = sky.sunPosition();
 		double sunSize = projection.applyToAngle(Angle.ofDeg(0.5));
 		Point2D sunPoint = transform.transform(sunCoor.x(), sunCoor.y());
@@ -202,11 +206,9 @@ public class SkyCanvasPainter {
 	 * 			Transform used
 	 * 
 	 */
-	public void drawMoon(ObservedSky sky, StereographicProjection projection, Transform transform) {
-		//Moon moon = sky.moon();
+	private void drawMoon(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		CartesianCoordinates moonCoor = sky.moonPosition();
 
-		//Moon size based on method diskSize or applyToAngle ?
 		double moonSize = projection.applyToAngle(Angle.ofDeg(0.5));
 		Point2D moonPoint = transform.transform(moonCoor.x(), moonCoor.y());
 		double diameter = transform.deltaTransform(0, moonSize)
@@ -231,7 +233,7 @@ public class SkyCanvasPainter {
 	 * 			Transform used
 	 * 			
 	 */
-	public void drawAsterisms(ObservedSky sky, StereographicProjection projection, Transform transform) {
+	private void drawAsterisms(ObservedSky sky, StereographicProjection projection, Transform transform) {
 
 		graphicsContext.setStroke(Color.BLUE);
 		graphicsContext.setLineWidth(1.0);
@@ -274,7 +276,7 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			Transform used
 	 */
-	public void transformStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
+	private void transformStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		starPoints = new double[sky.starPositions().length];
 		transform.transform2DPoints(sky.starPositions(), 0, starPoints, 0, starPoints.length/2);
 		int y = 0;
@@ -299,7 +301,7 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			Transform used
 	 */
-	public void drawHorizon(ObservedSky sky, StereographicProjection projection, Transform transform) {
+	private void drawHorizon(ObservedSky sky, StereographicProjection projection, Transform transform) {
 
 		HorizontalCoordinates obs = HorizontalCoordinates.ofDeg(0, 0);
 		CartesianCoordinates centerCoor = projection.circleCenterForParallel(obs);
@@ -344,7 +346,7 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			Transform depending on the canvas
 	 * 
-	 * @return size of the disk of the celestial object
+	 * @return size of the disk of the transformed celestial object
 	 */
 	private double transformedDiskSize(StereographicProjection proj, double magnitude, Transform transform) {
 

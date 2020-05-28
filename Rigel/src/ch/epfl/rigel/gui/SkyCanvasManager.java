@@ -1,6 +1,7 @@
 package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.CelestialObject;
+import static java.lang.Math.abs;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
@@ -50,6 +51,8 @@ public class SkyCanvasManager {
 	//Incrementations/Decrementations
 	private static final double ALT_INC = 5.0;
 	private static final double LON_INC = 10.0;
+	
+	private static final double MAX_DISTANCE = 10.0;
 
 	/**
 	 * Constructor of the skyCanvasManager
@@ -73,7 +76,8 @@ public class SkyCanvasManager {
 
 		//Bindings
 
-		projection = Bindings.createObjectBinding(() -> new StereographicProjection(viewingParametersBean.getCenterCoordinates()), viewingParametersBean.getCenterCoordinatesProperty());
+		projection = Bindings.createObjectBinding(() -> new StereographicProjection(viewingParametersBean.getCenterCoordinates()), 
+				viewingParametersBean.getCenterCoordinatesProperty());
 
 		observedSky = Bindings.createObjectBinding(
 				() -> new ObservedSky(dateTimeBean.getZonedDateTime(), observerLocationBean.getGeographicCoordinates(), projection.get(), catalogue), 
@@ -100,17 +104,22 @@ public class SkyCanvasManager {
 			try {
 				Point2D invertedMousePosition = planeToCanvas.get().inverseTransform(mousePosition.get().x(), mousePosition.get().y());
 				return CartesianCoordinates.of(invertedMousePosition.getX(), invertedMousePosition.getY());
-			}
-
-			catch (NonInvertibleTransformException e){
+			}	catch (NonInvertibleTransformException e){
 				return CartesianCoordinates.of(0, 0);
 			}
 
 		}, mousePosition, planeToCanvas);
 
 		objectUnderMouse = Bindings.createObjectBinding(
-				() -> observedSky.get().objectClosestTo(inverseTransformedMouse.get(), 10).get(), 
-				observedSky, inverseTransformedMouse);
+				() -> {
+					try {
+						CelestialObject object = observedSky.get().objectClosestTo(inverseTransformedMouse.get(), MAX_DISTANCE).get();
+						return object;
+					}	catch (NullPointerException e) {
+						return null;
+					}
+					 
+				}, observedSky, inverseTransformedMouse);
 
 		mouseHorizontalPosition = Bindings.createObjectBinding(
 				() -> projection.get().inverseApply(inverseTransformedMouse.get()), 
@@ -183,7 +192,7 @@ public class SkyCanvasManager {
 			double fov = viewingParametersBean.getFieldOfViewDeg();
 			double x = event.getDeltaX();
 			double y = event.getDeltaY();
-			double max = Math.abs(x) >= Math.abs(y) ? x : y;
+			double max = abs(x) >= abs(y) ? x : y; 
 
 			fov = FOV_INT.clip(fov + max);
 			viewingParametersBean.setFieldOfViewDeg(fov);

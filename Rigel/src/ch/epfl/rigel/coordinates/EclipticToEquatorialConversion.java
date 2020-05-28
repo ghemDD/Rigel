@@ -1,6 +1,7 @@
 package ch.epfl.rigel.coordinates;
 
 import static ch.epfl.rigel.math.Angle.normalizePositive;
+
 import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static ch.epfl.rigel.math.Angle.ofDMS;
 import static java.lang.Math.asin;
@@ -66,7 +67,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
 	 * @see Object#equals()
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -74,7 +75,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
 	 * @see Object#hashCode()
 	 */
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		throw new UnsupportedOperationException();
 	}
 }

@@ -6,7 +6,7 @@ import java.time.ZonedDateTime;
 /**
  * Represents a time accelerator 
  * 
- * @author Nael Ouerghemi (310435)
+ * @author Tanguy Marbot (316756)
  */
 
 @FunctionalInterface

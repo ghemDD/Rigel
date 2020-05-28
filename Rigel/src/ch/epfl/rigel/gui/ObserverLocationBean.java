@@ -23,7 +23,9 @@ public class ObserverLocationBean {
 	public ObserverLocationBean() {
 		lonDeg = new SimpleDoubleProperty();
 		latDeg = new SimpleDoubleProperty();
-		geographicCoordinates = Bindings.createObjectBinding(() -> ( GeographicCoordinates.ofDeg(lonDeg.get(), latDeg.get())), lonDeg, latDeg);
+		geographicCoordinates = Bindings.createObjectBinding(
+				() -> ( GeographicCoordinates.ofDeg(lonDeg.get(), latDeg.get())), 
+				lonDeg, latDeg);
 	}
 
 	// LON DEG PROPERTY

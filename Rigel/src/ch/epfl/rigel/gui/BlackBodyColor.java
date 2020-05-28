@@ -22,8 +22,9 @@ import javafx.scene.paint.Color;
 public class BlackBodyColor {
 	private static final ClosedInterval COLOR_INT = ClosedInterval.of(1000, 40000);
 	private static final Map<Integer, String> MAP = tempColorMap();
+	private static final String COLOR_PATH = "/bbr_color.txt";
 
-	private BlackBodyColor(){}
+	private BlackBodyColor() {}
 
 	/**
 	 * Builds the Map<Integer, String> mapping the temperature of the Star and the subsequent color given the resource file
@@ -32,8 +33,8 @@ public class BlackBodyColor {
 	 */
 	private static Map<Integer, String> tempColorMap() {
 		Map<Integer, String> map = new HashMap<Integer, String>();
-		try (InputStream inputStream= BlackBodyColor.class
-				.getResourceAsStream("/bbr_color.txt")) {
+		try (InputStream inputStream = BlackBodyColor.class
+				.getResourceAsStream(COLOR_PATH)) {
 			InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 			BufferedReader buffered = new BufferedReader(reader);
 			String currentLine = buffered.readLine();
@@ -64,7 +65,7 @@ public class BlackBodyColor {
 	 * 
 	 * @return Returns true if line has to be ignored, false otherwise 
 	 */
-	private static boolean ignoreLine(String string) {
+	private static final boolean ignoreLine(String string) {
 		return (string.charAt(0)=='#' || string.contains("2deg"));
 	}
 
@@ -73,9 +74,6 @@ public class BlackBodyColor {
 	 * 
 	 * @param temperature 
 	 * 				Temperature of the Star
-	 * 
-	 * @throws IllegalArgumentException
-	 * 			If the temperature is out of the closed interval [1000, 40000]
 	 * 
 	 * @throws NullPointerException
 	 * 			If the map associating temperatures with colors is null
