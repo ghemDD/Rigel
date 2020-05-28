@@ -25,6 +25,7 @@ import ch.epfl.rigel.coordinates.StereographicProjection;
  * Represents the set of all celestial objects visible in the sky
  * 
  * @author Nael Ouerghemi (310435)
+ * @author Tanguy Marbot (316756)
  */
 public class ObservedSky {
 
@@ -65,9 +66,6 @@ public class ObservedSky {
 	 */
 	public ObservedSky(ZonedDateTime date, GeographicCoordinates observationPosition, StereographicProjection stereo, StarCatalogue catalogue) {
 
-		/**
-		 * Coordinates conversions
-		 */
 		double daysSinceJ2010 = Epoch.J2010.daysUntil(date);
 		eclToEqu = new EclipticToEquatorialConversion(date);
 		equToHor = new EquatorialToHorizontalConversion(date, observationPosition);
@@ -294,6 +292,12 @@ public class ObservedSky {
 	 * @param maxDistance 
 	 * 				 Maximal distance to the point
 	 * 
+	 * @throws IllegalArgumentException
+	 * 				 If the maxDistance is negative
+	 * 
+	 * @throws NullPointerException
+	 * 				 If the coordinates are null
+	 * 
 	 * @return cell containing either the closest celestial object to the point given 
 	 * 		   if the distance between the two is inferior to maxDistance
 	 *		   or a empty cell if no celestial object has been found
@@ -301,14 +305,14 @@ public class ObservedSky {
 	public Optional<CelestialObject> objectClosestTo(CartesianCoordinates coordinates, double maxDistance) {
 		checkArgument(maxDistance>=0);
 		requireNonNull(coordinates);
-		
+
 		List<CelestialObject> reducedList = new ArrayList<CelestialObject>(); 
 
 		//First filter to avoid unnecessary computations : checks if the object is in the square of length 2*maxDistance centered in coordinates parameter 
 		for(CelestialObject object : celestialCoordinates.keySet()) {
 			boolean deltaX = abs(celestialCoordinates.get(object).x() - coordinates.x()) <= maxDistance;
 			boolean deltaY = abs(celestialCoordinates.get(object).y() - coordinates.y()) <= maxDistance;
-			
+
 			if (deltaX && deltaY) {
 				reducedList.add(object);
 			}
@@ -326,7 +330,7 @@ public class ObservedSky {
 			}
 		}
 
-		if (closest==null)
+		if (closest == null)
 			closest = Optional.empty();
 
 		return closest;

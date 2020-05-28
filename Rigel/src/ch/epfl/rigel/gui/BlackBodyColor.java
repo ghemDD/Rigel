@@ -34,9 +34,9 @@ public class BlackBodyColor {
 		Map<Integer, String> map = new HashMap<Integer, String>();
 		try (InputStream inputStream= BlackBodyColor.class
 				.getResourceAsStream("/bbr_color.txt")) {
-			InputStreamReader r= new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-			BufferedReader b = new BufferedReader(r);
-			String currentLine = b.readLine();
+			InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+			BufferedReader buffered = new BufferedReader(reader);
+			String currentLine = buffered.readLine();
 
 			while(currentLine!=null) {
 				if (!ignoreLine(currentLine)) {
@@ -44,7 +44,7 @@ public class BlackBodyColor {
 					temp = Integer.parseInt(currentLine.substring(1, 6).trim());
 					map.put(temp, currentLine.substring(80, 87));
 				}
-				currentLine = b.readLine();
+				currentLine = buffered.readLine();
 			}
 
 			return map;
@@ -60,7 +60,7 @@ public class BlackBodyColor {
 	 *  - if it contains "10deg"
 	 *  
 	 * @param string
-	 * 				Line 
+	 * 				String parameter
 	 * 
 	 * @return Returns true if line has to be ignored, false otherwise 
 	 */
@@ -74,12 +74,18 @@ public class BlackBodyColor {
 	 * @param temperature 
 	 * 				Temperature of the Star
 	 * 
+	 * @throws IllegalArgumentException
+	 * 			If the temperature is out of the closed interval [1000, 40000]
+	 * 
+	 * @throws NullPointerException
+	 * 			If the map associating temperatures with colors is null
+	 * 
 	 * @return Color given the temperature of the Star
 	 */
 	public static Color colorForTemperature(double temperature) {
 		requireNonNull(MAP);
 		checkInInterval(COLOR_INT, temperature);
-		
+
 		int tempMultiple = (int) (Math.round(temperature/100.0)*100);
 
 		String hexString = MAP.get(tempMultiple);

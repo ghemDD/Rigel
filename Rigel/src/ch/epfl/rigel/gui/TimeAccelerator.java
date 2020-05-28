@@ -11,27 +11,43 @@ import java.time.ZonedDateTime;
 
 @FunctionalInterface
 public interface TimeAccelerator {
-
 	/**
-	 * Computes time acceleration
-	 * 
+	 * Simulates an time acceleration given an actual date and the elapsed real time
+	 *
 	 * @param initialTime
-	 * 			ZonedDateTime
-	 * 			
+	 *          DatedTime at the beginning of the simulation
+	 *          
 	 * @param realTime
-	 * 			in nanoseconds
-	 * 
-	 * @return
+	 *          Real time elapsed from the beginning of the animation (in nanoseconds)
+	 *
+	 * @return accelerated time (in ZonedDateTime format)
 	 */
 	public abstract ZonedDateTime adjust(ZonedDateTime initialTime, long realTime);
 
+	/**
+	 * Simulates a continuous time accelerator given a speedFactor
+	 *
+	 * @param speedFactor
+	 *          Speed coefficient by which the time is sped up to
+	 *          
+	 * @return continuous time accelerator given a speedFactor
+	 */
 	public static TimeAccelerator continuous(int factor) {
-
 		return (initialTime, realTime) -> initialTime.plusNanos(factor * realTime);
 	}
 
-	public static TimeAccelerator discrete(double freq, Duration step) {
-
-		return (initialTime, realTime) -> initialTime.plusNanos( ((long) Math.floor(freq * realTime/1e9)) * step.toNanos());
+	/**
+	 * Simulate a discrete time accelerator given a frequency and a step of simulation
+	 *
+	 * @param frequency
+	 *          Frequency of the simulation (in Hz)
+	 *          
+	 * @param step
+	 *          Discrete time period of the simulated time (in Duration format)
+	 *          
+	 * @return a discrete time accelerator given a frequency and a step of simulation
+	 */
+	public static TimeAccelerator discrete(double frequency, Duration step) {
+		return (initialTime, realTime) -> initialTime.plusNanos( ((long) Math.floor(frequency * realTime/1e9)) * step.toNanos());
 	}
 }

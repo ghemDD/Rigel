@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
  * Represents a time animator
  * 
  * @author Nael Ouerghemi (310435)
+ * @author Tanguy Marbot (316756)
  *
  */
 public final class TimeAnimator extends AnimationTimer {
@@ -44,7 +45,7 @@ public final class TimeAnimator extends AnimationTimer {
 	 */
 	@Override
 	public void handle(long now) {
-		
+
 		if (first) {
 			firstTimePassed = now;
 			first = false;

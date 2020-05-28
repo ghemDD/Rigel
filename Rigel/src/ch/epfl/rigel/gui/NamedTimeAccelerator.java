@@ -1,8 +1,6 @@
 package ch.epfl.rigel.gui;
 import static java.time.Duration.*;
-
-
-
+import static ch.epfl.rigel.gui.TimeAccelerator.*;
 
 /**
  * Enumeration of various accelerators
@@ -11,13 +9,14 @@ import static java.time.Duration.*;
  */
 public enum NamedTimeAccelerator {
 
-	TIMES_1("1×", TimeAccelerator.continuous(1)),
-	TIMES_30("30×", TimeAccelerator.continuous(30)),
-	TIMES_300("300×", TimeAccelerator.continuous(300)),
-	TIMES_3000("3000×", TimeAccelerator.continuous(3000)),
-	DAY("jour", TimeAccelerator.discrete(60, ofHours(24))),
-	SIDEREAL_DAY("jour sidéral", TimeAccelerator.discrete(60, ofHours(23).plusMinutes(56)
-            														     .plusSeconds(4)));
+	TIMES_1("1×", continuous(1)),
+	TIMES_30("30×", continuous(30)),
+	TIMES_300("300×", continuous(300)),
+	TIMES_3000("3000×", continuous(3000)),
+	DAY("jour", discrete(60, ofHours(24))),
+	SIDEREAL_DAY("jour sidéral", discrete(60, ofHours(23)
+			.plusMinutes(56)
+			.plusSeconds(4)));
 
 	private final String name;
 	private final TimeAccelerator accelerator;

@@ -1,8 +1,12 @@
 package ch.epfl.rigel.gui;
 
-import ch.epfl.rigel.astronomy.Asterism;
+import static ch.epfl.rigel.gui.BlackBodyColor.colorForTemperature;
 
-import ch.epfl.rigel.astronomy.CelestialObject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import ch.epfl.rigel.astronomy.Asterism;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.Planet;
 import ch.epfl.rigel.astronomy.Star;
@@ -17,9 +21,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Transform;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Paints the sky on the canvas
@@ -48,6 +49,9 @@ public class SkyCanvasPainter {
 		starRadius = new HashMap<Star, Double>();
 	}
 
+	/**
+	 * Clears the canvas by filling with black rectangle adapted to the dimensions of the canvas
+	 */
 	public void clear() {
 		graphicsContext.setFill(Color.BLACK);
 		graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -94,18 +98,14 @@ public class SkyCanvasPainter {
 		int size = destPoints.length/2;
 		transform.transform2DPoints(sky.planetPositions(), 0, destPoints, 0, size);
 
-		int y = 0;
+		int index = 0;
 
 		graphicsContext.setFill(Color.LIGHTGRAY);
 
-		for (int i = 0; i<sky.planets().size(); ++i) {
-			Planet tempPlanet = sky.planets().get(i);
-			double planetSize = diskSize(projection, tempPlanet);
-			Point2D planetDistance = transform.deltaTransform(0, planetSize); 
-			double diameter = planetDistance.magnitude();
-
-			graphicsContext.fillOval(destPoints[y] - diameter/2, destPoints[y+1] - diameter/2, diameter, diameter);
-			y+=2;
+		for (Planet planet : sky.planets()) { 
+			double diameter = transformedDiskSize(projection, planet.magnitude(), transform);
+			graphicsContext.fillOval(destPoints[index] - diameter/2, destPoints[index+1] - diameter/2, diameter, diameter);
+			index+=2;
 		}
 	}
 
@@ -122,10 +122,9 @@ public class SkyCanvasPainter {
 	 * 			2D Transform
 	 */
 	public void drawStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
-
 		for(Star star : sky.stars()) {
 			int temperature = star.colorTemperature();
-			Color starColor = BlackBodyColor.colorForTemperature(temperature);
+			Color starColor = colorForTemperature(temperature);
 
 			double diameter = starRadius.get(star);
 			double x = starTransformed.get(star).x();
@@ -147,7 +146,6 @@ public class SkyCanvasPainter {
 	 * 
 	 * @param transform
 	 * 			2D transform
-	 * 
 	 */
 	public void drawSun(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		CartesianCoordinates sunCoor = sky.sunPosition();
@@ -155,8 +153,11 @@ public class SkyCanvasPainter {
 		Point2D sunPoint = transform.transform(sunCoor.x(), sunCoor.y());
 		double diameter = transform.deltaTransform(0, sunSize)
 				.magnitude();
+
 		double x = sunPoint.getX();
 		double y = sunPoint.getY();
+
+		//Here the index correspond to the order of painting, index 0 being the background
 		double[] diameters = new double[3];
 		Color[] colors = new Color[3];
 
@@ -262,6 +263,7 @@ public class SkyCanvasPainter {
 
 	/**
 	 * Transforms the stars positions of the sky given the projection and transform
+	 * This method is made to separate the painting of asterims and stars
 	 *  
 	 * @param sky
 	 * 			Observed sky used
@@ -271,18 +273,14 @@ public class SkyCanvasPainter {
 	 * 
 	 * @param transform
 	 * 			Transform used
-	 * 
 	 */
 	public void transformStars(ObservedSky sky, StereographicProjection projection, Transform transform) {
-
 		starPoints = new double[sky.starPositions().length];
 		transform.transform2DPoints(sky.starPositions(), 0, starPoints, 0, starPoints.length/2);
 		int y = 0;
 
 		for(Star star : sky.stars()) {
-			double starSize = diskSize(projection, star);
-			Point2D starDistance = transform.deltaTransform(starSize, 0);
-			double diameter = starDistance.magnitude();
+			double diameter = transformedDiskSize(projection, star.magnitude(), transform);
 			starTransformed.put(star, CartesianCoordinates.of(starPoints[y], starPoints[y+1]));
 			starRadius.put(star, diameter);
 			y+=2;
@@ -299,8 +297,7 @@ public class SkyCanvasPainter {
 	 * 			Stereographic projection used
 	 * 
 	 * @param transform
-	 * 			Traansform used
-	 * 
+	 * 			Transform used
 	 */
 	public void drawHorizon(ObservedSky sky, StereographicProjection projection, Transform transform) {
 
@@ -310,10 +307,11 @@ public class SkyCanvasPainter {
 		Point2D centerPoint = transform.transform(centerCoor.x(), centerCoor.y());
 		Point2D centerDistance = transform.deltaTransform(radius, 0);
 		double transRadius = centerDistance.magnitude();
+		double transDiameter = 2 * transRadius;
 
 		canvas.getGraphicsContext2D().setStroke(Color.RED);
 		canvas.getGraphicsContext2D().setLineWidth(2.0);
-		canvas.getGraphicsContext2D().strokeOval(centerPoint.getX() - transRadius, centerPoint.getY() - transRadius, transRadius * 2, transRadius * 2);
+		canvas.getGraphicsContext2D().strokeOval(centerPoint.getX() - transRadius, centerPoint.getY() - transRadius, transDiameter, transDiameter);
 		canvas.getGraphicsContext2D().setTextBaseline(VPos.TOP);
 
 		canvas.getGraphicsContext2D().setFill(Color.RED);
@@ -334,21 +332,27 @@ public class SkyCanvasPainter {
 	}
 
 	/**
-	 * Computes the size of the disk of the celestial object
+	 * Computes the size of the disk of the transformed celestial object
+	 * Method used for celestial objects whose positions are stored in arrays, as it would duplicate the transform operation of the coordinates for a single celestial object
 	 * 
 	 * @param proj
 	 * 			Stereographic projection used
 	 * 
-	 * @param object
-	 * 			Celestial object
+	 * @param magnitude
+	 * 			Magnitude of the celestial object
+	 * 
+	 * @param transform
+	 * 			Transform depending on the canvas
 	 * 
 	 * @return size of the disk of the celestial object
 	 */
-	private double diskSize(StereographicProjection proj, CelestialObject object) {
+	private double transformedDiskSize(StereographicProjection proj, double magnitude, Transform transform) {
 
-		double mp = MAGNITUDE_INT.clip(object.magnitude());	
+		double mp = MAGNITUDE_INT.clip(magnitude);	
 		double factor = (99 - 17*mp)/ 140.0;
+		double size = factor * proj.applyToAngle(Angle.ofDeg(0.5));
+		Point2D transformedDistance = transform.deltaTransform(size, 0);
 
-		return factor * proj.applyToAngle(Angle.ofDeg(0.5));
+		return transformedDistance.magnitude();
 	}
 }

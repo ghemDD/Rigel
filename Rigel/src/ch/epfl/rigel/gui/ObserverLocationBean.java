@@ -4,9 +4,7 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 /**
  * Bean containing the observer's location
@@ -15,85 +13,87 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public class ObserverLocationBean {
 
-	private final DoubleProperty lonDegProperty;
-	private final DoubleProperty latDegProperty;
-	private final ObjectBinding<GeographicCoordinates> geographicCoordinatesProperty;
+	private final DoubleProperty lonDeg;
+	private final DoubleProperty latDeg;
+	private final ObjectBinding<GeographicCoordinates> geographicCoordinates;
 
-
+	/**
+	 * Constructor for the observerLocationBean : instantiates the properties/Binding
+	 */
 	public ObserverLocationBean() {
-		lonDegProperty = new SimpleDoubleProperty();
-		latDegProperty = new SimpleDoubleProperty();
-		geographicCoordinatesProperty = Bindings.createObjectBinding(() -> ( GeographicCoordinates.ofDeg(lonDegProperty.get(), latDegProperty.get())), lonDegProperty, latDegProperty);
+		lonDeg = new SimpleDoubleProperty();
+		latDeg = new SimpleDoubleProperty();
+		geographicCoordinates = Bindings.createObjectBinding(() -> ( GeographicCoordinates.ofDeg(lonDeg.get(), latDeg.get())), lonDeg, latDeg);
 	}
 
 	// LON DEG PROPERTY
 	/**
-	 * Setter for lonDegProperty
+	 * Setter for lonDeg
 	 * 
 	 * @param value
 	 * 			Longitude of the observer's location (in degrees)
 	 * 
 	 */
 	public void setLonDeg(double value) {		
-		lonDegProperty.set(value);
+		lonDeg.set(value);
 	}
 
 	/**
-	 * Getter for the value of lonDegProperty
+	 * Getter for the value of lonDeg
 	 * 
 	 * @return Longitude of the observer's location (in degrees)
 	 */
 	public double getLonDeg() {
-		return lonDegProperty.get();
+		return lonDeg.get();
 	}
 
 	/**
-	 * Getter for the property lonDegProperty
+	 * Getter for the property lonDeg
 	 * 
-	 * @return property lonDegProperty
+	 * @return property lonDeg
 	 */
 	public DoubleProperty getLonDegProperty() {
-		return lonDegProperty;
+		return lonDeg;
 	}
 
 	// LAT DEG PROPERTY
 	/**
-	 * Setter for latDegProperty
+	 * Setter for latDeg
 	 * 
 	 * @param value
 	 * 			Latitude of the observer's location (in degrees)
 	 * 
 	 */
 	public void setLatDeg(double value) {
-		latDegProperty.set(value);
+		latDeg.set(value);
 	}
 
 	/**
-	 * Getter for the value of latDegProperty
+	 * Getter for the value of latDeg
 	 * 
 	 * @return Latitude of the observer's location (in degrees)
 	 */
 	public double getLatDeg() {
-		return latDegProperty.get();
+		return latDeg.get();
 	}
 
 	/**
-	 * Getter for the property latDegProperty
+	 * Getter for the property latDeg
 	 * 
-	 * @return property latDegProperty
+	 * @return property latDeg
 	 */
 	public DoubleProperty getLatDegProperty() {
-		return latDegProperty;
+		return latDeg;
 	}
 
 	// GEOGRAPHIC COORDINATES BINDING
 	/**
-	 * Getter for the value of geographicCoordinatesProperty
+	 * Getter for the value of geographicCoordinates
 	 * 
 	 * @return Geographic Coordinates of the observer's location
 	 */
 	public GeographicCoordinates getGeographicCoordinates() {
-		return geographicCoordinatesProperty.get();
+		return geographicCoordinates.get();
 	}
 
 	/**
@@ -101,11 +101,10 @@ public class ObserverLocationBean {
 	 * 
 	 * @param geo
 	 * 			Geographic coordinates to set in the property
-	 * 
 	 */
 	public void setCoordinates(GeographicCoordinates geo) {
-		lonDegProperty.set(geo.lonDeg());
-		latDegProperty.set(geo.latDeg());
+		lonDeg.set(geo.lonDeg());
+		latDeg.set(geo.latDeg());
 	}
 
 	/**
@@ -114,6 +113,6 @@ public class ObserverLocationBean {
 	 * @return Binding geographicCoordinatesBinding
 	 */
 	public ObjectBinding<GeographicCoordinates> getGeographicCoordinatesBinding() {
-		return geographicCoordinatesProperty;
+		return geographicCoordinates;
 	}
 }

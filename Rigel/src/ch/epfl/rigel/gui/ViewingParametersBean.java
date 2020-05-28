@@ -3,8 +3,8 @@ package ch.epfl.rigel.gui;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 
 /**
  * Bean the informations of the conditions of observation
@@ -12,22 +12,24 @@ import javafx.beans.property.SimpleObjectProperty;
  * @author Nael Ouerghemi (310435)
  */
 public class ViewingParametersBean {
-	private final ObjectProperty<Double> fieldOfViewDeg; 
+
+	private final DoubleProperty fieldOfViewDeg; 
 	private final ObjectBinding<HorizontalCoordinates> centerCoordinates;
-	private final ObjectProperty<Double> lonDeg;
-	private final ObjectProperty<Double> altDeg;
+	private final DoubleProperty lonDeg;
+	private final DoubleProperty altDeg;
 
 	/**
-	 * Constructor for the viewingParametersBean
+	 * Constructor for the viewingParametersBean : initialises properties fieldOfViewDeg, lonDeg, altDeg properties and binding centerCoordinates
 	 */
 	public ViewingParametersBean() {
-		fieldOfViewDeg = new SimpleObjectProperty<Double>();
-		lonDeg = new SimpleObjectProperty<Double>();
-		altDeg = new SimpleObjectProperty<Double>();
+		fieldOfViewDeg = new SimpleDoubleProperty();
+		lonDeg = new SimpleDoubleProperty();
+		altDeg = new SimpleDoubleProperty();
 		centerCoordinates = Bindings.createObjectBinding(() -> HorizontalCoordinates.ofDeg(lonDeg.getValue(), altDeg.getValue()), lonDeg, altDeg);
 	}
 
 	//FIELD OF VIEW PROPERTY
+
 	/**
 	 * Setter for the field of view property
 	 * 
@@ -52,11 +54,12 @@ public class ViewingParametersBean {
 	 * 
 	 * @return field of view property
 	 */
-	public ObjectProperty<Double> getFieldOfViewDegProperty() {
+	public DoubleProperty getFieldOfViewDegProperty() {
 		return fieldOfViewDeg;
 	}
 
 	//CENTER COORDINATES PROPERTY
+
 	/**
 	 * Setter for the coordinates of the center
 	 * 
