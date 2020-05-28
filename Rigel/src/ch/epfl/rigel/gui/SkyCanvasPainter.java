@@ -28,18 +28,18 @@ import javafx.scene.transform.Transform;
  * @author Nael Ouerghemi (310435)
  */
 public class SkyCanvasPainter {
-	
+
 	//Canvas
 	private final Canvas canvas;
 	private final GraphicsContext graphicsContext;
-	
+
 	//Star transform
 	private final Map<Star, CartesianCoordinates> starTransformed;
 	private final Map<Star, Double> starRadius;
 	private double[] starPoints;
-	
+
 	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
-	
+
 	/**
 	 * Constructor for skyCanvasPainter
 	 * 
@@ -75,7 +75,7 @@ public class SkyCanvasPainter {
 		drawSun(sky, projection, transform);
 		drawMoon(sky, projection, transform);
 	}
-	
+
 	/**
 	 * Clears the canvas by filling with black rectangle adapted to the dimensions of the canvas
 	 */

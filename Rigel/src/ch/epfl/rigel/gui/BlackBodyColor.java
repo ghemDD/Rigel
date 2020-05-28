@@ -65,7 +65,7 @@ public class BlackBodyColor {
 	 * 
 	 * @return Returns true if line has to be ignored, false otherwise 
 	 */
-	private static final boolean ignoreLine(String string) {
+	private static boolean ignoreLine(String string) {
 		return (string.charAt(0)=='#' || string.contains("2deg"));
 	}
 

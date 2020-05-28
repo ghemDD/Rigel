@@ -40,9 +40,10 @@ public enum NamedTimeAccelerator {
 	 */
 	public TimeAccelerator getAccelerator() {return accelerator;}
 
-	@Override
+
 	/**
 	 * @see Object#toString()
 	 */
+	@Override
 	public String toString() {return name;}
 }

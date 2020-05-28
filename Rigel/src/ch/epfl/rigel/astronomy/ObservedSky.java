@@ -225,7 +225,7 @@ public class ObservedSky {
 
 		return closest;
 	}
-	
+
 	/**
 	 * Returns the Sun calculated in the constructor
 	 * 

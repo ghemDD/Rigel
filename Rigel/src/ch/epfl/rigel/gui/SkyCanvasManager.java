@@ -51,7 +51,7 @@ public class SkyCanvasManager {
 	//Incrementations/Decrementations
 	private static final double ALT_INC = 5.0;
 	private static final double LON_INC = 10.0;
-	
+
 	private static final double MAX_DISTANCE = 10.0;
 
 	/**
@@ -118,7 +118,7 @@ public class SkyCanvasManager {
 					}	catch (NullPointerException e) {
 						return null;
 					}
-					 
+
 				}, observedSky, inverseTransformedMouse);
 
 		mouseHorizontalPosition = Bindings.createObjectBinding(

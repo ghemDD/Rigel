@@ -90,11 +90,11 @@ public final class Main extends Application {
 	private static final String RESET_STRING = "\uf0e2";
 	private static final String PLAY_STRING = "\uf04b";
 	private static final String PAUSE_STRING = "\uf04c";
-	
+
 	//FILES PATH
 	private static final String STARS_PATH = "/hygdata_v3.csv";
 	private static final String AST_PATH = "/asterisms.txt";
-	
+
 	private static final List<String> SORTED_ZONEIDS = sortedZoneIds();
 
 	/**
@@ -167,7 +167,7 @@ public final class Main extends Application {
 			sky.requestFocus();
 		} 
 	}
-	
+
 	private InputStream resourceStream(String resourceName) {
 		return getClass().getResourceAsStream(resourceName);
 	}
@@ -418,10 +418,12 @@ public final class Main extends Application {
 	private BorderPane infoBar() {
 		Text fieldOfViewText = new Text();
 		fieldOfViewText.textProperty().setValue("Champ de vue: 100°");
-		fieldOfViewText.textProperty().bind(Bindings.format("Champ de vue : %.1f°", viewingParametersBean.getFieldOfViewDegProperty()));
+		fieldOfViewText.textProperty().bind(Bindings.format("Champ de vue : %.1f°",
+				viewingParametersBean.getFieldOfViewDegProperty()));
 
 		objectUnderMouseString = Bindings.createStringBinding(
-				() -> canvasManager.objectUnderMouseProperty().getValue().info(), canvasManager.objectUnderMouseProperty());
+				() -> canvasManager.objectUnderMouseProperty().getValue().info(), 
+				canvasManager.objectUnderMouseProperty());
 
 		Text closestObjectText = new Text();
 		closestObjectText.textProperty().bind(objectUnderMouseString);
