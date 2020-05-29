@@ -73,7 +73,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
 	 * @see Object#equals()
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -81,7 +81,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
 	 * @see Object#hashCode()
 	 */
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		throw new UnsupportedOperationException();
 	}
 }

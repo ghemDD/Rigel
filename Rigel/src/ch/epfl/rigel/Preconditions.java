@@ -34,6 +34,9 @@ public final class Preconditions {
 	 * @param value
 	 * 			Value to test
 	 * 
+	 * @throws IllegalArgumentException
+	 * 			if the value is not in the interval
+	 * 
 	 * @return value
 	 */
 	public static double checkInInterval(Interval interval, double value) {

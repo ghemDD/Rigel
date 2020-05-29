@@ -24,6 +24,9 @@ public final class EclipticCoordinates extends SphericalCoordinates {
 	 * 
 	 * @param lat
 	 * 			Latitude (in radians)
+	 *
+	 * @throws IllegalArgumentException
+	 * 			If latitude/longitude are not in their respective interval
 	 * 
 	 * @return equatorial coordinates with the desired longitude and latitude
 	 */

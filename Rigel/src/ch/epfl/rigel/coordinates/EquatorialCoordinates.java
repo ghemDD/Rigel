@@ -27,6 +27,9 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
 	 * @param dec
 	 * 			Declination (radian)
 	 * 
+	 * @throws IllegalArgumentException
+	 * 			If right ascension/declination are not in their respective interval
+	 * 
 	 * @return Equatorial Coordinates with the desired right ascension and declination
 	 */
 	public static EquatorialCoordinates of(double ra, double dec) {

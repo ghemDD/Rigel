@@ -29,6 +29,9 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 	 * 
 	 * @param latDeg
 	 * 			Latitude in degrees
+	 * 
+	 * @throws IllegalArgumentException
+	 * 			If latitude/longitude are not in their respective interval
 	 * 			
 	 * @return geographic coordinates with the desired values
 	 */

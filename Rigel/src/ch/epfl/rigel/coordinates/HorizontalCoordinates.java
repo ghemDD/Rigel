@@ -1,15 +1,13 @@
 package ch.epfl.rigel.coordinates;
 
 import static ch.epfl.rigel.Preconditions.checkInInterval;
-import static java.lang.Math.cos;
 import static java.lang.Math.acos;
+import static java.lang.Math.cos;
 import static java.lang.Math.sin;
-
-
+import static ch.epfl.rigel.math.Angle.TAU;
 
 import java.util.Locale;
 
-import ch.epfl.rigel.math.RightOpenInterval;
 import ch.epfl.rigel.math.Angle;
 
 /**
@@ -22,12 +20,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	/**
 	 * Intervals of azimuth defining the octants
 	 */
-	//Remove intervals
-	private static final RightOpenInterval NORTH_1 = RightOpenInterval.of(292.5, 360);
-	private static final RightOpenInterval NORTH_2 = RightOpenInterval.of(0, 67.5);
-	private static final RightOpenInterval SOUTH = RightOpenInterval.of(112.5, 247.5);
-	private static final RightOpenInterval WEST = RightOpenInterval.of(202.5, 337.5);
-	private static final RightOpenInterval EAST = RightOpenInterval.of(22.5, 157.5);
 
 	public static final String NORTH_STRING = "N";
 	public static final String SOUTH_STRING = "S";
@@ -48,6 +40,9 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	 * @param alt
 	 * 			Altitude (in radians)
 	 * 
+	 * @throws IllegalArgumentException
+	 * 			If latitude/longitude are not in their respective interval
+	 * 
 	 * @return horizontal coordinates with the desired values
 	 */
 	public static HorizontalCoordinates of(double az, double alt) {
@@ -66,6 +61,9 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	 * 
 	 * @param altDeg
 	 * 			Altitude (in degrees)
+	 *
+	 * @throws IllegalArgumentException
+	 * 			If latitude/longitude are not in their respective interval
 	 * 
 	 * @return horizontal coordinates with the desired values
 	 */
@@ -95,21 +93,39 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 	 * @return String representing the polar direction given the horizontal coordinates
 	 */
 	public String azOctantName(String n, String e, String s, String w) {
-		StringBuilder string = new StringBuilder();
-
-		if (NORTH_1.contains(azDeg()) || NORTH_2.contains(azDeg()))
-			string.append(n);
-
-		if (SOUTH.contains(azDeg()))
-			string.append(s);
-
-		if (EAST.contains(azDeg()))
-			string.append(e);
-
-		if (WEST.contains(azDeg()))
-			string.append(w);
-
-		return string.toString();
+		int divided = (int) Math.round(this.az() * 8 / TAU);
+		
+		switch (divided) {
+			case (0) :
+				return n;
+			
+			case (1) :
+				return n+e;
+			
+			case (2) :
+				return e;
+			
+			case (3) :
+				return s+e;
+			
+			case (4) :
+				return s;
+			
+			case (5) :
+				return s+w;
+			
+			case (6) :
+				return w;
+			
+			case (7) :
+				return n+w;
+			
+			case (8) : 
+				return n;
+			
+			default :
+				return null;
+		}
 	}
 
 	/**

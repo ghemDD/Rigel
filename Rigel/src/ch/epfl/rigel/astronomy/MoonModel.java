@@ -20,8 +20,6 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
 
 	MOON;
 
-	private MoonModel() {}
-
 	private static final double MEAN_LON = ofDeg(91.929336);
 	private static final double MEAN_PERI = ofDeg(130.143076);
 	private static final double NODE_LON = ofDeg(291.682547);
