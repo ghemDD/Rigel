@@ -2,6 +2,9 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.CelestialObject;
 import static java.lang.Math.abs;
+
+import java.util.Optional;
+
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
@@ -102,8 +105,11 @@ public class SkyCanvasManager {
 
 		inverseTransformedMouse = Bindings.createObjectBinding(() -> {
 			try {
-				Point2D invertedMousePosition = planeToCanvas.get().inverseTransform(mousePosition.get().x(), mousePosition.get().y());
+				Point2D invertedMousePosition = planeToCanvas.get()
+						.inverseTransform(mousePosition.get().x(), mousePosition.get().y());
+				
 				return CartesianCoordinates.of(invertedMousePosition.getX(), invertedMousePosition.getY());
+				
 			}	catch (NonInvertibleTransformException e){
 				return CartesianCoordinates.of(0, 0);
 			}
@@ -113,13 +119,18 @@ public class SkyCanvasManager {
 		objectUnderMouse = Bindings.createObjectBinding(
 				() -> {
 					try {
-						CelestialObject object = observedSky.get().objectClosestTo(inverseTransformedMouse.get(), MAX_DISTANCE).get();
-						return object;
-					}	catch (NullPointerException e) {
+						double transformedMax = planeToCanvas.get()
+								.inverseDeltaTransform(MAX_DISTANCE, 0)
+								.magnitude();
+						
+						Optional<CelestialObject> object = observedSky.get().objectClosestTo(inverseTransformedMouse.get(), transformedMax);
+						return object.orElse(null);
+					
+					}	catch (Exception e) {
 						return null;
 					}
 
-				}, observedSky, inverseTransformedMouse);
+				}, observedSky, inverseTransformedMouse, planeToCanvas);
 
 		mouseHorizontalPosition = Bindings.createObjectBinding(
 				() -> projection.get().inverseApply(inverseTransformedMouse.get()), 

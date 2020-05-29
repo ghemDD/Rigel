@@ -423,8 +423,15 @@ public final class Main extends Application {
 				viewingParametersBean.getFieldOfViewDegProperty()));
 
 		objectUnderMouseString = Bindings.createStringBinding(
-				() -> canvasManager.objectUnderMouseProperty().getValue().info(), 
-				canvasManager.objectUnderMouseProperty());
+				() -> {
+					try {	
+						return canvasManager.objectUnderMouseProperty().getValue().info();
+						
+					} catch (NullPointerException e) {	
+						return null;
+					} 
+				
+				}, canvasManager.objectUnderMouseProperty());
 
 		Text closestObjectText = new Text();
 		closestObjectText.textProperty().bind(objectUnderMouseString);
