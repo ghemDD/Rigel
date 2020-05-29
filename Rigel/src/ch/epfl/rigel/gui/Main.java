@@ -48,6 +48,7 @@ import javafx.util.converter.NumberStringConverter;
  * Main class of the program
  * 
  * @author Tanguy Marbot (316756)
+ * @author Nael Ouerghemi (310435)
  */
 public final class Main extends Application {
 
@@ -289,14 +290,15 @@ public final class Main extends Application {
 	private HBox dateControlBar() {
 		HBox whenBox = new HBox();
 		whenBox.setStyle("-fx-spacing: inherit; -fx-alignment: baseline-left;" );
-
+		// The date label allows us to choose a date
 		Label dateLabel = new Label("Date: ");
 
 		datePicker = new DatePicker();
 		dateTimeBean.dateProperty().bindBidirectional(datePicker.valueProperty());
 		datePicker.valueProperty().set(when.toLocalDate());
 		datePicker.setStyle("-fx-pref-width: 120");
-
+		
+		// The hour label allows us to choose an hour
 		Label hourLabel = new Label("Heure: ");
 
 		DateTimeFormatter hmsFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -310,6 +312,8 @@ public final class Main extends Application {
 		hourTextField.setTextFormatter(timeFormatter);
 		hourTextField.setStyle("-fx-pref-width: 75;  -fx-alignment: baseline-right;");
 
+		// The zone id roll allows us to choose a Time zone
+
 		zoneIdRoll = new ComboBox<String>();
 
 		zoneIdRoll.valueProperty().set(when.getZone().toString());
@@ -320,6 +324,7 @@ public final class Main extends Application {
 		dateTimeBean.zoneProperty().bind(boxZoneId);
 
 		whenBox.getChildren().addAll(dateLabel, datePicker, hourLabel, hourTextField, zoneIdRoll);
+		//we make sure to disable any timeBox during an Animation
 		whenBox.disableProperty().bind(timeAnimator.getRunning());
 
 		return whenBox;
@@ -332,13 +337,15 @@ public final class Main extends Application {
 	 */
 	private HBox timeControlBar() {
 		HBox timeBox = new HBox();
-		timeBox.setStyle("-fx-spacing: inherit;");			
-
+		timeBox.setStyle("-fx-spacing: inherit;");		
+		
+		// The accelerator roll allows us to choose a type of accelerator
 		ComboBox<NamedTimeAccelerator> acceleratorRoll = new ComboBox<NamedTimeAccelerator>();
 		acceleratorRoll.setValue(NamedTimeAccelerator.TIMES_300);
 		List<NamedTimeAccelerator> listAccelerator = Arrays.asList(NamedTimeAccelerator.values());
 		acceleratorRoll.setItems(javafx.collections.FXCollections.observableList(listAccelerator));
 		accelerator.bind(Bindings.select(acceleratorRoll.valueProperty(), "accelerator" ));
+		
 		acceleratorRoll.disableProperty().bind(timeAnimator.getRunning());
 
 		try(InputStream fontStream = getClass()
@@ -348,7 +355,7 @@ public final class Main extends Application {
 			Button playPauseButton = new Button(PLAY_STRING);
 			playPauseButton.setFont(fontAwesome);
 			playPauseButton.setOnMouseClicked(e-> {
-
+			
 				if (play) {
 					unBindAllDateTimeBean();
 					timeAnimator.start();

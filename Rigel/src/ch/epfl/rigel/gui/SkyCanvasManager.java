@@ -212,23 +212,11 @@ public class SkyCanvasManager {
 		});
 
 		//Listeners painters
-		canvas.widthProperty().addListener(
+		planeToCanvas.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
+		observedSky.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
 
-		canvas.heightProperty().addListener(
-				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
-
-		dateTimeBean.getZonedDateTimeProperty().addListener(
-				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
-
-		observerLocationBean.getGeographicCoordinatesBinding().addListener(
-				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
-
-		viewingParametersBean.getFieldOfViewDegProperty().addListener(
-				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
-
-		viewingParametersBean.getCenterCoordinatesProperty().addListener(
-				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
 	}
 
 	/**

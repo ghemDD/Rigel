@@ -213,7 +213,7 @@ public class ObservedSky {
 
 		double minDistance = Double.MAX_VALUE;
 		Optional<CelestialObject> closest = null;
-
+		//From the filtered list we can find the closest object
 		for(CelestialObject object : reducedList) {
 			double tempDistance = coordinates.distance(celestialCoordinates.get(object));
 

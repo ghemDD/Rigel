@@ -2,6 +2,7 @@ package ch.epfl.rigel.gui;
 
 import static ch.epfl.rigel.gui.BlackBodyColor.colorForTemperature;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,24 +21,31 @@ import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Transform;
 
 /**
  * Paints the sky on the canvas
  * 
  * @author Nael Ouerghemi (310435)
+ * @author Tanguy Marbot (316756)
+ *
  */
 public class SkyCanvasPainter {
 
 	//Canvas
 	private final Canvas canvas;
+	
 	private final GraphicsContext graphicsContext;
 
 	//Star transform
 	private final Map<Star, CartesianCoordinates> starTransformed;
 	private final Map<Star, Double> starRadius;
 	private double[] starPoints;
-
+	
+	private final static HorizontalCoordinates ZERO_LAT_COORDINATES = HorizontalCoordinates.of(0.0,0.0);
+	private final static List<HorizontalCoordinates> CARDINALPOINTS_LIST= new ArrayList<HorizontalCoordinates>();
+	
 	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
 
 	/**
@@ -51,6 +59,11 @@ public class SkyCanvasPainter {
 		graphicsContext = this.canvas.getGraphicsContext2D();
 		starTransformed = new HashMap<Star, CartesianCoordinates>();
 		starRadius = new HashMap<Star, Double>();
+		
+		// we initiate the cardinal points list
+		for(int i = 0; i < 8; i++) {
+			CARDINALPOINTS_LIST.add(HorizontalCoordinates.ofDeg((double) i * 45, -0.5));
+		}
 	}
 
 	/**
@@ -70,10 +83,10 @@ public class SkyCanvasPainter {
 		transformStars(sky, projection, transform);
 		drawAsterisms(sky, projection, transform);
 		drawStars(sky, projection, transform);
-		drawHorizon(sky, projection, transform);
 		drawPlanets(sky, projection, transform);
 		drawSun(sky, projection, transform);
 		drawMoon(sky, projection, transform);
+		drawHorizon(sky, projection, transform);
 	}
 
 	/**
@@ -216,8 +229,8 @@ public class SkyCanvasPainter {
 		double x = moonPoint.getX();
 		double y = moonPoint.getY();
 
-		canvas.getGraphicsContext2D().setFill(Color.WHITE);
-		canvas.getGraphicsContext2D().fillOval(x - diameter/2, y - diameter/2, diameter, diameter);
+		graphicsContext.setFill(Color.WHITE);
+		graphicsContext.fillOval(x - diameter/2, y - diameter/2, diameter, diameter);
 	}
 
 	/**
@@ -302,34 +315,34 @@ public class SkyCanvasPainter {
 	 * 			Transform used
 	 */
 	public void drawHorizon(ObservedSky sky, StereographicProjection projection, Transform transform) {
+		
+		final CartesianCoordinates horizonCircleCenter= projection.circleCenterForParallel(ZERO_LAT_COORDINATES);
+		double horizonCircleRadius = projection.circleRadiusForParallel(ZERO_LAT_COORDINATES);
 
-		HorizontalCoordinates obs = HorizontalCoordinates.ofDeg(0, 0);
-		CartesianCoordinates centerCoor = projection.circleCenterForParallel(obs);
-		double radius = projection.circleRadiusForParallel(obs);
-		Point2D centerPoint = transform.transform(centerCoor.x(), centerCoor.y());
-		Point2D centerDistance = transform.deltaTransform(radius, 0);
-		double transRadius = centerDistance.magnitude();
-		double transDiameter = 2 * transRadius;
+		Point2D transfHorCircleCenterPos= transform.
+				transform(horizonCircleCenter.x(), horizonCircleCenter.y() );
+		
+		horizonCircleRadius = transform.deltaTransform(0, horizonCircleRadius).magnitude();
 
-		canvas.getGraphicsContext2D().setStroke(Color.RED);
-		canvas.getGraphicsContext2D().setLineWidth(2.0);
-		canvas.getGraphicsContext2D().strokeOval(centerPoint.getX() - transRadius, centerPoint.getY() - transRadius, transDiameter, transDiameter);
-		canvas.getGraphicsContext2D().setTextBaseline(VPos.TOP);
-
-		canvas.getGraphicsContext2D().setFill(Color.RED);
-		canvas.getGraphicsContext2D().setLineWidth(1.0);
-
-		for(int i = 0; i < 8; ++i){
-			HorizontalCoordinates cardinalHorizontal = HorizontalCoordinates.ofDeg(i * 45, -0.5);
-			CartesianCoordinates projectedCardinal = projection.apply(cardinalHorizontal);
-			Point2D transformedCardinalPoint = transform.transform(projectedCardinal.x(), projectedCardinal.y());
-
-			String cardinalPointName = cardinalHorizontal.azOctantName(HorizontalCoordinates.NORTH_STRING, 
-					HorizontalCoordinates.EAST_STRING, 
-					HorizontalCoordinates.SOUTH_STRING, 
-					HorizontalCoordinates.WEST_STRING);
-
-			graphicsContext.fillText(cardinalPointName, transformedCardinalPoint.getX(), transformedCardinalPoint.getY());
+		double diameter = horizonCircleRadius*2;
+		// Here we draw the Horizon
+		graphicsContext.setLineWidth(2);
+		graphicsContext.setStroke(Color.RED);
+		graphicsContext.strokeOval(transfHorCircleCenterPos.getX() - diameter/2, transfHorCircleCenterPos.getY() - diameter/2, diameter, diameter);
+		graphicsContext.fill();
+	
+		CartesianCoordinates tempCardTextPos;
+		Point2D tempTransCardTextPos;
+		String tempText;
+	   
+		for( HorizontalCoordinates tempCoord: CARDINALPOINTS_LIST) {
+			graphicsContext.setFill(Color.RED);
+			graphicsContext.setTextAlign(TextAlignment.CENTER);
+			graphicsContext.setTextBaseline(VPos.TOP);
+			tempText= tempCoord.azOctantName("N", "E", "S", "O");
+			tempCardTextPos = projection.apply(tempCoord);
+			tempTransCardTextPos = transform.transform(tempCardTextPos.x(),  tempCardTextPos.y());
+			graphicsContext.fillText(tempText, tempTransCardTextPos.getX(), tempTransCardTextPos.getY());
 		}
 	}
 
