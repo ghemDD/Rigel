@@ -56,7 +56,7 @@ public class ViewingParametersBean {
 	 * 
 	 * @return field of view property
 	 */
-	public DoubleProperty getFieldOfViewDegProperty() {
+	public DoubleProperty fieldOfViewDegProperty() {
 		return fieldOfViewDeg;
 	}
 
@@ -118,7 +118,7 @@ public class ViewingParametersBean {
 	 * 
 	 * @return center coordinates property
 	 */
-	public ObjectBinding<HorizontalCoordinates> getCenterCoordinatesProperty() {
+	public ObjectBinding<HorizontalCoordinates> centerCoordinatesProperty() {
 		return centerCoordinates;
 	}
 }

@@ -54,7 +54,7 @@ public class ObserverLocationBean {
 	 * 
 	 * @return property lonDeg
 	 */
-	public DoubleProperty getLonDegProperty() {
+	public DoubleProperty lonDegProperty() {
 		return lonDeg;
 	}
 
@@ -84,7 +84,7 @@ public class ObserverLocationBean {
 	 * 
 	 * @return property latDeg
 	 */
-	public DoubleProperty getLatDegProperty() {
+	public DoubleProperty latDegProperty() {
 		return latDeg;
 	}
 

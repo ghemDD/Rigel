@@ -80,15 +80,15 @@ public class SkyCanvasManager {
 		//Bindings
 
 		projection = Bindings.createObjectBinding(() -> new StereographicProjection(viewingParametersBean.getCenterCoordinates()), 
-				viewingParametersBean.getCenterCoordinatesProperty());
+				viewingParametersBean.centerCoordinatesProperty());
 
 		observedSky = Bindings.createObjectBinding(
 				() -> new ObservedSky(dateTimeBean.getZonedDateTime(), observerLocationBean.getGeographicCoordinates(), projection.get(), catalogue), 
-				dateTimeBean.getZonedDateTimeProperty(), observerLocationBean.getGeographicCoordinatesBinding(), projection);
+				dateTimeBean.zonedDateTimeProperty(), observerLocationBean.getGeographicCoordinatesBinding(), projection);
 
 		DoubleBinding dilatation = Bindings.createDoubleBinding(
 				() -> (dilatationFactor(projection.get(), viewingParametersBean.getFieldOfViewDeg())), 
-				projection, viewingParametersBean.getFieldOfViewDegProperty(), canvas.widthProperty());
+				projection, viewingParametersBean.fieldOfViewDegProperty(), canvas.widthProperty());
 
 		planeToCanvas = Bindings.createObjectBinding(() -> {
 			Transform scale = Transform.scale(dilatation.get(), - dilatation.get());

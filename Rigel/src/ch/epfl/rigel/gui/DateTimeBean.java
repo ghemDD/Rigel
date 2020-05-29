@@ -113,7 +113,7 @@ public final class DateTimeBean {
 	 * 
 	 * @return zonedDateTime property
 	 */
-	public ObjectBinding<ZonedDateTime> getZonedDateTimeProperty() {return zonedDateTime;}
+	public ObjectBinding<ZonedDateTime> zonedDateTimeProperty() {return zonedDateTime;}
 
 
 	//ZONE PROPERTY

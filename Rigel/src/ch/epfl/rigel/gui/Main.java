@@ -254,8 +254,8 @@ public final class Main extends Application {
 	 * Binds all observer location bean properties
 	 */
 	private void bindAllobserverLocationBean() {
-		observerLocationBean.getLonDegProperty().bind(lonTextFormatter.valueProperty());
-		observerLocationBean.getLatDegProperty().bind(latTextFormatter.valueProperty());
+		observerLocationBean.lonDegProperty().bind(lonTextFormatter.valueProperty());
+		observerLocationBean.latDegProperty().bind(latTextFormatter.valueProperty());
 	}
 
 	/**
@@ -427,7 +427,7 @@ public final class Main extends Application {
 		Text fieldOfViewText = new Text();
 		fieldOfViewText.textProperty().setValue("Champ de vue: 100°");
 		fieldOfViewText.textProperty().bind(Bindings.format("Champ de vue : %.1f°",
-				viewingParametersBean.getFieldOfViewDegProperty()));
+				viewingParametersBean.fieldOfViewDegProperty()));
 
 		objectUnderMouseString = Bindings.createStringBinding(
 				() -> {
