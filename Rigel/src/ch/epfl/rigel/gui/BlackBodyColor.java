@@ -1,7 +1,9 @@
 package ch.epfl.rigel.gui;
 
+import static ch.epfl.rigel.Preconditions.checkArgument;
+import static ch.epfl.rigel.Preconditions.checkInInterval;
+
 import java.io.BufferedReader;
-import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,7 +11,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import static ch.epfl.rigel.Preconditions.checkInInterval;
 
 import ch.epfl.rigel.math.ClosedInterval;
 import javafx.scene.paint.Color;
@@ -75,16 +76,14 @@ public class BlackBodyColor {
 	 * @param temperature 
 	 * 				Temperature of the Star
 	 * 
-	 * @throws NullPointerException
-	 * 			If the map associating temperatures with colors is null
-	 * 
 	 * @throws IllegalArgumentException
 	 * 			If the temperature is not in the closed interval [1000, 40000]
+	 * 			Or if the map is empty
 	 * 
 	 * @return Color given the temperature of the Star
 	 */
 	public static Color colorForTemperature(double temperature) {
-		requireNonNull(MAP);
+		checkArgument(!MAP.isEmpty());
 		checkInInterval(COLOR_INT, temperature);
 
 		int tempMultiple = (int) (Math.round(temperature/100.0)*100);
