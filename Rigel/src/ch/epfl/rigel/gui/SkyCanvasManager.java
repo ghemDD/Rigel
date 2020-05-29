@@ -107,9 +107,9 @@ public class SkyCanvasManager {
 			try {
 				Point2D invertedMousePosition = planeToCanvas.get()
 						.inverseTransform(mousePosition.get().x(), mousePosition.get().y());
-				
+
 				return CartesianCoordinates.of(invertedMousePosition.getX(), invertedMousePosition.getY());
-				
+
 			}	catch (NonInvertibleTransformException e){
 				return CartesianCoordinates.of(0, 0);
 			}
@@ -122,10 +122,12 @@ public class SkyCanvasManager {
 						double transformedMax = planeToCanvas.get()
 								.inverseDeltaTransform(MAX_DISTANCE, 0)
 								.magnitude();
-						
-						Optional<CelestialObject> object = observedSky.get().objectClosestTo(inverseTransformedMouse.get(), transformedMax);
+
+						Optional<CelestialObject> object = observedSky.get()
+								.objectClosestTo(inverseTransformedMouse.get(), transformedMax);
+
 						return object.orElse(null);
-					
+
 					}	catch (Exception e) {
 						return null;
 					}

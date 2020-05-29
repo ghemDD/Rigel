@@ -426,11 +426,11 @@ public final class Main extends Application {
 				() -> {
 					try {	
 						return canvasManager.objectUnderMouseProperty().getValue().info();
-						
+
 					} catch (NullPointerException e) {	
 						return null;
 					} 
-				
+
 				}, canvasManager.objectUnderMouseProperty());
 
 		Text closestObjectText = new Text();
