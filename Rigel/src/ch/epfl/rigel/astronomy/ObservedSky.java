@@ -1,22 +1,20 @@
 package ch.epfl.rigel.astronomy;
 
 
-import java.time.ZonedDateTime;
-
 import static ch.epfl.rigel.Preconditions.checkArgument;
+import static java.lang.Math.abs;
 import static java.util.Objects.requireNonNull;
 
-
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import static java.lang.Math.abs;
+
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
-import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
@@ -138,11 +136,8 @@ public class ObservedSky {
 			cartesianCoordinates.add(projectedCoordinates);
 			celestialCoordinates.put(object, projectedCoordinates);
 			
-			if(object.name().equals(starString)) {
-				EquatorialCoordinates phan = object.equatorialPos();
-				selectedStarCoordinates = projectedCoordinates;
-				System.out.println("Rigel Coordinates "+projectedCoordinates);
-			}	
+			if(object.name().equals(starString))
+				selectedStarCoordinates = projectedCoordinates;	
 
 			index+=2;
 		}

@@ -16,6 +16,8 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
@@ -54,6 +56,10 @@ public class SkyCanvasPainter {
 	private CartesianCoordinates firstCoor;
 	private boolean first;
 	
+	private BooleanProperty showStars;
+	private BooleanProperty showAsterisms;
+	private BooleanProperty showHorizon;
+	
 
 	/**
 	 * Constructor for skyCanvasPainter
@@ -69,6 +75,10 @@ public class SkyCanvasPainter {
 		deltaXPath = new ArrayList<Double>();
 		deltaYPath = new ArrayList<Double>();
 		first = true;
+		
+		showStars = new SimpleBooleanProperty();
+		showAsterisms = new SimpleBooleanProperty();
+		showHorizon = new SimpleBooleanProperty();
 
 		// we initiate the cardinal points list
 		for(int i = 0; i < 8; i++) {
@@ -92,12 +102,19 @@ public class SkyCanvasPainter {
 		clear();
 		this.tracePath = tracePath;
 		transformStars(sky, projection, transform);
-		drawAsterisms(sky, projection, transform);
-		drawStars(sky, projection, transform);
+		
+		if (showAsterisms.get())
+			drawAsterisms(sky, projection, transform);
+		
+		if (showStars.get())
+			drawStars(sky, projection, transform);
+		
 		drawPlanets(sky, projection, transform);
 		drawSun(sky, projection, transform);
 		drawMoon(sky, projection, transform);
-		drawHorizon(sky, projection, transform);
+		
+		if (showHorizon.get())
+			drawHorizon(sky, projection, transform);
 		
 		if (clearPath) {
 			deltaXPath.clear();
@@ -398,6 +415,30 @@ public class SkyCanvasPainter {
 			graphicsContext.setFill(Color.RED);
 			graphicsContext.fillOval(point.getX() - 0.5, point.getY() - 0.5, 1, 1);
 		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public BooleanProperty getShowStarsProperty() {
+		return showStars;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public BooleanProperty getShowAsterismsProperty() {
+		return showAsterisms;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public BooleanProperty getShowHorizonProperty() {
+		return showHorizon;
 	}
 	
 	/**

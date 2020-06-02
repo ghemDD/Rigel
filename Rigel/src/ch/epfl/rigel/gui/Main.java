@@ -1,7 +1,6 @@
 package ch.epfl.rigel.gui;
 
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.time.LocalTime;
@@ -23,26 +22,32 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.effect.SepiaTone;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.converter.LocalTimeStringConverter;
 import javafx.util.converter.NumberStringConverter;
 
@@ -110,6 +115,9 @@ public final class Main extends Application {
 	
 	//PATH
 	private boolean trace;
+	
+	private Stage primaryStage;
+	private BorderPane skyRoot;
 
 	/**
 	 * Sort the ID zones in natural order
@@ -143,8 +151,9 @@ public final class Main extends Application {
 				InputStream ast = resourceStream(AST_PATH)) {
 
 			resetStartProcess();
-
+			this.primaryStage = primaryStage;
 			
+			HBox whenBox = dateControlBar();
 
 			//SKY PANE
 			StarCatalogue catalogue = new StarCatalogue.Builder()
@@ -165,18 +174,30 @@ public final class Main extends Application {
 			Canvas sky = canvasManager.canvas();
 			Pane skyPane = new Pane();		
 			skyPane.getChildren().addAll(sky);
-			BorderPane root = new BorderPane(skyPane);
-			sky.widthProperty().bind(root.widthProperty());
-			sky.heightProperty().bind(root.heightProperty());
+			skyRoot = new BorderPane(skyPane);
+			sky.widthProperty().bind(skyRoot.widthProperty());
+			sky.heightProperty().bind(skyRoot.heightProperty());
 			
 			//TOP CONTROL BAR
-			HBox controlBar = controlBar();
+			HBox controlBar = new HBox();
+			controlBar.setStyle("-fx-spacing: 4; -fx-padding: 4;");
+
+			HBox obsPosBox = coordControlBar();
+			HBox timeBox = timeControlBar();
+			
+			Separator separator = new Separator();
+			separator.setOrientation(Orientation.VERTICAL);
+
+			Separator separatorSec = new Separator();
+			separatorSec.setOrientation(Orientation.VERTICAL);
+
+			controlBar.getChildren().addAll(obsPosBox, separator, whenBox, separatorSec, timeBox);
 
 			//BOTTOM CONTROL BAR
 			BorderPane informationBar = infoBar();
 
 			//MAIN PANE
-			BorderPane mainPane = new BorderPane(root, controlBar, null, informationBar, null);
+			BorderPane mainPane = new BorderPane(skyRoot, controlBar, null, informationBar, null);
 
 			primaryStage.setMinWidth(MIN_WIDTH);
 			primaryStage.setMinHeight(MIN_HEIGHT);
@@ -214,29 +235,6 @@ public final class Main extends Application {
 		viewingParametersBean.setFieldOfViewDeg(START_FIELD_OF_VIEW_DEG);
 	}
 
-	/**
-	 * Instantiate the top control bar of the interface composed of : the observation position information, the date information and time control
-	 * 
-	 * @return top control bar of the interface
-	 */
-	private HBox controlBar() {
-		HBox controlBar = new HBox();
-		controlBar.setStyle("-fx-spacing: 4; -fx-padding: 4;");
-
-		HBox obsPosBox = coordControlBar();
-		HBox whenBox = dateControlBar();
-		HBox timeBox = timeControlBar();
-
-		Separator separator = new Separator();
-		separator.setOrientation(Orientation.VERTICAL);
-
-		Separator separatorSec = new Separator();
-		separatorSec.setOrientation(Orientation.VERTICAL);
-
-		controlBar.getChildren().addAll(obsPosBox, separator, whenBox, separatorSec, timeBox);
-
-		return controlBar;
-	}
 
 	/**
 	 * Instantiate the HBox corresponding to the control of coordinates bar, part of the top control bar
@@ -432,8 +430,51 @@ public final class Main extends Application {
 			Button parametersButton = new Button(COG_STRING);
 			parametersButton.setFont(fontAwesome);
 			
-			parametersButton.setOnMouseClicked(e -> {
+			CheckBox showAsterisms = new CheckBox("Show Asterisms");
+			showAsterisms.setFont(fontAwesome);
+            showAsterisms.setSelected(true);
+            canvasManager.getShowAsterismsProperty().bind(showAsterisms.selectedProperty());
+            
+            CheckBox showHorizon = new CheckBox("Show Horizon");
+            showHorizon.setFont(fontAwesome);
+            showHorizon.setSelected(true);
+            canvasManager.getShowHorizonProperty().bind(showHorizon.selectedProperty());
+            
+            CheckBox showStars = new CheckBox("Show Stars");
+            showStars.setFont(fontAwesome);
+            showStars.setSelected(true);
+            canvasManager.getShowStarsProperty().bind(showStars.selectedProperty());
 			
+			parametersButton.setOnMouseClicked(e -> {
+
+		            VBox parametersRoot = new VBox(5);
+		            Label parameters = new Label("Parameters");
+		            parameters.setFont(fontAwesome);
+		            parametersRoot.setLayoutY(canvasManager.canvas().getHeight()/2);
+		            parametersRoot.getChildren().add(parameters);
+		            parametersRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8); -fx-alignment: center-left;");
+		            parametersRoot.setAlignment(Pos.TOP_CENTER);
+		            parametersRoot.setSpacing(7.5);
+		            
+		            parametersRoot.setPadding(new Insets(20));
+		            skyRoot.setEffect(new SepiaTone());
+		               
+		            parametersRoot.getChildren().addAll(showAsterisms, showHorizon, showStars);
+		            
+		            Button confirm = new Button("Confirm");
+		            parametersRoot.getChildren().add(confirm);
+  
+		            Stage popupStage = new Stage(StageStyle.TRANSPARENT);
+		            popupStage.initOwner(primaryStage);
+		            popupStage.initModality(Modality.APPLICATION_MODAL);
+		            popupStage.setScene(new Scene(parametersRoot, Color.TRANSPARENT));
+		            
+		            confirm.setOnAction(event -> {
+		                skyRoot.setEffect(null);
+		                popupStage.hide();
+		            });
+		        
+		          popupStage.show();
 			});
 
 			resetButton.disableProperty().bind(timeAnimator.getRunning());

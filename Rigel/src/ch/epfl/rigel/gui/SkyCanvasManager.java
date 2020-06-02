@@ -48,6 +48,10 @@ public class SkyCanvasManager {
 	private final BooleanProperty tracePath;
 	private final BooleanProperty clearPath;
 	private final StringProperty selectedStar;
+	
+	private final BooleanProperty showStars;
+	private final BooleanProperty showAsterisms;
+	private final BooleanProperty showHorizon;
 
 	//External links
 	public final ObjectBinding<Double> mouseAzDeg;
@@ -85,8 +89,15 @@ public class SkyCanvasManager {
 		canvas = new Canvas();
 		SkyCanvasPainter painter = new SkyCanvasPainter(canvas);
 		selectedStar = new SimpleStringProperty();
+		
+		showStars = new SimpleBooleanProperty();
+		showAsterisms = new SimpleBooleanProperty();
+		showHorizon = new SimpleBooleanProperty();
 
 		//Bindings
+		painter.getShowAsterismsProperty().bind(showAsterisms);
+		painter.getShowHorizonProperty().bind(showHorizon);
+		painter.getShowStarsProperty().bind(showStars);
 
 		projection = Bindings.createObjectBinding(() -> new StereographicProjection(viewingParametersBean.getCenterCoordinates()), 
 				viewingParametersBean.centerCoordinatesProperty());
@@ -230,7 +241,6 @@ public class SkyCanvasManager {
 			
 			double deltaX = mousePositionOnPressed.get().x() - event.getX();
 			double deltaY = mousePositionOnPressed.get().y() - event.getY();
-			System.out.println("x "+deltaX+ " y "+deltaY);
 			
 			lon += deltaX/2;
 			lon = LON_INT.reduce(lon);
@@ -263,11 +273,22 @@ public class SkyCanvasManager {
 		//Listeners painters
 		planeToCanvas.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		
 		observedSky.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		
 		clearPath.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
-
+		
+		showStars.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		
+		showAsterisms.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		
+		showHorizon.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		
 	}
 
 	/**
@@ -365,4 +386,16 @@ public class SkyCanvasManager {
 	public StringProperty getSelectedStarProperty() {
 		return selectedStar;
 	}
+	
+	public BooleanProperty getShowStarsProperty() {
+		return showStars;
+	}
+	
+	public BooleanProperty getShowHorizonProperty() {
+		return showHorizon;
+	}
+	
+	public BooleanProperty getShowAsterismsProperty() {
+		return showAsterisms;
+	}	
 }
