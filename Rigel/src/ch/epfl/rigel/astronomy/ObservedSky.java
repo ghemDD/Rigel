@@ -16,6 +16,7 @@ import java.util.Set;
 import static java.lang.Math.abs;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
@@ -47,6 +48,10 @@ public class ObservedSky {
 	private final StarCatalogue catalogue;
 	private final List<CartesianCoordinates> starCartesianPositions;
 	private final double[] starPositions;
+	
+	//PATH
+	private String starString;
+	private CartesianCoordinates selectedStarCoordinates;
 
 	/**
 	 * Constructor for the ObservedSky class containing representing the set of all celestial objects visible in the sky
@@ -64,7 +69,7 @@ public class ObservedSky {
 	 * 			StarCatalogue containing the list of stars and asterisms
 	 * 
 	 */
-	public ObservedSky(ZonedDateTime date, GeographicCoordinates observationPosition, StereographicProjection stereo, StarCatalogue catalogue) {
+	public ObservedSky(ZonedDateTime date, GeographicCoordinates observationPosition, StereographicProjection stereo, StarCatalogue catalogue, String starString) {
 
 		double daysSinceJ2010 = Epoch.J2010.daysUntil(date);
 		eclToEqu = new EclipticToEquatorialConversion(date);
@@ -74,7 +79,10 @@ public class ObservedSky {
 		planetCartesianPositions = new ArrayList<>();
 		starCartesianPositions = new ArrayList<>();
 		this.catalogue = catalogue;
+		this.starString = starString;
 		celestialCoordinates = new HashMap<CelestialObject, CartesianCoordinates>();
+		
+		//pathCoordinates = new ArrayList<CartesianCoordinates>();
 
 		sun = SunModel.SUN.at(daysSinceJ2010, eclToEqu);
 		sunPosition = projectSingleCelestialObject(sun);
@@ -121,6 +129,7 @@ public class ObservedSky {
 		double[] celestialObjectsPositions = new double[objects.size() * 2];
 
 		for (CelestialObject object : objects) {
+			
 			HorizontalCoordinates horConverted = equToHor.apply(object.equatorialPos());
 			CartesianCoordinates projectedCoordinates = projection.apply(horConverted);
 
@@ -128,6 +137,12 @@ public class ObservedSky {
 			celestialObjectsPositions[index + 1] = projectedCoordinates.y();
 			cartesianCoordinates.add(projectedCoordinates);
 			celestialCoordinates.put(object, projectedCoordinates);
+			
+			if(object.name().equals(starString)) {
+				EquatorialCoordinates phan = object.equatorialPos();
+				selectedStarCoordinates = projectedCoordinates;
+				System.out.println("Rigel Coordinates "+projectedCoordinates);
+			}	
 
 			index+=2;
 		}
@@ -292,6 +307,15 @@ public class ObservedSky {
 	 */
 	public List<CartesianCoordinates> starCartesianCoordinates() {
 		return List.copyOf(starCartesianPositions);
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public CartesianCoordinates pathCoordinates() {
+		return selectedStarCoordinates;
 	}
 
 	/**

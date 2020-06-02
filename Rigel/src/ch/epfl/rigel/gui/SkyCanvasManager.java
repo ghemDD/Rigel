@@ -16,8 +16,12 @@ import ch.epfl.rigel.math.RightOpenInterval;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -38,8 +42,12 @@ public class SkyCanvasManager {
 	private final ObjectBinding<Transform> planeToCanvas;
 	private final ObjectBinding<ObservedSky> observedSky;
 	private final ObjectProperty<CartesianCoordinates> mousePosition;
+	private final ObjectProperty<CartesianCoordinates> mousePositionOnPressed;
 	private final ObjectBinding<CartesianCoordinates> inverseTransformedMouse;
 	private final ObjectBinding<HorizontalCoordinates> mouseHorizontalPosition;
+	private final BooleanProperty tracePath;
+	private final BooleanProperty clearPath;
+	private final StringProperty selectedStar;
 
 	//External links
 	public final ObjectBinding<Double> mouseAzDeg;
@@ -76,6 +84,7 @@ public class SkyCanvasManager {
 	public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dateTimeBean, ObserverLocationBean observerLocationBean, ViewingParametersBean viewingParametersBean) {
 		canvas = new Canvas();
 		SkyCanvasPainter painter = new SkyCanvasPainter(canvas);
+		selectedStar = new SimpleStringProperty();
 
 		//Bindings
 
@@ -83,7 +92,7 @@ public class SkyCanvasManager {
 				viewingParametersBean.centerCoordinatesProperty());
 
 		observedSky = Bindings.createObjectBinding(
-				() -> new ObservedSky(dateTimeBean.getZonedDateTime(), observerLocationBean.getGeographicCoordinates(), projection.get(), catalogue), 
+				() -> new ObservedSky(dateTimeBean.getZonedDateTime(), observerLocationBean.getGeographicCoordinates(), projection.get(), catalogue, getSelectedStar()), 
 				dateTimeBean.zonedDateTimeProperty(), observerLocationBean.getGeographicCoordinatesBinding(), projection);
 
 		DoubleBinding dilatation = Bindings.createDoubleBinding(
@@ -101,6 +110,9 @@ public class SkyCanvasManager {
 		//Initialization Mouse Position
 		mousePosition = new SimpleObjectProperty<CartesianCoordinates>();
 		mousePosition.set(CartesianCoordinates.of(0, 0));
+		
+		tracePath = new SimpleBooleanProperty();
+		clearPath = new SimpleBooleanProperty();
 
 
 		inverseTransformedMouse = Bindings.createObjectBinding(() -> {
@@ -189,9 +201,15 @@ public class SkyCanvasManager {
 		});
 
 		//Listeners mouse
+		mousePositionOnPressed = new SimpleObjectProperty<CartesianCoordinates>();
+		mousePositionOnPressed.set(CartesianCoordinates.of(0, 0));
+		
 		canvas.setOnMousePressed((event) -> {
 			if (event.isPrimaryButtonDown())
 				canvas.requestFocus();
+			
+			//Bonus
+			mousePositionOnPressed.set(CartesianCoordinates.of(event.getX(), event.getY()));
 		});
 
 		canvas.setOnMouseMoved((event) -> {
@@ -200,6 +218,37 @@ public class SkyCanvasManager {
 
 			mousePosition.set(CartesianCoordinates.of(x, y));
 		});
+		
+
+		/**
+		 * Bonus 
+		 */
+		canvas.setOnMouseDragged((event) -> {
+			
+			double lon = viewingParametersBean.getCenterLonDeg();
+			double alt = viewingParametersBean.getCenterAltDeg();
+			
+			double deltaX = mousePositionOnPressed.get().x() - event.getX();
+			double deltaY = mousePositionOnPressed.get().y() - event.getY();
+			System.out.println("x "+deltaX+ " y "+deltaY);
+			
+			lon += deltaX/2;
+			lon = LON_INT.reduce(lon);
+			
+			alt += -deltaY/2;
+			alt = ALT_INT.clip(alt);
+			
+			mousePositionOnPressed.set(CartesianCoordinates.of(event.getX(), event.getY()));
+			viewingParametersBean.setCenterAltDeg(alt);
+			viewingParametersBean.setCenterLonDeg(lon);
+			setTracePath(false);
+			
+			event.consume();
+		});
+		
+		/**
+		 * 
+		 */
 
 		canvas.setOnScroll((event) -> {
 			double fov = viewingParametersBean.getFieldOfViewDeg();
@@ -213,9 +262,11 @@ public class SkyCanvasManager {
 
 		//Listeners painters
 		planeToCanvas.addListener(
-				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
 		observedSky.addListener(
-				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get()));
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		clearPath.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
 
 	}
 
@@ -261,4 +312,57 @@ public class SkyCanvasManager {
 	 * @return mouse altitude property
 	 */
 	public ObjectBinding<Double> mouseAltDegProperty() {return mouseAltDeg;}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean getTracePath() {return tracePath.get();}
+	
+	/**
+	 * 
+	 * @param value
+	 */
+	public void setTracePath(boolean value) {
+		tracePath.set(value);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean getClearPath() {return clearPath.get();}
+	
+	/**
+	 * 
+	 * @param value
+	 */
+	public void setClearPath(boolean value) {
+		clearPath.set(value);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getSelectedStar() {
+		return selectedStar.get();
+	}
+	
+	/**
+	 * 
+	 * @param value
+	 */
+	public void setSelectedStar(String value) {
+		selectedStar.set(value);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public StringProperty getSelectedStarProperty() {
+		return selectedStar;
+	}
 }

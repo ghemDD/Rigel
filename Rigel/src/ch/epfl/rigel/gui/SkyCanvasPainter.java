@@ -35,18 +35,25 @@ public class SkyCanvasPainter {
 
 	//Canvas
 	private final Canvas canvas;
-	
+
 	private final GraphicsContext graphicsContext;
 
 	//Star transform
 	private final Map<Star, CartesianCoordinates> starTransformed;
 	private final Map<Star, Double> starRadius;
 	private double[] starPoints;
-	
+
 	private final static HorizontalCoordinates ZERO_LAT_COORDINATES = HorizontalCoordinates.of(0.0,0.0);
 	private final static List<HorizontalCoordinates> CARDINALPOINTS_LIST= new ArrayList<HorizontalCoordinates>();
-	
+
 	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
+	
+	private boolean tracePath;
+	private List<Double> deltaXPath;
+	private List<Double> deltaYPath;
+	private CartesianCoordinates firstCoor;
+	private boolean first;
+	
 
 	/**
 	 * Constructor for skyCanvasPainter
@@ -59,7 +66,10 @@ public class SkyCanvasPainter {
 		graphicsContext = this.canvas.getGraphicsContext2D();
 		starTransformed = new HashMap<Star, CartesianCoordinates>();
 		starRadius = new HashMap<Star, Double>();
-		
+		deltaXPath = new ArrayList<Double>();
+		deltaYPath = new ArrayList<Double>();
+		first = true;
+
 		// we initiate the cardinal points list
 		for(int i = 0; i < 8; i++) {
 			CARDINALPOINTS_LIST.add(HorizontalCoordinates.ofDeg((double) i * 45, -0.5));
@@ -78,8 +88,9 @@ public class SkyCanvasPainter {
 	 * @param transform
 	 * 			Transform used
 	 */
-	public void drawSky(ObservedSky sky, StereographicProjection projection, Transform transform) {	
+	public void drawSky(ObservedSky sky, StereographicProjection projection, Transform transform, boolean tracePath, boolean clearPath) {	
 		clear();
+		this.tracePath = tracePath;
 		transformStars(sky, projection, transform);
 		drawAsterisms(sky, projection, transform);
 		drawStars(sky, projection, transform);
@@ -87,6 +98,13 @@ public class SkyCanvasPainter {
 		drawSun(sky, projection, transform);
 		drawMoon(sky, projection, transform);
 		drawHorizon(sky, projection, transform);
+		
+		if (clearPath) {
+			deltaXPath.clear();
+			deltaYPath.clear();
+		}
+		
+		tracePath(sky, transform);
 	}
 
 	/**
@@ -293,11 +311,14 @@ public class SkyCanvasPainter {
 		starPoints = new double[sky.starPositions().length];
 		transform.transform2DPoints(sky.starPositions(), 0, starPoints, 0, starPoints.length/2);
 		int y = 0;
+		
 
 		for(Star star : sky.stars()) {
 			double diameter = transformedDiskSize(projection, star.magnitude(), transform);
 			starTransformed.put(star, CartesianCoordinates.of(starPoints[y], starPoints[y+1]));
+			
 			starRadius.put(star, diameter);
+				
 			y+=2;
 		}
 	}
@@ -315,13 +336,13 @@ public class SkyCanvasPainter {
 	 * 			Transform used
 	 */
 	public void drawHorizon(ObservedSky sky, StereographicProjection projection, Transform transform) {
-		
+
 		final CartesianCoordinates horizonCircleCenter= projection.circleCenterForParallel(ZERO_LAT_COORDINATES);
 		double horizonCircleRadius = projection.circleRadiusForParallel(ZERO_LAT_COORDINATES);
 
 		Point2D transfHorCircleCenterPos= transform.
 				transform(horizonCircleCenter.x(), horizonCircleCenter.y() );
-		
+
 		horizonCircleRadius = transform.deltaTransform(0, horizonCircleRadius).magnitude();
 
 		double diameter = horizonCircleRadius*2;
@@ -330,12 +351,12 @@ public class SkyCanvasPainter {
 		graphicsContext.setStroke(Color.RED);
 		graphicsContext.strokeOval(transfHorCircleCenterPos.getX() - diameter/2, transfHorCircleCenterPos.getY() - diameter/2, diameter, diameter);
 		graphicsContext.fill();
-	
+
 		CartesianCoordinates tempCardTextPos;
 		Point2D tempTransCardTextPos;
 		String tempText;
-	   
-		for( HorizontalCoordinates tempCoord: CARDINALPOINTS_LIST) {
+
+		for( HorizontalCoordinates tempCoord : CARDINALPOINTS_LIST) {
 			graphicsContext.setFill(Color.RED);
 			graphicsContext.setTextAlign(TextAlignment.CENTER);
 			graphicsContext.setTextBaseline(VPos.TOP);
@@ -345,7 +366,40 @@ public class SkyCanvasPainter {
 			graphicsContext.fillText(tempText, tempTransCardTextPos.getX(), tempTransCardTextPos.getY());
 		}
 	}
-
+	
+	
+	private void tracePath(ObservedSky sky, Transform transform) {
+		CartesianCoordinates actual;
+		actual = sky.pathCoordinates();
+		
+		if (first && tracePath) {
+			firstCoor = sky.pathCoordinates();
+			first = false;
+		}
+		
+		else if (!tracePath) {
+			firstCoor = sky.pathCoordinates();
+		}
+		
+		else {
+			if (tracePath) {
+				deltaXPath.add(actual.x() - firstCoor.x());
+				deltaYPath.add(actual.y() - firstCoor.y()); 
+			}
+		}
+		
+		for(int i = 0; i < deltaXPath.size(); ++i) {
+			//System.out.println("RIGEL "+deltaXPath.size());
+			//System.out.println("DELTA X "+deltaXPath.get(i));
+			//System.out.println("DELTA Y "+deltaYPath.get(i));
+			//System.out.println("Rigel actual "+actual);
+			
+			Point2D point = transform.transform(actual.x() - deltaXPath.get(i), actual.y() - deltaYPath.get(i));
+			graphicsContext.setFill(Color.RED);
+			graphicsContext.fillOval(point.getX() - 0.5, point.getY() - 0.5, 1, 1);
+		}
+	}
+	
 	/**
 	 * Computes the size of the disk of the transformed celestial object
 	 * Method used for celestial objects whose positions are stored in arrays, as it would duplicate the transform operation of the coordinates for a single celestial object
@@ -370,4 +424,5 @@ public class SkyCanvasPainter {
 
 		return transformedDistance.magnitude();
 	}
+	
 }

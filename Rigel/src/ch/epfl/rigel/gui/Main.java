@@ -23,7 +23,9 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
@@ -70,7 +72,9 @@ public final class Main extends Application {
 	//DATE TIME BEAN
 	private ZonedDateTime when;
 	private ComboBox<String> zoneIdRoll;
+	private ComboBox<String> starNamesRoll;
 	private ObjectBinding<ZoneId> boxZoneId;
+	private ObjectBinding<String> starBox;
 
 	//TIME ANIMATOR
 	private boolean play; 
@@ -92,12 +96,20 @@ public final class Main extends Application {
 	private static final String RESET_STRING = "\uf0e2";
 	private static final String PLAY_STRING = "\uf04b";
 	private static final String PAUSE_STRING = "\uf04c";
+	private static final String COG_STRING = "\uf013";
+	private static final String PEN_IDLE_STRING = "\uf303";
+	private static final String PEN_ACTIVE_STRING = "\uf304";
+	private static final String ERASER_STRING = "\uf12d";
 
 	//FILES PATH
 	private static final String STARS_PATH = "/hygdata_v3.csv";
 	private static final String AST_PATH = "/asterisms.txt";
 
 	private static final List<String> SORTED_ZONEIDS = sortedZoneIds();
+	private List<String> listStars;
+	
+	//PATH
+	private boolean trace;
 
 	/**
 	 * Sort the ID zones in natural order
@@ -132,14 +144,17 @@ public final class Main extends Application {
 
 			resetStartProcess();
 
-			//TOP CONTROL BAR
-			HBox controlBar = controlBar();
+			
 
 			//SKY PANE
 			StarCatalogue catalogue = new StarCatalogue.Builder()
 					.loadFrom(hs, HygDatabaseLoader.INSTANCE)
 					.loadFrom(ast, AsterismLoader.INSTANCE)
 					.build();
+			
+			listStars = catalogue.getStarNames();
+			
+			
 
 			canvasManager = new SkyCanvasManager(
 					catalogue,
@@ -153,6 +168,9 @@ public final class Main extends Application {
 			BorderPane root = new BorderPane(skyPane);
 			sky.widthProperty().bind(root.widthProperty());
 			sky.heightProperty().bind(root.heightProperty());
+			
+			//TOP CONTROL BAR
+			HBox controlBar = controlBar();
 
 			//BOTTOM CONTROL BAR
 			BorderPane informationBar = infoBar();
@@ -297,7 +315,7 @@ public final class Main extends Application {
 		dateTimeBean.dateProperty().bindBidirectional(datePicker.valueProperty());
 		datePicker.valueProperty().set(when.toLocalDate());
 		datePicker.setStyle("-fx-pref-width: 120");
-		
+
 		// The hour label allows us to choose an hour
 		Label hourLabel = new Label("Heure: ");
 
@@ -338,14 +356,14 @@ public final class Main extends Application {
 	private HBox timeControlBar() {
 		HBox timeBox = new HBox();
 		timeBox.setStyle("-fx-spacing: inherit;");		
-		
+
 		// The accelerator roll allows us to choose a type of accelerator
 		ComboBox<NamedTimeAccelerator> acceleratorRoll = new ComboBox<NamedTimeAccelerator>();
 		acceleratorRoll.setValue(NamedTimeAccelerator.TIMES_300);
 		List<NamedTimeAccelerator> listAccelerator = Arrays.asList(NamedTimeAccelerator.values());
 		acceleratorRoll.setItems(javafx.collections.FXCollections.observableList(listAccelerator));
 		accelerator.bind(Bindings.select(acceleratorRoll.valueProperty(), "accelerator" ));
-		
+
 		acceleratorRoll.disableProperty().bind(timeAnimator.getRunning());
 
 		try(InputStream fontStream = getClass()
@@ -355,7 +373,7 @@ public final class Main extends Application {
 			Button playPauseButton = new Button(PLAY_STRING);
 			playPauseButton.setFont(fontAwesome);
 			playPauseButton.setOnMouseClicked(e-> {
-			
+
 				if (play) {
 					unBindAllDateTimeBean();
 					timeAnimator.start();
@@ -365,6 +383,7 @@ public final class Main extends Application {
 				} else {
 					bindAllDateTimeBean();
 					timeAnimator.stop();
+					canvasManager.setTracePath(false);
 					playPauseButton.setText(PLAY_STRING);
 					play = true;
 				}
@@ -376,10 +395,56 @@ public final class Main extends Application {
 			resetButton.setOnMouseClicked(e ->{	
 				resetButtonProcess();				
 			});	
+			
+			starNamesRoll = new ComboBox<String>();
+			
+			starNamesRoll.valueProperty().set("Rigel");
+			java.util.Collections.sort(listStars);
+			starNamesRoll.getItems().addAll(listStars);
+			starNamesRoll.setStyle(" -fx-pref-width: 140;");
+			
+			starBox = Bindings.createObjectBinding(() ->  starNamesRoll.valueProperty().get(), starNamesRoll.valueProperty());
+			canvasManager.getSelectedStarProperty().bind(starBox);
+			
+			Button tracePathButton = new Button(PEN_IDLE_STRING);
+			tracePathButton.setFont(fontAwesome);
+			
+			tracePathButton.setOnMouseClicked(e -> {
+					canvasManager.setTracePath(!trace);
+					trace = !trace;
+					
+					if (trace)
+						tracePathButton.setText(PEN_ACTIVE_STRING);
+					
+					else {
+						tracePathButton.setText(PEN_IDLE_STRING);
+					}			
+			});
+			
+			Button eraserButton = new Button(ERASER_STRING);
+			eraserButton.setFont(fontAwesome);
+			
+			eraserButton.setOnMouseClicked(e -> {
+					canvasManager.setClearPath(true);
+					canvasManager.setClearPath(false);
+			});
+			
+			Button parametersButton = new Button(COG_STRING);
+			parametersButton.setFont(fontAwesome);
+			
+			parametersButton.setOnMouseClicked(e -> {
+			
+			});
 
 			resetButton.disableProperty().bind(timeAnimator.getRunning());
+			
+			Separator separator = new Separator();
+			separator.setOrientation(Orientation.VERTICAL);
+			
+			Separator separatorSec = new Separator();
+			separatorSec.setOrientation(Orientation.VERTICAL);
 
-			timeBox.getChildren().addAll(acceleratorRoll, resetButton, playPauseButton);
+			timeBox.getChildren().addAll(acceleratorRoll, resetButton, playPauseButton, separator, starNamesRoll, tracePathButton, eraserButton, separatorSec, parametersButton);
 
 			fontStream.close();		
 

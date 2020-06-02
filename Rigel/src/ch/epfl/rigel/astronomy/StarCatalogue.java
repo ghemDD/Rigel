@@ -17,6 +17,7 @@ import java.util.Set;
 public final class StarCatalogue {
 	private List<Star> stars;
 	private Map<Asterism, List<Integer>> map;
+	private List<String> starNames;
 
 	/**
 	 * StarCatalogue constructor
@@ -34,6 +35,7 @@ public final class StarCatalogue {
 
 		map = new HashMap<Asterism, List<Integer>>();
 		this.stars = List.copyOf(stars);
+		starNames = new ArrayList<String>();
 
 		//Initialization of the map linking a Star and its index in the List<Star> stars
 		//Faster access to the Star given the index than a linear search, (in order to create the map linking Asterisms and the list of indices of its stars) 
@@ -41,6 +43,10 @@ public final class StarCatalogue {
 		int i = 0;
 		for(Star star : stars) {
 			indexMap.put(star, i);
+			
+			if (star.name().charAt(0) != '?')
+				starNames.add(star.name());
+			
 			++i;
 		}
 
@@ -71,6 +77,14 @@ public final class StarCatalogue {
 	 */
 	public List<Star> stars() {
 		return stars;
+	}
+	
+	/**
+	 * Returns the names of named stars (that do not start with '?' character)
+	 * @return
+	 */
+	public List<String> getStarNames() {
+		return starNames;
 	}
 
 	/**
