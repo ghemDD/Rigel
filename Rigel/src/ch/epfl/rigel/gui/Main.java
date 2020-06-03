@@ -452,11 +452,8 @@ public final class Main extends Application {
 		            parameters.setFont(fontAwesome);
 		            parametersRoot.setLayoutY(canvasManager.canvas().getHeight()/2);
 		            parametersRoot.getChildren().add(parameters);
-		            parametersRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8); -fx-alignment: center-left;");
-		            parametersRoot.setAlignment(Pos.TOP_CENTER);
-		            parametersRoot.setSpacing(7.5);
+		            parametersRoot.setStyle("-fx-background-color: LightGray; -fx-alignment: center-left; -fx-spacing: 7.5; -fx-padding : 20px 20px 20px 20px;");
 		            
-		            parametersRoot.setPadding(new Insets(20));
 		            skyRoot.setEffect(new SepiaTone());
 		               
 		            parametersRoot.getChildren().addAll(showAsterisms, showHorizon, showStars);
@@ -464,17 +461,17 @@ public final class Main extends Application {
 		            Button confirm = new Button("Confirm");
 		            parametersRoot.getChildren().add(confirm);
   
-		            Stage popupStage = new Stage(StageStyle.TRANSPARENT);
-		            popupStage.initOwner(primaryStage);
-		            popupStage.initModality(Modality.APPLICATION_MODAL);
-		            popupStage.setScene(new Scene(parametersRoot, Color.TRANSPARENT));
+		            Stage parametersStage = new Stage(StageStyle.TRANSPARENT);
+		            parametersStage.initOwner(primaryStage);
+		            parametersStage.initModality(Modality.APPLICATION_MODAL);
+		            parametersStage.setScene(new Scene(parametersRoot, Color.TRANSPARENT));
 		            
 		            confirm.setOnAction(event -> {
 		                skyRoot.setEffect(null);
-		                popupStage.hide();
+		                parametersStage.hide();
 		            });
 		        
-		          popupStage.show();
+		          parametersStage.show();
 			});
 
 			resetButton.disableProperty().bind(timeAnimator.getRunning());

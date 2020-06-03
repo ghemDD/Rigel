@@ -79,8 +79,6 @@ public class ObservedSky {
 		this.catalogue = catalogue;
 		this.starString = starString;
 		celestialCoordinates = new HashMap<CelestialObject, CartesianCoordinates>();
-		
-		//pathCoordinates = new ArrayList<CartesianCoordinates>();
 
 		sun = SunModel.SUN.at(daysSinceJ2010, eclToEqu);
 		sunPosition = projectSingleCelestialObject(sun);
