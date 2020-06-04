@@ -12,13 +12,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
+import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
+import ch.epfl.rigel.math.Angle;
 
 /**
  * Represents the set of all celestial objects visible in the sky
@@ -47,6 +51,13 @@ public class ObservedSky {
 	private final List<CartesianCoordinates> starCartesianPositions;
 	private final double[] starPositions;
 	
+	private final double[] eclipticPositions = new double[120];
+	private final double[] equatorialPositions = new double [120];
+
+
+
+
+	
 	//PATH
 	private String starString;
 	private CartesianCoordinates selectedStarCoordinates;
@@ -72,6 +83,9 @@ public class ObservedSky {
 		double daysSinceJ2010 = Epoch.J2010.daysUntil(date);
 		eclToEqu = new EclipticToEquatorialConversion(date);
 		equToHor = new EquatorialToHorizontalConversion(date, observationPosition);
+		Function<EclipticCoordinates,HorizontalCoordinates> eclToHor =
+				  eclToEqu.andThen(equToHor);
+		
 		projection = stereo;
 		planets = new ArrayList<Planet>();
 		planetCartesianPositions = new ArrayList<>();
@@ -91,6 +105,28 @@ public class ObservedSky {
 
 		List<CelestialObject> starsCelestial = starsCelestialObjects(catalogue);
 		starPositions = projectListCelestialObject(starsCelestial, starCartesianPositions);
+		
+		for(int i = 0; i < 60; i++) {
+			EclipticCoordinates tempEclipticCoordinates = EclipticCoordinates.of(Angle.ofDeg((double) i * 6), 0.0); 
+
+			EquatorialCoordinates  tempEquatorialCoordinates = EquatorialCoordinates.of(Angle.ofDeg((double) i * 6), 0.0); 
+			HorizontalCoordinates tempFromEclipticHorCoord = eclToHor.apply(tempEclipticCoordinates);
+
+			HorizontalCoordinates tempFromEquatorialHorCoord = equToHor.apply(tempEquatorialCoordinates);
+
+			
+			CartesianCoordinates tempFromEclipticToCart = stereo.apply(tempFromEclipticHorCoord);
+
+			CartesianCoordinates tempFromEquatorialToCart = stereo.apply(tempFromEquatorialHorCoord);
+
+			
+			eclipticPositions[i * 2] = tempFromEclipticToCart.x();
+			eclipticPositions[ (i * 2) + 1 ] = tempFromEclipticToCart.y();
+			
+			equatorialPositions[i * 2] = tempFromEquatorialToCart.x();
+			equatorialPositions[ (i * 2) + 1 ] = tempFromEquatorialToCart.y();
+
+		}
 	}
 
 	/**
@@ -166,6 +202,7 @@ public class ObservedSky {
 		return planetsCelestialObject;
 	}
 
+	
 	/**
 	 * Returns the list of stars in the form of a List<CelestialObject> to be used in further method projectListCelestialObject
 	 * 
@@ -272,6 +309,15 @@ public class ObservedSky {
 	 */
 	public double[] planetPositions() {
 		return planetPositions.clone();
+	}
+	
+	
+	public double[] eclipticPositions() {
+		return eclipticPositions.clone();
+	}
+	
+	public double[] equatorialPositions() {
+		return equatorialPositions.clone();
 	}
 
 	/**

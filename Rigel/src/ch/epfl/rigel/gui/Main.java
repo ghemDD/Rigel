@@ -429,21 +429,36 @@ public final class Main extends Application {
 			
 			Button parametersButton = new Button(COG_STRING);
 			parametersButton.setFont(fontAwesome);
-			
+			//  A MODULARISER 
 			CheckBox showAsterisms = new CheckBox("Show Asterisms");
 			showAsterisms.setFont(fontAwesome);
             showAsterisms.setSelected(true);
-            canvasManager.getShowAsterismsProperty().bind(showAsterisms.selectedProperty());
+            canvasManager.showAsterismsProperty().bind(showAsterisms.selectedProperty());
             
             CheckBox showHorizon = new CheckBox("Show Horizon");
             showHorizon.setFont(fontAwesome);
             showHorizon.setSelected(true);
-            canvasManager.getShowHorizonProperty().bind(showHorizon.selectedProperty());
+            canvasManager.showHorizonProperty().bind(showHorizon.selectedProperty());
             
             CheckBox showStars = new CheckBox("Show Stars");
             showStars.setFont(fontAwesome);
             showStars.setSelected(true);
-            canvasManager.getShowStarsProperty().bind(showStars.selectedProperty());
+            canvasManager.showStarsProperty().bind(showStars.selectedProperty());
+            
+            CheckBox showGrid = new CheckBox("Show Horizontal Coordinates Grid");
+            showGrid.setFont(fontAwesome);
+            showGrid.setSelected(true);
+            canvasManager.showGridProperty().bind(showGrid.selectedProperty());
+            
+            CheckBox showEquator = new CheckBox("Show Equator");
+            showEquator.setFont(fontAwesome);
+            showEquator.setSelected(true);
+            canvasManager.showEquatorProperty().bind(showEquator.selectedProperty());
+            
+            CheckBox showEcliptic = new CheckBox("Show Ecliptic");
+            showEcliptic.setFont(fontAwesome);
+            showEcliptic.setSelected(true);
+            canvasManager.showEclipticProperty().bind(showEcliptic.selectedProperty());
 			
 			parametersButton.setOnMouseClicked(e -> {
 
@@ -456,7 +471,7 @@ public final class Main extends Application {
 		            
 		            skyRoot.setEffect(new SepiaTone());
 		               
-		            parametersRoot.getChildren().addAll(showAsterisms, showHorizon, showStars);
+		            parametersRoot.getChildren().addAll(showAsterisms, showHorizon, showStars, showGrid, showEquator, showEcliptic );
 		            
 		            Button confirm = new Button("Confirm");
 		            parametersRoot.getChildren().add(confirm);

@@ -47,6 +47,10 @@ public class SkyCanvasPainter {
 
 	private final static HorizontalCoordinates ZERO_LAT_COORDINATES = HorizontalCoordinates.of(0.0,0.0);
 	private final static List<HorizontalCoordinates> CARDINALPOINTS_LIST= new ArrayList<HorizontalCoordinates>();
+	private final static List<HorizontalCoordinates> POINTS_FOR_MERIDIAN_LIST = new ArrayList<HorizontalCoordinates>(); 
+	private final static List<HorizontalCoordinates> POINTS_FOR_PARALLELS_LIST = new ArrayList<HorizontalCoordinates>(); 
+	private final static HorizontalCoordinates ZENITH_COORDINATES = HorizontalCoordinates.ofDeg(0.0,90.0);
+
 
 	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
 	
@@ -59,7 +63,11 @@ public class SkyCanvasPainter {
 	private BooleanProperty showStars;
 	private BooleanProperty showAsterisms;
 	private BooleanProperty showHorizon;
-	
+	private BooleanProperty showGrid;
+	private BooleanProperty showEcliptic;
+	private BooleanProperty showEquator;
+
+
 
 	/**
 	 * Constructor for skyCanvasPainter
@@ -79,10 +87,22 @@ public class SkyCanvasPainter {
 		showStars = new SimpleBooleanProperty();
 		showAsterisms = new SimpleBooleanProperty();
 		showHorizon = new SimpleBooleanProperty();
+		showGrid = new SimpleBooleanProperty();
+		showEcliptic = new SimpleBooleanProperty();
+		showEquator = new SimpleBooleanProperty();
+
 
 		// we initiate the cardinal points list
 		for(int i = 0; i < 8; i++) {
 			CARDINALPOINTS_LIST.add(HorizontalCoordinates.ofDeg((double) i * 45, -0.5));
+		}
+		// we initiate the points we will use to draw parallels 
+		for(int j = 0; j < 36; j++) {
+			POINTS_FOR_MERIDIAN_LIST.add((HorizontalCoordinates.ofDeg((double) j * 10, 0.0)));
+		}
+		// we initiate the points we will use to draw meridians
+		for(int k = 1 ; k < 9; k ++) {
+			POINTS_FOR_PARALLELS_LIST.add((HorizontalCoordinates.ofDeg(0.0, (double) k * 10)));
 		}
 	}
 
@@ -114,13 +134,19 @@ public class SkyCanvasPainter {
 		drawMoon(sky, projection, transform);
 		
 		if (showHorizon.get())
-			drawHorizon(sky, projection, transform);
-		
+			drawHorizon(projection, transform);
+		if (showGrid.get())
+			drawMeridiansAndParallels(projection, transform);
+		if(showEcliptic.get())
+			drawEcliptic(sky, projection, transform);
+		if(showEquator.get())
+			drawEquator(sky, projection, transform);
+
+
 		if (clearPath) {
 			deltaXPath.clear();
 			deltaYPath.clear();
 		}
-		
 		tracePath(sky, transform);
 	}
 
@@ -343,16 +369,13 @@ public class SkyCanvasPainter {
 	/**
 	 * Draws the horizon
 	 * 
-	 * @param sky
-	 * 			Observed sky used
-	 * 
 	 * @param projection
 	 * 			Stereographic projection used
 	 * 
 	 * @param transform
 	 * 			Transform used
 	 */
-	public void drawHorizon(ObservedSky sky, StereographicProjection projection, Transform transform) {
+	public void drawHorizon(StereographicProjection projection, Transform transform) {
 
 		final CartesianCoordinates horizonCircleCenter= projection.circleCenterForParallel(ZERO_LAT_COORDINATES);
 		double horizonCircleRadius = projection.circleRadiusForParallel(ZERO_LAT_COORDINATES);
@@ -382,6 +405,113 @@ public class SkyCanvasPainter {
 			tempTransCardTextPos = transform.transform(tempCardTextPos.x(),  tempCardTextPos.y());
 			graphicsContext.fillText(tempText, tempTransCardTextPos.getX(), tempTransCardTextPos.getY());
 		}
+	}
+	
+	public void drawMeridiansAndParallels(StereographicProjection projection, Transform transform) {
+		
+		graphicsContext.setStroke(Color.GRAY);
+		graphicsContext.setLineWidth(0.5);
+		
+		for (HorizontalCoordinates tempMedCoord : POINTS_FOR_MERIDIAN_LIST) {
+			graphicsContext.beginPath();
+			final CartesianCoordinates convertedZenith = projection.apply(ZENITH_COORDINATES);
+			Point2D transformedZenith = transform.transform(convertedZenith.x(), convertedZenith.y() );
+			
+			final CartesianCoordinates convertedCoord= projection.apply(tempMedCoord);
+			Point2D transformedPoint = transform.transform(convertedCoord.x(), convertedCoord.y() );
+			
+			graphicsContext.moveTo(transformedZenith.getX(), transformedZenith.getY());
+			graphicsContext.lineTo(transformedPoint.getX(), transformedPoint.getY());
+			graphicsContext.stroke();	
+		}
+		
+		for (HorizontalCoordinates tempParCoord : POINTS_FOR_PARALLELS_LIST) {
+			final CartesianCoordinates parCircleCenter= projection.circleCenterForParallel(tempParCoord);
+			double parCircleRadius = projection.circleRadiusForParallel(tempParCoord);
+
+			Point2D parCircleCenterPos= transform.
+					transform(parCircleCenter.x(), parCircleCenter.y() );
+
+			parCircleRadius = transform.deltaTransform(0, parCircleRadius).magnitude();
+
+			double diameter = parCircleRadius*2;
+			// Here we draw the Horizon
+			graphicsContext.setLineWidth(0.5);
+			graphicsContext.setStroke(Color.GRAY);
+			graphicsContext.strokeOval(parCircleCenterPos.getX() - diameter/2, parCircleCenterPos.getY() - diameter/2, diameter, diameter);
+			graphicsContext.fill();
+			
+			
+		}
+		
+		
+		graphicsContext.closePath();
+
+		
+	}
+	
+	public void drawEcliptic(ObservedSky sky, StereographicProjection projection, Transform transform) {
+		drawBaseParallel(sky, projection, transform, sky.eclipticPositions(), Color.GREEN);
+
+	}
+	
+	public void drawEquator(ObservedSky sky, StereographicProjection projection, Transform transform) {
+		drawBaseParallel(sky, projection, transform, sky.equatorialPositions(), Color.PURPLE);
+
+	}
+	
+	
+	
+	private void drawBaseParallel(ObservedSky sky, StereographicProjection projection, Transform transform,  double[] arrayOfCoordinates, Color color ) {
+		for(int i1 = 0, i2 = 1; i2 < 60; i1++, i2++) {
+			graphicsContext.beginPath();
+
+			double tempX1 = arrayOfCoordinates[i1*2];
+			double tempY1 = arrayOfCoordinates[i1*2 + 1];
+			Point2D tempTransformed1 = transform.transform(tempX1, tempY1);
+			graphicsContext.moveTo(tempTransformed1.getX(), tempTransformed1.getY() );
+
+			double tempX2 = arrayOfCoordinates[i2*2];
+			double tempY2 = arrayOfCoordinates[i2*2 + 1];
+			Point2D tempTransformed2 = transform.transform(tempX2, tempY2);
+			graphicsContext.lineTo(tempTransformed2.getX(), tempTransformed2.getY());
+
+		
+			if(canvas.getBoundsInLocal().contains(tempTransformed1) || canvas.getBoundsInLocal().contains(tempTransformed2)) {
+				graphicsContext.setLineWidth(2);
+				graphicsContext.setStroke(color);
+				graphicsContext.stroke();
+				graphicsContext.fill();
+				graphicsContext.closePath();		
+
+			}
+			graphicsContext.closePath();		
+			
+			
+			graphicsContext.beginPath();
+
+			double xFirst = arrayOfCoordinates[0];
+			double yFirst= arrayOfCoordinates[ 1];
+			Point2D firstTransformed = transform.transform(xFirst, yFirst);
+			graphicsContext.moveTo(firstTransformed.getX(), firstTransformed.getY() );
+
+			double xSecond = arrayOfCoordinates[118];
+			double ySecond = arrayOfCoordinates[119];
+			Point2D secondTransformed = transform.transform(xSecond, ySecond);
+			graphicsContext.lineTo(secondTransformed.getX(), secondTransformed.getY());
+
+		
+			if(canvas.getBoundsInLocal().contains(firstTransformed) || canvas.getBoundsInLocal().contains(secondTransformed)) {
+				graphicsContext.setLineWidth(2);
+				graphicsContext.setStroke(color);
+				graphicsContext.stroke();
+				graphicsContext.fill();
+			}
+			
+			graphicsContext.closePath();	
+
+		}
+
 	}
 	
 	
@@ -421,7 +551,7 @@ public class SkyCanvasPainter {
 	 * 
 	 * @return
 	 */
-	public BooleanProperty getShowStarsProperty() {
+	public BooleanProperty showStarsProperty() {
 		return showStars;
 	}
 	
@@ -429,7 +559,7 @@ public class SkyCanvasPainter {
 	 * 
 	 * @return
 	 */
-	public BooleanProperty getShowAsterismsProperty() {
+	public BooleanProperty showAsterismsProperty() {
 		return showAsterisms;
 	}
 	
@@ -437,8 +567,31 @@ public class SkyCanvasPainter {
 	 * 
 	 * @return
 	 */
-	public BooleanProperty getShowHorizonProperty() {
+	public BooleanProperty showHorizonProperty() {
 		return showHorizon;
+	}
+	
+	/**
+	 * @return
+	 */
+	public BooleanProperty showGridProperty() {
+		return showGrid;
+	}
+	
+	
+	
+	/**
+	 * @return
+	 */
+	public BooleanProperty showEclipticProperty() {
+		return showEcliptic;
+	}
+
+	/**
+	 * @return
+	 */
+	public BooleanProperty showEquatorProperty() {
+		return showEquator;
 	}
 	
 	/**

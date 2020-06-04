@@ -52,6 +52,10 @@ public class SkyCanvasManager {
 	private final BooleanProperty showStars;
 	private final BooleanProperty showAsterisms;
 	private final BooleanProperty showHorizon;
+	private final BooleanProperty showGrid;
+	private final BooleanProperty showEcliptic;
+	private final BooleanProperty showEquator;
+	
 
 	//External links
 	public final ObjectBinding<Double> mouseAzDeg;
@@ -90,14 +94,23 @@ public class SkyCanvasManager {
 		SkyCanvasPainter painter = new SkyCanvasPainter(canvas);
 		selectedStar = new SimpleStringProperty();
 		
+		showGrid = new SimpleBooleanProperty();
+		
 		showStars = new SimpleBooleanProperty();
 		showAsterisms = new SimpleBooleanProperty();
 		showHorizon = new SimpleBooleanProperty();
 
+		showEcliptic = new SimpleBooleanProperty();
+		showEquator = new SimpleBooleanProperty();
+
 		//Bindings
-		painter.getShowAsterismsProperty().bind(showAsterisms);
-		painter.getShowHorizonProperty().bind(showHorizon);
-		painter.getShowStarsProperty().bind(showStars);
+	    painter.showGridProperty().bind(showGrid);
+		painter.showAsterismsProperty().bind(showAsterisms);
+		painter.showHorizonProperty().bind(showHorizon);
+		painter.showStarsProperty().bind(showStars);
+		painter.showEclipticProperty().bind(showEcliptic);
+		painter.showEquatorProperty().bind(showEquator);
+
 
 		projection = Bindings.createObjectBinding(() -> new StereographicProjection(viewingParametersBean.getCenterCoordinates()), 
 				viewingParametersBean.centerCoordinatesProperty());
@@ -288,6 +301,12 @@ public class SkyCanvasManager {
 		
 		showHorizon.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		showGrid.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		showEquator.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+		showEcliptic.addListener(
+				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
 		
 	}
 
@@ -387,15 +406,27 @@ public class SkyCanvasManager {
 		return selectedStar;
 	}
 	
-	public BooleanProperty getShowStarsProperty() {
+	public BooleanProperty showStarsProperty() {
 		return showStars;
 	}
 	
-	public BooleanProperty getShowHorizonProperty() {
+	public BooleanProperty showHorizonProperty() {
 		return showHorizon;
 	}
 	
-	public BooleanProperty getShowAsterismsProperty() {
+	public BooleanProperty showAsterismsProperty() {
 		return showAsterisms;
+	}	
+	
+	public BooleanProperty showGridProperty() {
+		return showGrid;
+	}	
+	
+	public BooleanProperty showEclipticProperty() {
+		return showEcliptic;
+	}	
+	
+	public BooleanProperty showEquatorProperty() {
+		return showEquator;
 	}	
 }
