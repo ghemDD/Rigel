@@ -407,6 +407,10 @@ public class SkyCanvasPainter {
 		}
 	}
 	
+	/** this method draws the meridians and parallels
+	 * @param projection
+	 * @param transform
+	 */
 	public void drawMeridiansAndParallels(StereographicProjection projection, Transform transform) {
 		
 		graphicsContext.setStroke(Color.GRAY);
@@ -435,7 +439,6 @@ public class SkyCanvasPainter {
 			parCircleRadius = transform.deltaTransform(0, parCircleRadius).magnitude();
 
 			double diameter = parCircleRadius*2;
-			// Here we draw the Horizon
 			graphicsContext.setLineWidth(0.5);
 			graphicsContext.setStroke(Color.GRAY);
 			graphicsContext.strokeOval(parCircleCenterPos.getX() - diameter/2, parCircleCenterPos.getY() - diameter/2, diameter, diameter);
@@ -450,11 +453,21 @@ public class SkyCanvasPainter {
 		
 	}
 	
+	/** draws ecliptoc
+	 * @param sky
+	 * @param projection
+	 * @param transform
+	 */
 	public void drawEcliptic(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		drawBaseParallel(sky, projection, transform, sky.eclipticPositions(), Color.GREEN); 
 
 	}
 	
+	/** draws the equator
+	 * @param sky
+	 * @param projection
+	 * @param transform
+	 */
 	public void drawEquator(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		drawBaseParallel(sky, projection, transform, sky.equatorialPositions(), Color.PURPLE);
 
@@ -462,20 +475,26 @@ public class SkyCanvasPainter {
 	
 	
 	
+	/** This method allows to draw a base parallel for a coordinates system for a given color and different base coordinates
+	 * used for the equator or the  ecliptic
+	 * @param sky
+	 * @param projection
+	 * @param transform
+	 * @param arrayOfCoordinates
+	 * @param color
+	 */
 	private void drawBaseParallel(ObservedSky sky, StereographicProjection projection, Transform transform,  double[] arrayOfCoordinates, Color color ) {
-		for(int i1 = 0, i2 = 1; i2 < 60; i1++, i2++) {
+		for(int i1 = 0, i2 = 1; i2 < 180; i1++, i2++) {
 			graphicsContext.beginPath();
-
 			double tempX1 = arrayOfCoordinates[i1*2];
 			double tempY1 = arrayOfCoordinates[i1*2 + 1];
 			Point2D tempTransformed1 = transform.transform(tempX1, tempY1);
 			graphicsContext.moveTo(tempTransformed1.getX(), tempTransformed1.getY() );
-
+			
 			double tempX2 = arrayOfCoordinates[i2*2];
 			double tempY2 = arrayOfCoordinates[i2*2 + 1];
 			Point2D tempTransformed2 = transform.transform(tempX2, tempY2);
 			graphicsContext.lineTo(tempTransformed2.getX(), tempTransformed2.getY());
-
 		
 			if(canvas.getBoundsInLocal().contains(tempTransformed1) || canvas.getBoundsInLocal().contains(tempTransformed2)) {
 				graphicsContext.setLineWidth(2);
@@ -485,32 +504,30 @@ public class SkyCanvasPainter {
 				graphicsContext.closePath();		
 
 			}
-			graphicsContext.closePath();		
-			
-			
-			graphicsContext.beginPath();
+		}
+		graphicsContext.closePath();		
+		graphicsContext.beginPath();
 
-			double xFirst = arrayOfCoordinates[0];
-			double yFirst= arrayOfCoordinates[ 1];
-			Point2D firstTransformed = transform.transform(xFirst, yFirst);
-			graphicsContext.moveTo(firstTransformed.getX(), firstTransformed.getY() );
+		double xFirst = arrayOfCoordinates[0];
+		double yFirst= arrayOfCoordinates[1];
+		Point2D firstTransformed = transform.transform(xFirst, yFirst);
+		graphicsContext.moveTo(firstTransformed.getX(), firstTransformed.getY() );
+		double xSecond = arrayOfCoordinates[358];
+		double ySecond = arrayOfCoordinates[359];
+		Point2D secondTransformed = transform.transform(xSecond, ySecond);
+		graphicsContext.lineTo(secondTransformed.getX(), secondTransformed.getY());
 
-			double xSecond = arrayOfCoordinates[118];
-			double ySecond = arrayOfCoordinates[119];
-			Point2D secondTransformed = transform.transform(xSecond, ySecond);
-			graphicsContext.lineTo(secondTransformed.getX(), secondTransformed.getY());
+	
+		if(canvas.getBoundsInLocal().contains(firstTransformed) || canvas.getBoundsInLocal().contains(secondTransformed)) {
+			graphicsContext.setLineWidth(2);
+			graphicsContext.setStroke(color);
+			graphicsContext.stroke();
+			graphicsContext.fill();
+		}
+		
+		graphicsContext.closePath();	
 
 		
-			if(canvas.getBoundsInLocal().contains(firstTransformed) || canvas.getBoundsInLocal().contains(secondTransformed)) {
-				graphicsContext.setLineWidth(2);
-				graphicsContext.setStroke(color);
-				graphicsContext.stroke();
-				graphicsContext.fill();
-			}
-			
-			graphicsContext.closePath();	
-
-		}
 
 	}
 	

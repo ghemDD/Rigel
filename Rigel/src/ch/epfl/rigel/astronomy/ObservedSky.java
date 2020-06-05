@@ -51,8 +51,8 @@ public class ObservedSky {
 	private final List<CartesianCoordinates> starCartesianPositions;
 	private final double[] starPositions;
 	
-	private final double[] eclipticPositions = new double[120];
-	private final double[] equatorialPositions = new double [120];
+	private final double[] eclipticPositions = new double[360];
+	private final double[] equatorialPositions = new double [360];
 
 
 
@@ -106,14 +106,14 @@ public class ObservedSky {
 		List<CelestialObject> starsCelestial = starsCelestialObjects(catalogue);
 		starPositions = projectListCelestialObject(starsCelestial, starCartesianPositions);
 		
-		for(int i = 0; i < 60; i++) {
-			EclipticCoordinates tempEclipticCoordinates = EclipticCoordinates.of(Angle.ofDeg((double) i * 6), 0.0); 
+		// HERE WE INITIATE THE ECLIPTIC AND EQUATOR POSITIONS ARRAYS 
+		for(int i = 0; i < 180; i++) {
+			EclipticCoordinates tempEclipticCoordinates = EclipticCoordinates.of(Angle.ofDeg((double) i *2 ), 0.0); 
 
-			EquatorialCoordinates  tempEquatorialCoordinates = EquatorialCoordinates.of(Angle.ofDeg((double) i * 6), 0.0); 
+			EquatorialCoordinates  tempEquatorialCoordinates = EquatorialCoordinates.of(Angle.ofDeg((double) i *2), 0.0); 
 			HorizontalCoordinates tempFromEclipticHorCoord = eclToHor.apply(tempEclipticCoordinates);
 
 			HorizontalCoordinates tempFromEquatorialHorCoord = equToHor.apply(tempEquatorialCoordinates);
-
 			
 			CartesianCoordinates tempFromEclipticToCart = stereo.apply(tempFromEclipticHorCoord);
 
@@ -396,4 +396,6 @@ public class ObservedSky {
 	public List<Integer> asterismIndices(Asterism asterism) {
 		return catalogue.asterismIndices(asterism);
 	}
+	
+	
 }
