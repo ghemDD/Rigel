@@ -412,7 +412,7 @@ public class SkyCanvasPainter {
 		}
 	}
 
-	/** This method draws the meridians and parallels
+	/** This method draws the meridians and parallels for the horizontal coordinates grid
 	 * 
 	 * @param projection
 	 * 			Stereographic projection used
@@ -424,7 +424,7 @@ public class SkyCanvasPainter {
 
 		graphicsContext.setStroke(Color.GRAY);
 		graphicsContext.setLineWidth(0.5);
-
+		// draw the meridians
 		for (HorizontalCoordinates tempMedCoord : POINTS_FOR_MERIDIAN_LIST) {
 			graphicsContext.beginPath();
 			final CartesianCoordinates convertedZenith = projection.apply(ZENITH_COORDINATES);
@@ -437,7 +437,7 @@ public class SkyCanvasPainter {
 			graphicsContext.lineTo(transformedPoint.getX(), transformedPoint.getY());
 			graphicsContext.stroke();	
 		}
-
+		// draw the parallels
 		for (HorizontalCoordinates tempParCoord : POINTS_FOR_PARALLELS_LIST) {
 			final CartesianCoordinates parCircleCenter= projection.circleCenterForParallel(tempParCoord);
 			double parCircleRadius = projection.circleRadiusForParallel(tempParCoord);
@@ -488,7 +488,7 @@ public class SkyCanvasPainter {
 	}
 
 
-	/** This method allows to draw a base parallel for a coordinates system for a given color and different base coordinates
+	/** This method allows to draw a base parallel for a coordinates system for a given color and different base coordinates (180 positions),
 	 * used for the equator or the  ecliptic
 	 * 
 	 * @param sky
@@ -582,7 +582,7 @@ public class SkyCanvasPainter {
 
 		for(int i = 0; i < deltaXPath.size(); ++i) {
 			Point2D point = transform.transform(actual.x() - deltaXPath.get(i), actual.y() - deltaYPath.get(i));
-			graphicsContext.setFill(Color.RED);
+			graphicsContext.setFill(Color.ORANGE);
 			graphicsContext.fillOval(point.getX() - PATH_SIZE/2, point.getY() - PATH_SIZE/2, PATH_SIZE, PATH_SIZE);
 		}
 	}
