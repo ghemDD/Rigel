@@ -188,37 +188,40 @@ public class SkyCanvasManager {
 			double lon = viewingParametersBean.getCenterLonDeg();
 			double alt = viewingParametersBean.getCenterAltDeg();
 
-			switch(event.getCode()) {
-			case LEFT :
-				lon -= LON_INC;
-				lon = LON_INT.reduce(lon);
+			if (!tracePath.get()) {
 
-				viewingParametersBean.setCenterLonDeg(lon);
-				break;
+				switch(event.getCode()) {
+				case LEFT :
+					lon -= LON_INC;
+					lon = LON_INT.reduce(lon);
 
-			case RIGHT :
-				lon += LON_INC;
-				lon = LON_INT.reduce(lon);
+					viewingParametersBean.setCenterLonDeg(lon);
+					break;
 
-				viewingParametersBean.setCenterLonDeg(lon);
-				break;
+				case RIGHT :
+					lon += LON_INC;
+					lon = LON_INT.reduce(lon);
 
-			case UP : 
-				alt += ALT_INC;
-				alt = ALT_INT.clip(alt);
+					viewingParametersBean.setCenterLonDeg(lon);
+					break;
 
-				viewingParametersBean.setCenterAltDeg(alt);
-				break;
+				case UP : 
+					alt += ALT_INC;
+					alt = ALT_INT.clip(alt);
 
-			case DOWN : 
-				alt -= ALT_INC;
-				alt = ALT_INT.clip(alt);
+					viewingParametersBean.setCenterAltDeg(alt);
+					break;
 
-				viewingParametersBean.setCenterAltDeg(alt);
-				break;
+				case DOWN : 
+					alt -= ALT_INC;
+					alt = ALT_INT.clip(alt);
 
-			default:
-				break;
+					viewingParametersBean.setCenterAltDeg(alt);
+					break;
+
+				default:
+					break;
+				}
 			}
 
 			event.consume();
@@ -252,20 +255,21 @@ public class SkyCanvasManager {
 			double lon = viewingParametersBean.getCenterLonDeg();
 			double alt = viewingParametersBean.getCenterAltDeg();
 			
-			double deltaX = mousePositionOnPressed.get().x() - event.getX();
-			double deltaY = mousePositionOnPressed.get().y() - event.getY();
-			
-			lon += deltaX/2;
-			lon = LON_INT.reduce(lon);
-			
-			alt += -deltaY/2;
-			alt = ALT_INT.clip(alt);
-			
-			mousePositionOnPressed.set(CartesianCoordinates.of(event.getX(), event.getY()));
-			viewingParametersBean.setCenterAltDeg(alt);
-			viewingParametersBean.setCenterLonDeg(lon);
-			setTracePath(false);
-			
+			if (!tracePath.get()) {
+				double deltaX = mousePositionOnPressed.get().x() - event.getX();
+				double deltaY = mousePositionOnPressed.get().y() - event.getY();
+
+				lon += deltaX/2;
+				lon = LON_INT.reduce(lon);
+
+				alt += -deltaY/2;
+				alt = ALT_INT.clip(alt);
+
+				mousePositionOnPressed.set(CartesianCoordinates.of(event.getX(), event.getY()));
+				viewingParametersBean.setCenterAltDeg(alt);
+				viewingParametersBean.setCenterLonDeg(lon);
+			}
+
 			event.consume();
 		});
 		
@@ -405,6 +409,7 @@ public class SkyCanvasManager {
 	public StringProperty getSelectedStarProperty() {
 		return selectedStar;
 	}
+	
 	
 	public BooleanProperty showStarsProperty() {
 		return showStars;

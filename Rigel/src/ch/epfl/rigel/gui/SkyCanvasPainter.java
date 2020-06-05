@@ -144,6 +144,7 @@ public class SkyCanvasPainter {
 
 
 		if (clearPath) {
+			firstCoor = sky.pathCoordinates();
 			deltaXPath.clear();
 			deltaYPath.clear();
 		}
@@ -544,7 +545,7 @@ public class SkyCanvasPainter {
 			
 			else {
 				deltaXPath.add(actual.x() - firstCoor.x());
-				deltaYPath.add(actual.y() - firstCoor.y()); 
+				deltaYPath.add(actual.y() - firstCoor.y());
 			}
 		}
 		

@@ -410,8 +410,9 @@ public final class Main extends Application {
 					canvasManager.setTracePath(!trace);
 					trace = !trace;
 					
-					if (trace)
+					if (trace) {
 						tracePathButton.setText(PEN_ACTIVE_STRING);
+					}	
 					
 					else {
 						tracePathButton.setText(PEN_IDLE_STRING);
