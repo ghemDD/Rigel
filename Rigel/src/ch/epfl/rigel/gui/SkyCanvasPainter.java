@@ -451,7 +451,7 @@ public class SkyCanvasPainter {
 	}
 	
 	public void drawEcliptic(ObservedSky sky, StereographicProjection projection, Transform transform) {
-		drawBaseParallel(sky, projection, transform, sky.eclipticPositions(), Color.GREEN);
+		drawBaseParallel(sky, projection, transform, sky.eclipticPositions(), Color.GREEN); 
 
 	}
 	
@@ -519,28 +519,23 @@ public class SkyCanvasPainter {
 		CartesianCoordinates actual;
 		actual = sky.pathCoordinates();
 		
-		if (first && tracePath) {
-			firstCoor = sky.pathCoordinates();
-			first = false;
-		}
-		
-		else if (!tracePath) {
-			firstCoor = sky.pathCoordinates();
-		}
-		
-		else {
-			if (tracePath) {
+		if (tracePath) {
+			if (first) {
+				firstCoor = sky.pathCoordinates();
+				first = false;
+			}
+			
+			else {
 				deltaXPath.add(actual.x() - firstCoor.x());
 				deltaYPath.add(actual.y() - firstCoor.y()); 
 			}
 		}
 		
+		else {
+			firstCoor = sky.pathCoordinates();
+		}
+		
 		for(int i = 0; i < deltaXPath.size(); ++i) {
-			//System.out.println("RIGEL "+deltaXPath.size());
-			//System.out.println("DELTA X "+deltaXPath.get(i));
-			//System.out.println("DELTA Y "+deltaYPath.get(i));
-			//System.out.println("Rigel actual "+actual);
-			
 			Point2D point = transform.transform(actual.x() - deltaXPath.get(i), actual.y() - deltaYPath.get(i));
 			graphicsContext.setFill(Color.RED);
 			graphicsContext.fillOval(point.getX() - 0.5, point.getY() - 0.5, 1, 1);
@@ -577,7 +572,6 @@ public class SkyCanvasPainter {
 	public BooleanProperty showGridProperty() {
 		return showGrid;
 	}
-	
 	
 	
 	/**

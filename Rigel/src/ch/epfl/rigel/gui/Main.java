@@ -381,7 +381,6 @@ public final class Main extends Application {
 				} else {
 					bindAllDateTimeBean();
 					timeAnimator.stop();
-					canvasManager.setTracePath(false);
 					playPauseButton.setText(PLAY_STRING);
 					play = true;
 				}
@@ -462,10 +461,10 @@ public final class Main extends Application {
 			
 			parametersButton.setOnMouseClicked(e -> {
 
-		            VBox parametersRoot = new VBox(5);
+		            VBox parametersRoot = new VBox();
 		            Label parameters = new Label("Parameters");
 		            parameters.setFont(fontAwesome);
-		            parametersRoot.setLayoutY(canvasManager.canvas().getHeight()/2);
+		            parametersRoot.setLayoutY(canvasManager.canvas().getHeight()/2 - 50);
 		            parametersRoot.getChildren().add(parameters);
 		            parametersRoot.setStyle("-fx-background-color: LightGray; -fx-alignment: center-left; -fx-spacing: 7.5; -fx-padding : 20px 20px 20px 20px;");
 		            
@@ -481,7 +480,7 @@ public final class Main extends Application {
 		            parametersStage.initModality(Modality.APPLICATION_MODAL);
 		            parametersStage.setScene(new Scene(parametersRoot, Color.TRANSPARENT));
 		            
-		            confirm.setOnAction(event -> {
+		            confirm.setOnMouseClicked(event -> {
 		                skyRoot.setEffect(null);
 		                parametersStage.hide();
 		            });

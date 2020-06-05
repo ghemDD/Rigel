@@ -47,7 +47,7 @@ public final class DrawSky extends Application {
 	      StereographicProjection projection =
 		new StereographicProjection(projCenter);
 	      ObservedSky sky =
-		new ObservedSky(when, where, projection, catalogue);
+		new ObservedSky(when, where, projection, catalogue, null);
 
 	      Canvas canvas =
 		new Canvas(800, 600);
@@ -57,7 +57,7 @@ public final class DrawSky extends Application {
 	      SkyCanvasPainter painter =
 		new SkyCanvasPainter(canvas);
 
-	      painter.drawSky(sky, projection, planeToCanvas);
+	      painter.drawSky(sky, projection, planeToCanvas, false, false);
 	      //painter.drawSun(sky, projection, planeToCanvas);
 
 	      WritableImage fxImage =
