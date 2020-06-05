@@ -22,6 +22,7 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Orientation;
@@ -428,52 +429,33 @@ public final class Main extends Application {
 
 			Button parametersButton = new Button(COG_STRING);
 			parametersButton.setFont(fontAwesome);
-			//  A MODULARISER 
-			CheckBox showAsterisms = new CheckBox("Show Asterisms");
-			showAsterisms.setFont(fontAwesome);
-			showAsterisms.setSelected(true);
-			canvasManager.showAsterismsProperty().bind(showAsterisms.selectedProperty());
 
-			CheckBox showHorizon = new CheckBox("Show Horizon");
-			showHorizon.setFont(fontAwesome);
-			showHorizon.setSelected(true);
-			canvasManager.showHorizonProperty().bind(showHorizon.selectedProperty());
+			CheckBox showAsterisms = tickBoxMaker("Show Asterims", fontAwesome, true, canvasManager.showAsterismsProperty());
 
-			CheckBox showStars = new CheckBox("Show Stars");
-			showStars.setFont(fontAwesome);
-			showStars.setSelected(true);
-			canvasManager.showStarsProperty().bind(showStars.selectedProperty());
+			CheckBox showHorizon = tickBoxMaker("Show Horizon", fontAwesome, true, canvasManager.showHorizonProperty());
 
-			CheckBox showGrid = new CheckBox("Show Horizontal Coordinates Grid");
-			showGrid.setFont(fontAwesome);
-			showGrid.setSelected(true);
-			canvasManager.showGridProperty().bind(showGrid.selectedProperty());
+			CheckBox showStars = tickBoxMaker("Show Stars", fontAwesome, true, canvasManager.showStarsProperty());
 
-			CheckBox showEquator = new CheckBox("Show Equator");
-			showEquator.setFont(fontAwesome);
-			showEquator.setSelected(true);
-			canvasManager.showEquatorProperty().bind(showEquator.selectedProperty());
+			CheckBox showGrid = tickBoxMaker("Show Horizontal Coordinates Grid", fontAwesome, false, canvasManager.showGridProperty());
 
-			CheckBox showEcliptic = new CheckBox("Show Ecliptic");
-			showEcliptic.setFont(fontAwesome);
-			showEcliptic.setSelected(true);
-			canvasManager.showEclipticProperty().bind(showEcliptic.selectedProperty());
+			CheckBox showEquator = tickBoxMaker("Show Equator", fontAwesome, true, canvasManager.showEquatorProperty());
+
+			CheckBox showEcliptic = tickBoxMaker("Show Ecliptic", fontAwesome, true, canvasManager.showEclipticProperty());
 
 			parametersButton.setOnMouseClicked(e -> {
 
+				skyRoot.setEffect(new SepiaTone());
 				VBox parametersRoot = new VBox();
-				Label parameters = new Label("Parameters");
-				parameters.setFont(fontAwesome);
 				parametersRoot.setLayoutY(canvasManager.canvas().getHeight()/2 - 50);
-				parametersRoot.getChildren().add(parameters);
 				parametersRoot.setStyle("-fx-background-color: LightGray; -fx-alignment: center-left; -fx-spacing: 7.5; -fx-padding : 20px 20px 20px 20px;");
 
-				skyRoot.setEffect(new SepiaTone());
-
-				parametersRoot.getChildren().addAll(showAsterisms, showHorizon, showStars, showGrid, showEquator, showEcliptic );
+				Label parameters = new Label("Parameters");
+				parameters.setFont(fontAwesome);
 
 				Button confirm = new Button("Confirm");
-				parametersRoot.getChildren().add(confirm);
+				confirm.setFont(fontAwesome);
+
+				parametersRoot.getChildren().addAll(parameters, showAsterisms, showHorizon, showStars, showGrid, showEquator, showEcliptic, confirm);
 
 				Stage parametersStage = new Stage(StageStyle.TRANSPARENT);
 				parametersStage.initOwner(primaryStage);
@@ -505,6 +487,32 @@ public final class Main extends Application {
 		}		
 
 		return timeBox;
+	}
+
+	/**
+	 * Instantiates a CheckBox corresponding the parameter described by its label (String), and its property in the class skyCanvasManager
+	 * 
+	 * @param label
+	 * 			Label of the parameter
+	 * 
+	 * @param font
+	 * 			Font of the CheckBox
+	 * 
+	 * @param initValue
+	 * 			Defines if the object is drawn at the start of the application
+	 * 
+	 * @param selectedProperty
+	 * 			Property of the parameter in skyCanvasManager
+	 * 
+	 * @return CheckBox corresponding the parameter
+	 */
+	private CheckBox tickBoxMaker(String label, Font font, boolean initValue, BooleanProperty selectedProperty) {
+		CheckBox showProperty = new CheckBox(label);
+		showProperty.setFont(font);
+		showProperty.setSelected(initValue);
+		selectedProperty.bind(showProperty.selectedProperty());
+
+		return showProperty;
 	}
 
 	/**
