@@ -43,10 +43,10 @@ public final class StarCatalogue {
 		int i = 0;
 		for(Star star : stars) {
 			indexMap.put(star, i);
-			
+
 			if (star.name().charAt(0) != '?')
 				starNames.add(star.name());
-			
+
 			++i;
 		}
 
@@ -78,10 +78,11 @@ public final class StarCatalogue {
 	public List<Star> stars() {
 		return stars;
 	}
-	
+
 	/**
 	 * Returns the names of named stars (that do not start with '?' character)
-	 * @return
+	 * 
+	 * @return names of named stars (that do not start with '?' character)
 	 */
 	public List<String> getStarNames() {
 		return starNames;

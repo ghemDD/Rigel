@@ -48,14 +48,14 @@ public class SkyCanvasManager {
 	private final BooleanProperty tracePath;
 	private final BooleanProperty clearPath;
 	private final StringProperty selectedStar;
-	
+
 	private final BooleanProperty showStars;
 	private final BooleanProperty showAsterisms;
 	private final BooleanProperty showHorizon;
 	private final BooleanProperty showGrid;
 	private final BooleanProperty showEcliptic;
 	private final BooleanProperty showEquator;
-	
+
 
 	//External links
 	public final ObjectBinding<Double> mouseAzDeg;
@@ -93,9 +93,9 @@ public class SkyCanvasManager {
 		canvas = new Canvas();
 		SkyCanvasPainter painter = new SkyCanvasPainter(canvas);
 		selectedStar = new SimpleStringProperty();
-		
+
 		showGrid = new SimpleBooleanProperty();
-		
+
 		showStars = new SimpleBooleanProperty();
 		showAsterisms = new SimpleBooleanProperty();
 		showHorizon = new SimpleBooleanProperty();
@@ -104,7 +104,7 @@ public class SkyCanvasManager {
 		showEquator = new SimpleBooleanProperty();
 
 		//Bindings
-	    painter.showGridProperty().bind(showGrid);
+		painter.showGridProperty().bind(showGrid);
 		painter.showAsterismsProperty().bind(showAsterisms);
 		painter.showHorizonProperty().bind(showHorizon);
 		painter.showStarsProperty().bind(showStars);
@@ -134,7 +134,7 @@ public class SkyCanvasManager {
 		//Initialization Mouse Position
 		mousePosition = new SimpleObjectProperty<CartesianCoordinates>();
 		mousePosition.set(CartesianCoordinates.of(0, 0));
-		
+
 		tracePath = new SimpleBooleanProperty();
 		clearPath = new SimpleBooleanProperty();
 
@@ -230,11 +230,11 @@ public class SkyCanvasManager {
 		//Listeners mouse
 		mousePositionOnPressed = new SimpleObjectProperty<CartesianCoordinates>();
 		mousePositionOnPressed.set(CartesianCoordinates.of(0, 0));
-		
+
 		canvas.setOnMousePressed((event) -> {
 			if (event.isPrimaryButtonDown())
 				canvas.requestFocus();
-			
+
 			//Bonus
 			mousePositionOnPressed.set(CartesianCoordinates.of(event.getX(), event.getY()));
 		});
@@ -245,16 +245,16 @@ public class SkyCanvasManager {
 
 			mousePosition.set(CartesianCoordinates.of(x, y));
 		});
-		
+
 
 		/**
 		 * Bonus 
 		 */
 		canvas.setOnMouseDragged((event) -> {
-			
+
 			double lon = viewingParametersBean.getCenterLonDeg();
 			double alt = viewingParametersBean.getCenterAltDeg();
-			
+
 			if (!tracePath.get()) {
 				double deltaX = mousePositionOnPressed.get().x() - event.getX();
 				double deltaY = mousePositionOnPressed.get().y() - event.getY();
@@ -272,7 +272,7 @@ public class SkyCanvasManager {
 
 			event.consume();
 		});
-		
+
 		/**
 		 * 
 		 */
@@ -290,28 +290,31 @@ public class SkyCanvasManager {
 		//Listeners painters
 		planeToCanvas.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
-		
+
 		observedSky.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
-		
+
 		clearPath.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
-		
+
 		showStars.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
-		
+
 		showAsterisms.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
-		
+
 		showHorizon.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+
 		showGrid.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+
 		showEquator.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
+
 		showEcliptic.addListener(
 				(o) -> painter.drawSky(observedSky.get(), projection.get(), planeToCanvas.get(), tracePath.get(), clearPath.get()));
-		
+
 	}
 
 	/**
@@ -356,81 +359,117 @@ public class SkyCanvasManager {
 	 * @return mouse altitude property
 	 */
 	public ObjectBinding<Double> mouseAltDegProperty() {return mouseAltDeg;}
-	
-	
+
+
 	/**
+	 * Getter for the value of trace path property
 	 * 
-	 * @return
+	 * @return value of trace path property
 	 */
 	public boolean getTracePath() {return tracePath.get();}
-	
+
 	/**
+	 * Setter for trace path property
 	 * 
-	 * @param value
+	 * @param value to be set in the property
 	 */
 	public void setTracePath(boolean value) {
 		tracePath.set(value);
 	}
-	
+
 	/**
+	 * Getter for the value of clear path property
 	 * 
-	 * @return
+	 * @return value of clear path property
 	 */
 	public boolean getClearPath() {return clearPath.get();}
-	
+
 	/**
+	 * Setter for clear path property
 	 * 
-	 * @param value
+	 * @param value to be set in the property
 	 */
 	public void setClearPath(boolean value) {
 		clearPath.set(value);
 	}
-	
+
 	/**
+	 * Getter for the value of the selected star property
 	 * 
-	 * @return
+	 * @return value of the selected star property
 	 */
 	public String getSelectedStar() {
 		return selectedStar.get();
 	}
-	
+
 	/**
+	 * Setter for the selected star property
 	 * 
-	 * @param value
+	 * @param value to be set in the property
 	 */
 	public void setSelectedStar(String value) {
 		selectedStar.set(value);
 	}
-	
+
 	/**
+	 * Getter for the selected star property
 	 * 
-	 * @return
+	 * @return selected star property
 	 */
 	public StringProperty getSelectedStarProperty() {
 		return selectedStar;
 	}
-	
-	
+
+	/**
+	 * Getter for the value of the show stars property
+	 * 
+	 * @return value of the show stars property
+	 */
 	public BooleanProperty showStarsProperty() {
 		return showStars;
 	}
-	
+
+	/**
+	 * Getter for the value of the show horizon property
+	 * 
+	 * @return value of the show horizon property
+	 */
 	public BooleanProperty showHorizonProperty() {
 		return showHorizon;
 	}
-	
+
+	/**
+	 * Getter for the value of the show asterisms property
+	 * 
+	 * @return value of the show asterisms property
+	 */
 	public BooleanProperty showAsterismsProperty() {
 		return showAsterisms;
 	}	
-	
+
+	/**
+	 * Getter for the value of the show grid property
+	 * 
+	 * @return value of the show grid property
+	 */
 	public BooleanProperty showGridProperty() {
 		return showGrid;
 	}	
-	
+
+	/**
+	 * Getter for the value of the show ecliptic property
+	 * 
+	 * @return value of the show ecliptic property
+	 */
 	public BooleanProperty showEclipticProperty() {
 		return showEcliptic;
 	}	
-	
+
+	/**
+	 * Getter for the value of the show equator property
+	 * 
+	 * @return value of the show equator property
+	 */
 	public BooleanProperty showEquatorProperty() {
 		return showEquator;
 	}	

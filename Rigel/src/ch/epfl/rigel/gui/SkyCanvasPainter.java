@@ -53,21 +53,22 @@ public class SkyCanvasPainter {
 
 
 	private static final ClosedInterval MAGNITUDE_INT = ClosedInterval.of(-2, 5);
-	
+
+	//Path
 	private boolean tracePath;
 	private List<Double> deltaXPath;
 	private List<Double> deltaYPath;
 	private CartesianCoordinates firstCoor;
 	private boolean first;
-	
+	private static final double PATH_SIZE = 1.0;
+
+	//Show properties
 	private BooleanProperty showStars;
 	private BooleanProperty showAsterisms;
 	private BooleanProperty showHorizon;
 	private BooleanProperty showGrid;
 	private BooleanProperty showEcliptic;
 	private BooleanProperty showEquator;
-
-
 
 	/**
 	 * Constructor for skyCanvasPainter
@@ -83,7 +84,7 @@ public class SkyCanvasPainter {
 		deltaXPath = new ArrayList<Double>();
 		deltaYPath = new ArrayList<Double>();
 		first = true;
-		
+
 		showStars = new SimpleBooleanProperty();
 		showAsterisms = new SimpleBooleanProperty();
 		showHorizon = new SimpleBooleanProperty();
@@ -122,23 +123,26 @@ public class SkyCanvasPainter {
 		clear();
 		this.tracePath = tracePath;
 		transformStars(sky, projection, transform);
-		
+
 		if (showAsterisms.get())
 			drawAsterisms(sky, projection, transform);
-		
+
 		if (showStars.get())
 			drawStars(sky, projection, transform);
-		
+
 		drawPlanets(sky, projection, transform);
 		drawSun(sky, projection, transform);
 		drawMoon(sky, projection, transform);
-		
+
 		if (showHorizon.get())
 			drawHorizon(projection, transform);
+
 		if (showGrid.get())
 			drawMeridiansAndParallels(projection, transform);
+
 		if(showEcliptic.get())
 			drawEcliptic(sky, projection, transform);
+
 		if(showEquator.get())
 			drawEquator(sky, projection, transform);
 
@@ -355,14 +359,14 @@ public class SkyCanvasPainter {
 		starPoints = new double[sky.starPositions().length];
 		transform.transform2DPoints(sky.starPositions(), 0, starPoints, 0, starPoints.length/2);
 		int y = 0;
-		
+
 
 		for(Star star : sky.stars()) {
 			double diameter = transformedDiskSize(projection, star.magnitude(), transform);
 			starTransformed.put(star, CartesianCoordinates.of(starPoints[y], starPoints[y+1]));
-			
+
 			starRadius.put(star, diameter);
-				
+
 			y+=2;
 		}
 	}
@@ -407,29 +411,33 @@ public class SkyCanvasPainter {
 			graphicsContext.fillText(tempText, tempTransCardTextPos.getX(), tempTransCardTextPos.getY());
 		}
 	}
-	
-	/** this method draws the meridians and parallels
+
+	/** This method draws the meridians and parallels
+	 * 
 	 * @param projection
+	 * 			Stereographic projection used
+	 * 
 	 * @param transform
+	 * 			Transformed used 
 	 */
 	public void drawMeridiansAndParallels(StereographicProjection projection, Transform transform) {
-		
+
 		graphicsContext.setStroke(Color.GRAY);
 		graphicsContext.setLineWidth(0.5);
-		
+
 		for (HorizontalCoordinates tempMedCoord : POINTS_FOR_MERIDIAN_LIST) {
 			graphicsContext.beginPath();
 			final CartesianCoordinates convertedZenith = projection.apply(ZENITH_COORDINATES);
 			Point2D transformedZenith = transform.transform(convertedZenith.x(), convertedZenith.y() );
-			
+
 			final CartesianCoordinates convertedCoord= projection.apply(tempMedCoord);
 			Point2D transformedPoint = transform.transform(convertedCoord.x(), convertedCoord.y() );
-			
+
 			graphicsContext.moveTo(transformedZenith.getX(), transformedZenith.getY());
 			graphicsContext.lineTo(transformedPoint.getX(), transformedPoint.getY());
 			graphicsContext.stroke();	
 		}
-		
+
 		for (HorizontalCoordinates tempParCoord : POINTS_FOR_PARALLELS_LIST) {
 			final CartesianCoordinates parCircleCenter= projection.circleCenterForParallel(tempParCoord);
 			double parCircleRadius = projection.circleRadiusForParallel(tempParCoord);
@@ -443,46 +451,60 @@ public class SkyCanvasPainter {
 			graphicsContext.setLineWidth(0.5);
 			graphicsContext.setStroke(Color.GRAY);
 			graphicsContext.strokeOval(parCircleCenterPos.getX() - diameter/2, parCircleCenterPos.getY() - diameter/2, diameter, diameter);
-			graphicsContext.fill();
-			
-			
+			graphicsContext.fill();	
 		}
-		
-		
-		graphicsContext.closePath();
 
-		
+		graphicsContext.closePath();
 	}
-	
-	/** draws ecliptoc
+
+	/** Draws ecliptic
+	 * 
 	 * @param sky
+	 * 			Observed sky
+	 * 
 	 * @param projection
+	 * 			Stereographic projection
+	 * 
 	 * @param transform
+	 * 			Transform used
 	 */
 	public void drawEcliptic(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		drawBaseParallel(sky, projection, transform, sky.eclipticPositions(), Color.GREEN); 
-
 	}
-	
-	/** draws the equator
+
+	/** Draws the equator
+	 * 
 	 * @param sky
+	 * 			Observed sky
+	 * 
 	 * @param projection
+	 * 			Stereographic projection
+	 * 
 	 * @param transform
+	 * 			Transform used
 	 */
 	public void drawEquator(ObservedSky sky, StereographicProjection projection, Transform transform) {
 		drawBaseParallel(sky, projection, transform, sky.equatorialPositions(), Color.PURPLE);
-
 	}
-	
-	
-	
+
+
 	/** This method allows to draw a base parallel for a coordinates system for a given color and different base coordinates
 	 * used for the equator or the  ecliptic
+	 * 
 	 * @param sky
+	 * 			Observed sky
+	 * 
 	 * @param projection
+	 * 			Stereographic projection used
+	 * 
 	 * @param transform
+	 * 			Transform used
+	 * 
 	 * @param arrayOfCoordinates
+	 * 			Array of coordinates characteristic of the line to be drawn
+	 * 
 	 * @param color
+	 * 			Color used
 	 */
 	private void drawBaseParallel(ObservedSky sky, StereographicProjection projection, Transform transform,  double[] arrayOfCoordinates, Color color ) {
 		for(int i1 = 0, i2 = 1; i2 < 180; i1++, i2++) {
@@ -491,12 +513,12 @@ public class SkyCanvasPainter {
 			double tempY1 = arrayOfCoordinates[i1*2 + 1];
 			Point2D tempTransformed1 = transform.transform(tempX1, tempY1);
 			graphicsContext.moveTo(tempTransformed1.getX(), tempTransformed1.getY() );
-			
+
 			double tempX2 = arrayOfCoordinates[i2*2];
 			double tempY2 = arrayOfCoordinates[i2*2 + 1];
 			Point2D tempTransformed2 = transform.transform(tempX2, tempY2);
 			graphicsContext.lineTo(tempTransformed2.getX(), tempTransformed2.getY());
-		
+
 			if(canvas.getBoundsInLocal().contains(tempTransformed1) || canvas.getBoundsInLocal().contains(tempTransformed2)) {
 				graphicsContext.setLineWidth(2);
 				graphicsContext.setStroke(color);
@@ -518,94 +540,108 @@ public class SkyCanvasPainter {
 		Point2D secondTransformed = transform.transform(xSecond, ySecond);
 		graphicsContext.lineTo(secondTransformed.getX(), secondTransformed.getY());
 
-	
+
 		if(canvas.getBoundsInLocal().contains(firstTransformed) || canvas.getBoundsInLocal().contains(secondTransformed)) {
 			graphicsContext.setLineWidth(2);
 			graphicsContext.setStroke(color);
 			graphicsContext.stroke();
 			graphicsContext.fill();
 		}
-		
+
 		graphicsContext.closePath();	
-
-		
-
 	}
-	
-	
+
+	/**
+	 * Draws the trajectory of star
+	 * 
+	 * @param sky
+	 * 			Observed sky
+	 * 
+	 * @param transform
+	 * 			Transform used
+	 */
 	private void tracePath(ObservedSky sky, Transform transform) {
 		CartesianCoordinates actual;
 		actual = sky.pathCoordinates();
-		
+
 		if (tracePath) {
 			if (first) {
 				firstCoor = sky.pathCoordinates();
 				first = false;
 			}
-			
+
 			else {
 				deltaXPath.add(actual.x() - firstCoor.x());
 				deltaYPath.add(actual.y() - firstCoor.y());
 			}
 		}
-		
+
 		else {
 			firstCoor = sky.pathCoordinates();
 		}
-		
+
 		for(int i = 0; i < deltaXPath.size(); ++i) {
 			Point2D point = transform.transform(actual.x() - deltaXPath.get(i), actual.y() - deltaYPath.get(i));
 			graphicsContext.setFill(Color.RED);
-			graphicsContext.fillOval(point.getX() - 0.5, point.getY() - 0.5, 1, 1);
+			graphicsContext.fillOval(point.getX() - PATH_SIZE/2, point.getY() - PATH_SIZE/2, PATH_SIZE, PATH_SIZE);
 		}
 	}
-	
+
 	/**
+	 * Getter for the show stars property
 	 * 
-	 * @return
+	 * @return show stars property
 	 */
 	public BooleanProperty showStarsProperty() {
 		return showStars;
 	}
-	
+
 	/**
+	 * Getter for the show asterisms property
 	 * 
-	 * @return
+	 * @return show asterisms property
 	 */
 	public BooleanProperty showAsterismsProperty() {
 		return showAsterisms;
 	}
-	
+
 	/**
+	 * Getter for the show horizon property
 	 * 
-	 * @return
+	 * @return show horizon property
 	 */
 	public BooleanProperty showHorizonProperty() {
 		return showHorizon;
 	}
-	
+
 	/**
-	 * @return
+	 * Getter for the show grid property
+	 * 
+	 * @return show grid property
 	 */
 	public BooleanProperty showGridProperty() {
 		return showGrid;
 	}
-	
-	
+
+
 	/**
-	 * @return
+	 * Getter for the show ecliptic property
+	 * 
+	 * @return show ecliptic property
 	 */
 	public BooleanProperty showEclipticProperty() {
 		return showEcliptic;
 	}
 
 	/**
-	 * @return
+	 * Getter for the show equator property
+	 * 
+	 * @return show equator property
 	 */
 	public BooleanProperty showEquatorProperty() {
 		return showEquator;
 	}
-	
+
 	/**
 	 * Computes the size of the disk of the transformed celestial object
 	 * Method used for celestial objects whose positions are stored in arrays, as it would duplicate the transform operation of the coordinates for a single celestial object
@@ -630,5 +666,4 @@ public class SkyCanvasPainter {
 
 		return transformedDistance.magnitude();
 	}
-	
 }

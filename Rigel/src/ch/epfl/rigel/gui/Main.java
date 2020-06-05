@@ -24,9 +24,7 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
@@ -112,10 +110,11 @@ public final class Main extends Application {
 
 	private static final List<String> SORTED_ZONEIDS = sortedZoneIds();
 	private List<String> listStars;
-	
+
 	//PATH
 	private boolean trace;
-	
+
+	//Stage
 	private Stage primaryStage;
 	private BorderPane skyRoot;
 
@@ -152,7 +151,7 @@ public final class Main extends Application {
 
 			resetStartProcess();
 			this.primaryStage = primaryStage;
-			
+
 			HBox whenBox = dateControlBar();
 
 			//SKY PANE
@@ -160,10 +159,10 @@ public final class Main extends Application {
 					.loadFrom(hs, HygDatabaseLoader.INSTANCE)
 					.loadFrom(ast, AsterismLoader.INSTANCE)
 					.build();
-			
+
 			listStars = catalogue.getStarNames();
-			
-			
+
+
 
 			canvasManager = new SkyCanvasManager(
 					catalogue,
@@ -177,14 +176,14 @@ public final class Main extends Application {
 			skyRoot = new BorderPane(skyPane);
 			sky.widthProperty().bind(skyRoot.widthProperty());
 			sky.heightProperty().bind(skyRoot.heightProperty());
-			
+
 			//TOP CONTROL BAR
 			HBox controlBar = new HBox();
 			controlBar.setStyle("-fx-spacing: 4; -fx-padding: 4;");
 
 			HBox obsPosBox = coordControlBar();
 			HBox timeBox = timeControlBar();
-			
+
 			Separator separator = new Separator();
 			separator.setOrientation(Orientation.VERTICAL);
 
@@ -392,108 +391,108 @@ public final class Main extends Application {
 			resetButton.setOnMouseClicked(e ->{	
 				resetButtonProcess();				
 			});	
-			
+
 			starNamesRoll = new ComboBox<String>();
-			
+
 			starNamesRoll.valueProperty().set("Rigel");
 			java.util.Collections.sort(listStars);
 			starNamesRoll.getItems().addAll(listStars);
 			starNamesRoll.setStyle(" -fx-pref-width: 140;");
-			
+
 			starBox = Bindings.createObjectBinding(() ->  starNamesRoll.valueProperty().get(), starNamesRoll.valueProperty());
 			canvasManager.getSelectedStarProperty().bind(starBox);
-			
+
 			Button tracePathButton = new Button(PEN_IDLE_STRING);
 			tracePathButton.setFont(fontAwesome);
-			
+
 			tracePathButton.setOnMouseClicked(e -> {
-					canvasManager.setTracePath(!trace);
-					trace = !trace;
-					
-					if (trace) {
-						tracePathButton.setText(PEN_ACTIVE_STRING);
-					}	
-					
-					else {
-						tracePathButton.setText(PEN_IDLE_STRING);
-					}			
+				canvasManager.setTracePath(!trace);
+				trace = !trace;
+
+				if (trace) {
+					tracePathButton.setText(PEN_ACTIVE_STRING);
+				}	
+
+				else {
+					tracePathButton.setText(PEN_IDLE_STRING);
+				}			
 			});
-			
+
 			Button eraserButton = new Button(ERASER_STRING);
 			eraserButton.setFont(fontAwesome);
-			
+
 			eraserButton.setOnMouseClicked(e -> {
-					canvasManager.setClearPath(true);
-					canvasManager.setClearPath(false);
+				canvasManager.setClearPath(true);
+				canvasManager.setClearPath(false);
 			});
-			
+
 			Button parametersButton = new Button(COG_STRING);
 			parametersButton.setFont(fontAwesome);
 			//  A MODULARISER 
 			CheckBox showAsterisms = new CheckBox("Show Asterisms");
 			showAsterisms.setFont(fontAwesome);
-            showAsterisms.setSelected(true);
-            canvasManager.showAsterismsProperty().bind(showAsterisms.selectedProperty());
-            
-            CheckBox showHorizon = new CheckBox("Show Horizon");
-            showHorizon.setFont(fontAwesome);
-            showHorizon.setSelected(true);
-            canvasManager.showHorizonProperty().bind(showHorizon.selectedProperty());
-            
-            CheckBox showStars = new CheckBox("Show Stars");
-            showStars.setFont(fontAwesome);
-            showStars.setSelected(true);
-            canvasManager.showStarsProperty().bind(showStars.selectedProperty());
-            
-            CheckBox showGrid = new CheckBox("Show Horizontal Coordinates Grid");
-            showGrid.setFont(fontAwesome);
-            showGrid.setSelected(true);
-            canvasManager.showGridProperty().bind(showGrid.selectedProperty());
-            
-            CheckBox showEquator = new CheckBox("Show Equator");
-            showEquator.setFont(fontAwesome);
-            showEquator.setSelected(true);
-            canvasManager.showEquatorProperty().bind(showEquator.selectedProperty());
-            
-            CheckBox showEcliptic = new CheckBox("Show Ecliptic");
-            showEcliptic.setFont(fontAwesome);
-            showEcliptic.setSelected(true);
-            canvasManager.showEclipticProperty().bind(showEcliptic.selectedProperty());
-			
+			showAsterisms.setSelected(true);
+			canvasManager.showAsterismsProperty().bind(showAsterisms.selectedProperty());
+
+			CheckBox showHorizon = new CheckBox("Show Horizon");
+			showHorizon.setFont(fontAwesome);
+			showHorizon.setSelected(true);
+			canvasManager.showHorizonProperty().bind(showHorizon.selectedProperty());
+
+			CheckBox showStars = new CheckBox("Show Stars");
+			showStars.setFont(fontAwesome);
+			showStars.setSelected(true);
+			canvasManager.showStarsProperty().bind(showStars.selectedProperty());
+
+			CheckBox showGrid = new CheckBox("Show Horizontal Coordinates Grid");
+			showGrid.setFont(fontAwesome);
+			showGrid.setSelected(true);
+			canvasManager.showGridProperty().bind(showGrid.selectedProperty());
+
+			CheckBox showEquator = new CheckBox("Show Equator");
+			showEquator.setFont(fontAwesome);
+			showEquator.setSelected(true);
+			canvasManager.showEquatorProperty().bind(showEquator.selectedProperty());
+
+			CheckBox showEcliptic = new CheckBox("Show Ecliptic");
+			showEcliptic.setFont(fontAwesome);
+			showEcliptic.setSelected(true);
+			canvasManager.showEclipticProperty().bind(showEcliptic.selectedProperty());
+
 			parametersButton.setOnMouseClicked(e -> {
 
-		            VBox parametersRoot = new VBox();
-		            Label parameters = new Label("Parameters");
-		            parameters.setFont(fontAwesome);
-		            parametersRoot.setLayoutY(canvasManager.canvas().getHeight()/2 - 50);
-		            parametersRoot.getChildren().add(parameters);
-		            parametersRoot.setStyle("-fx-background-color: LightGray; -fx-alignment: center-left; -fx-spacing: 7.5; -fx-padding : 20px 20px 20px 20px;");
-		            
-		            skyRoot.setEffect(new SepiaTone());
-		               
-		            parametersRoot.getChildren().addAll(showAsterisms, showHorizon, showStars, showGrid, showEquator, showEcliptic );
-		            
-		            Button confirm = new Button("Confirm");
-		            parametersRoot.getChildren().add(confirm);
-  
-		            Stage parametersStage = new Stage(StageStyle.TRANSPARENT);
-		            parametersStage.initOwner(primaryStage);
-		            parametersStage.initModality(Modality.APPLICATION_MODAL);
-		            parametersStage.setScene(new Scene(parametersRoot, Color.TRANSPARENT));
-		            
-		            confirm.setOnMouseClicked(event -> {
-		                skyRoot.setEffect(null);
-		                parametersStage.hide();
-		            });
-		        
-		          parametersStage.show();
+				VBox parametersRoot = new VBox();
+				Label parameters = new Label("Parameters");
+				parameters.setFont(fontAwesome);
+				parametersRoot.setLayoutY(canvasManager.canvas().getHeight()/2 - 50);
+				parametersRoot.getChildren().add(parameters);
+				parametersRoot.setStyle("-fx-background-color: LightGray; -fx-alignment: center-left; -fx-spacing: 7.5; -fx-padding : 20px 20px 20px 20px;");
+
+				skyRoot.setEffect(new SepiaTone());
+
+				parametersRoot.getChildren().addAll(showAsterisms, showHorizon, showStars, showGrid, showEquator, showEcliptic );
+
+				Button confirm = new Button("Confirm");
+				parametersRoot.getChildren().add(confirm);
+
+				Stage parametersStage = new Stage(StageStyle.TRANSPARENT);
+				parametersStage.initOwner(primaryStage);
+				parametersStage.initModality(Modality.APPLICATION_MODAL);
+				parametersStage.setScene(new Scene(parametersRoot, Color.TRANSPARENT));
+
+				confirm.setOnMouseClicked(event -> {
+					skyRoot.setEffect(null);
+					parametersStage.hide();
+				});
+
+				parametersStage.show();
 			});
 
 			resetButton.disableProperty().bind(timeAnimator.getRunning());
-			
+
 			Separator separator = new Separator();
 			separator.setOrientation(Orientation.VERTICAL);
-			
+
 			Separator separatorSec = new Separator();
 			separatorSec.setOrientation(Orientation.VERTICAL);
 

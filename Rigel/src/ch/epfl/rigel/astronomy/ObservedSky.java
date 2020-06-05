@@ -53,10 +53,6 @@ public class ObservedSky {
 	
 	private final double[] eclipticPositions = new double[360];
 	private final double[] equatorialPositions = new double [360];
-
-
-
-
 	
 	//PATH
 	private String starString;
@@ -350,8 +346,9 @@ public class ObservedSky {
 	
 	
 	/**
+	 * Getter for the projected coordinates of the selected star
 	 * 
-	 * @return
+	 * @return projected coordinates of the selected star
 	 */
 	public CartesianCoordinates pathCoordinates() {
 		return selectedStarCoordinates;
