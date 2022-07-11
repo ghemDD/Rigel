@@ -1,4 +1,4 @@
-# Rigel
+# Rigel (EPFL CS-108)  
 Programme de visualization du ciel nocturne écrit en Java.
 
 ## Interface Utilisateur
