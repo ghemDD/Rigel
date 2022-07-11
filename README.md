@@ -11,9 +11,9 @@ la section dédiée à la fonctionnalité de traçage : comprenant un menu déro
 nommées, un bouton de traçage et enfin un bouton de gommage
 la section dédiée aux paramètres, uniquement constituée du bouton de paramètres
 Tandis que de nouveaux éléments sont dessinés à l’écran :  
-** l’écliptique, en vert  
-** l’équateur, en violet  
-** la grille des coordonnées horizontales, en gris clair  
+* l’écliptique, en vert  
+* l’équateur, en violet  
+* la grille des coordonnées horizontales, en gris clair  
 
 Il est dorénavant possible de changer la direction du regard au moyen d'un drag de la souris.
 
@@ -24,12 +24,12 @@ L'interface du menu de paramètres est illustrée ci-dessous.
 ![alt text](https://github.com/ghemDD/Rigel/blob/master/Rigel/rigel_2.PNG)
 
 Les paramètres, tels qu'illustrés ci-dessus, concernent :  
-** l'affichage des astérismes  
-** l'affichage de l'horizon  
-** l'affichage des stars  
-** l’affichage de l’écliptique  
-** l’affichage de l’équateur  
-** l’affichage de la grille des coordonnées horizontales  
+* l'affichage des astérismes  
+* l'affichage de l'horizon  
+* l'affichage des stars  
+* l’affichage de l’écliptique  
+* l’affichage de l’équateur  
+* l’affichage de la grille des coordonnées horizontales  
 
 ## Suivi de la trajectoire d'une étoile
 
